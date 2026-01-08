@@ -3,7 +3,7 @@
 
 import * as React from "react"
 import Link from "next/link"
-import { Landmark, Menu, X } from "lucide-react"
+import { Landmark, Menu } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
 import {
@@ -30,12 +30,12 @@ const navLinks = [
 const bankingLinks: { title: string; href: string; description: string }[] = [
   {
     title: "Personal Banking",
-    href: "/banking/personal",
+    href: "/personal",
     description: "Accounts, cards, and loans tailored for your personal financial needs.",
   },
   {
     title: "Corporate Banking",
-    href: "/banking/corporate",
+    href: "/corporate",
     description: "Advanced financial solutions for your business, from payroll to investments.",
   },
 ]
@@ -57,7 +57,7 @@ export function Header() {
             <NavigationMenuList>
                 {navLinks.map(link => (
                     <NavigationMenuItem key={link.label}>
-                      <Link href={link.href} passHref legacyBehavior>
+                      <Link href={link.href} legacyBehavior={false} passHref>
                           <NavigationMenuLink className={navigationMenuTriggerStyle()}>
                           {link.label}
                           </NavigationMenuLink>
@@ -135,7 +135,7 @@ const ListItem = React.forwardRef<
   return (
     <li>
       <NavigationMenuLink asChild>
-        <a
+        <Link
           ref={ref}
           className={cn(
             "block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground",
@@ -147,7 +147,7 @@ const ListItem = React.forwardRef<
           <p className="line-clamp-2 text-sm leading-snug text-muted-foreground">
             {children}
           </p>
-        </a>
+        </Link>
       </NavigationMenuLink>
     </li>
   )
