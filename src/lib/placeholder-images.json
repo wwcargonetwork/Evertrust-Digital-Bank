@@ -1,3 +1,10 @@
 {
-  "placeholderImages": []
+  "placeholderImages": [
+    {
+      "id": "hero-banner",
+      "description": "Dynamic banner showing a modern cityscape with financial data overlay.",
+      "imageUrl": "https://images.unsplash.com/photo-1696334813658-95c311e8a6ba?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwyfHxtb2Rlcm4lMjBjaXR5c2NhcGV8ZW58MHx8fHwxNzY3ODY3Njk5fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "modern cityscape"
+    }
+  ]
 }
