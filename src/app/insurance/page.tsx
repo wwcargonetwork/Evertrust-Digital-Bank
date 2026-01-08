@@ -3,14 +3,14 @@ import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, HeartHand, Home, Car, ShieldCheck } from "lucide-react";
+import { ArrowRight, HeartHandshake, Home, Car, ShieldCheck } from "lucide-react";
 import Image from "next/image";
 
 const insuranceProducts = [
     {
         title: "Life Insurance",
         description: "Protect your loved ones' financial future. Our life insurance policies provide peace of mind, ensuring your family is supported no matter what tomorrow holds.",
-        icon: <HeartHand className="h-8 w-8 text-primary" />,
+        icon: <HeartHandshake className="h-8 w-8 text-primary" />,
         image: {
             src: "https://picsum.photos/seed/insurance1/600/400",
             alt: "A happy family, representing the peace of mind from life insurance.",
