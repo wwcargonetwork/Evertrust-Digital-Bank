@@ -1,4 +1,6 @@
 
+'use client';
+
 import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card";
@@ -16,17 +18,17 @@ import Image from "next/image";
 import { PlaceHolderImages } from "@/lib/placeholder-images";
 
 const chartData = [
-  { date: 'Jan', performance: 0 },
-  { date: 'Feb', performance: 5 },
-  { date: 'Mar', performance: 4 },
-  { date: 'Apr', performance: 8 },
-  { date: 'May', performance: 12 },
-  { date: 'Jun', performance: 15 },
+  { date: 'Jan', performance: 10000 },
+  { date: 'Feb', performance: 10500 },
+  { date: 'Mar', performance: 10400 },
+  { date: 'Apr', performance: 10800 },
+  { date: 'May', performance: 11200 },
+  { date: 'Jun', performance: 11500 },
 ];
 
 const chartConfig = {
   performance: {
-    label: "Performance",
+    label: "Growth",
     color: "hsl(var(--accent))",
   },
 };
@@ -164,12 +166,37 @@ export default function InvestmentsPage() {
                         <Card className="bg-card shadow-lg">
                             <CardContent className="pt-6">
                                 <ChartContainer config={chartConfig} className="aspect-auto h-[250px] w-full">
-                                    <LineChart data={chartData} margin={{ top: 5, right: 20, left: -10, bottom: 0 }}>
+                                    <LineChart
+                                        accessibilityLayer
+                                        data={chartData}
+                                        margin={{
+                                            left: 12,
+                                            right: 12,
+                                        }}
+                                    >
                                         <CartesianGrid vertical={false} />
-                                        <XAxis dataKey="date" tickLine={false} axisLine={false} tickMargin={8} />
-                                        <YAxis tickLine={false} axisLine={false} tickMargin={8} tickFormatter={(value) => `$${value}k`} />
-                                        <Tooltip cursor={{ strokeDasharray: '3 3' }} content={<ChartTooltipContent indicator="dot" />} />
-                                        <Line type="monotone" dataKey="performance" stroke="var(--color-performance)" strokeWidth={2} dot={false} />
+                                        <XAxis
+                                            dataKey="date"
+                                            tickLine={false}
+                                            axisLine={false}
+                                            tickMargin={8}
+                                        />
+                                        <YAxis
+                                            tickLine={false}
+                                            axisLine={false}
+                                            tickMargin={8}
+                                            tickFormatter={(value) => `$${value / 1000}k`}
+                                        />
+                                        <ChartTooltip
+                                            cursor={false}
+                                            content={<ChartTooltipContent indicator="dot" />}
+                                        />
+                                        <Line
+                                            dataKey="performance"
+                                            type="monotone"
+                                            stroke="var(--color-performance)"
+                                            strokeWidth={2}
+                                        />
                                     </LineChart>
                                 </ChartContainer>
                             </CardContent>
@@ -185,15 +212,29 @@ export default function InvestmentsPage() {
                         </p>
                         <Card className="bg-card shadow-lg">
                             <CardContent className="pt-6 flex justify-center">
-                                <ChartContainer config={allocationConfig} className="aspect-square h-[250px]">
+                                <ChartContainer
+                                    config={allocationConfig}
+                                    className="mx-auto aspect-square h-[250px]"
+                                >
                                     <PieChart>
-                                        <Tooltip content={<ChartTooltipContent nameKey="name" hideLabel />} />
-                                        <Pie data={allocationData} dataKey="value" nameKey="name" innerRadius={60} strokeWidth={5}>
-                                             {allocationData.map((entry) => (
+                                        <ChartTooltip
+                                            cursor={false}
+                                            content={<ChartTooltipContent hideLabel />}
+                                        />
+                                        <Pie
+                                            data={allocationData}
+                                            dataKey="value"
+                                            nameKey="name"
+                                            innerRadius={60}
+                                            strokeWidth={5}
+                                        >
+                                            {allocationData.map((entry) => (
                                                 <Cell key={`cell-${entry.name}`} fill={entry.fill} />
                                             ))}
                                         </Pie>
-                                        <ChartLegend content={<ChartLegendContent nameKey="name" />} />
+                                        <ChartLegend
+                                            content={<ChartLegendContent nameKey="name" />}
+                                        />
                                     </PieChart>
                                 </ChartContainer>
                             </CardContent>
