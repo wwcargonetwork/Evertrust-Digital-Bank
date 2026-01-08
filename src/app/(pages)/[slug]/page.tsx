@@ -5,7 +5,7 @@ import { Building2 } from "lucide-react";
 
 export default function Page({ params }: { params: { slug: string } }) {
   // Exclude 'deposits', 'credits', and 'cards' from this generic page
-  if (params.slug === 'deposits' || params.slug === 'credits' || params.slug === 'cards') {
+  if (params.slug === 'deposits' || params.slug === 'credits' || params.slug === 'cards' || params.slug === 'investments') {
     return null;
   }
   
