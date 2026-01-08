@@ -1,8 +1,14 @@
+
 import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
 import { Building2 } from "lucide-react";
 
 export default function Page({ params }: { params: { slug: string } }) {
+  // Exclude 'deposits' from this generic page
+  if (params.slug === 'deposits') {
+    return null;
+  }
+  
   const pageName = params.slug.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
 
   return (
