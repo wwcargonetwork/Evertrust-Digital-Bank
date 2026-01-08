@@ -56,9 +56,9 @@ export function Header() {
           <NavigationMenu className="hidden md:flex">
             <NavigationMenuList>
               <NavigationMenuItem>
-                <Link href="/" passHref>
-                  <NavigationMenuLink asChild className={navigationMenuTriggerStyle()}>
-                    <a>Home</a>
+                <Link href="/" legacyBehavior passHref>
+                  <NavigationMenuLink className={navigationMenuTriggerStyle()}>
+                    Home
                   </NavigationMenuLink>
                 </Link>
               </NavigationMenuItem>
@@ -80,9 +80,9 @@ export function Header() {
               </NavigationMenuItem>
               {navLinks.filter(l => l.label !== 'Home').map(link => (
                  <NavigationMenuItem key={link.label}>
-                    <Link href={link.href} passHref>
-                      <NavigationMenuLink asChild className={navigationMenuTriggerStyle()}>
-                        <a>{link.label}</a>
+                    <Link href={link.href} legacyBehavior passHref>
+                      <NavigationMenuLink className={navigationMenuTriggerStyle()}>
+                        {link.label}
                       </NavigationMenuLink>
                     </Link>
                  </NavigationMenuItem>
@@ -137,13 +137,12 @@ export function Header() {
 
 const ListItem = React.forwardRef<
   React.ElementRef<"a">,
-  Omit<React.ComponentPropsWithoutRef<"a">, "href"> & { href: string }
->(({ className, title, children, href, ...props }, ref) => {
+  React.ComponentPropsWithoutRef<"a">
+>(({ className, title, children, ...props }, ref) => {
   return (
     <li>
       <NavigationMenuLink asChild>
-        <Link
-          href={href}
+        <a
           ref={ref}
           className={cn(
             "block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground",
@@ -155,7 +154,7 @@ const ListItem = React.forwardRef<
           <p className="line-clamp-2 text-sm leading-snug text-muted-foreground">
             {children}
           </p>
-        </Link>
+        </a>
       </NavigationMenuLink>
     </li>
   )
