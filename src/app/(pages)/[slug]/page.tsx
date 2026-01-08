@@ -4,8 +4,8 @@ import { Footer } from "@/components/layout/footer";
 import { Building2 } from "lucide-react";
 
 export default function Page({ params }: { params: { slug: string } }) {
-  // Exclude 'deposits' from this generic page
-  if (params.slug === 'deposits') {
+  // Exclude 'deposits' and 'credits' from this generic page
+  if (params.slug === 'deposits' || params.slug === 'credits') {
     return null;
   }
   
