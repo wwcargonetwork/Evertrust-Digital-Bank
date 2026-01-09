@@ -7,7 +7,8 @@ export default function Page({ params }: { params: { slug: string } }) {
   // Exclude handled pages from this generic page
   const excludedSlugs = [
     'deposits', 'credits', 'cards', 'investments', 'loans', 'insurance', 
-    'personal', 'corporate', 'privacy-policy', 'terms-of-service', 'cookie-policy'
+    'personal', 'corporate', 'privacy-policy', 'terms-of-service', 'cookie-policy',
+    'about-us', 'careers', 'press'
   ];
 
   if (excludedSlugs.includes(params.slug)) {
