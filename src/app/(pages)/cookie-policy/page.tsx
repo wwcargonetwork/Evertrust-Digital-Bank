@@ -35,7 +35,7 @@ export default function CookiePolicyPage() {
             animate="visible"
           >
             <motion.h1 variants={itemVariants}>Cookie Policy</motion.h1>
-            <motion.p variants={itemVariants} className="lead text-muted-foreground">Last updated: {new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</motion.p>
+            <motion.p variants={itemVariants} className="lead !text-muted-foreground">Last updated: {new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</motion.p>
 
             <motion.p variants={itemVariants}>This Cookie Policy explains what cookies are and how Evertrust Digital Bank ("we," "our," or "us") uses them on our website and mobile application. We encourage you to read this policy in full so that you can understand what information we collect using cookies and how that information is used.</motion.p>
 
@@ -44,11 +44,11 @@ export default function CookiePolicyPage() {
 
             <motion.h2 variants={itemVariants}>2. How We Use Cookies</motion.h2>
             <motion.p variants={itemVariants}>We use cookies for a variety of reasons detailed below. Unfortunately, in most cases, there are no industry-standard options for disabling cookies without completely disabling the functionality and features they add to this site.</motion.p>
-            <motion.ul variants={itemVariants}>
-              <li><strong>Essential Cookies:</strong> These cookies are necessary for the website to function and cannot be switched off in our systems. They are usually only set in response to actions made by you which amount to a request for services, such as setting your privacy preferences, logging in, or filling in forms.</li>
-              <li><strong>Performance and Analytics Cookies:</strong> These cookies allow us to count visits and traffic sources so we can measure and improve the performance of our site. They help us to know which pages are the most and least popular and see how visitors move around the site.</li>
-              <li><strong>Functionality Cookies:</strong> These cookies enable the website to provide enhanced functionality and personalization. They may be set by us or by third-party providers whose services we have added to our pages.</li>
-              <li><strong>Advertising Cookies:</strong> These cookies may be set through our site by our advertising partners. They may be used by those companies to build a profile of your interests and show you relevant adverts on other sites.</li>
+            <motion.ul variants={itemVariants} className="space-y-2">
+              <motion.li variants={itemVariants}><strong>Essential Cookies:</strong> These cookies are necessary for the website to function and cannot be switched off in our systems. They are usually only set in response to actions made by you which amount to a request for services, such as setting your privacy preferences, logging in, or filling in forms.</motion.li>
+              <motion.li variants={itemVariants}><strong>Performance and Analytics Cookies:</strong> These cookies allow us to count visits and traffic sources so we can measure and improve the performance of our site. They help us to know which pages are the most and least popular and see how visitors move around the site.</motion.li>
+              <motion.li variants={itemVariants}><strong>Functionality Cookies:</strong> These cookies enable the website to provide enhanced functionality and personalization. They may be set by us or by third-party providers whose services we have added to our pages.</motion.li>
+              <motion.li variants={itemVariants}><strong>Advertising Cookies:</strong> These cookies may be set through our site by our advertising partners. They may be used by those companies to build a profile of your interests and show you relevant adverts on other sites.</motion.li>
             </motion.ul>
             
             <motion.h2 variants={itemVariants}>3. Your Choices Regarding Cookies</motion.h2>

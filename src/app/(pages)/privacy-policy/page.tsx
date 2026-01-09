@@ -35,34 +35,34 @@ export default function PrivacyPolicyPage() {
             animate="visible"
           >
             <motion.h1 variants={itemVariants}>Privacy Policy</motion.h1>
-            <motion.p variants={itemVariants} className="lead text-muted-foreground">Last updated: {new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</motion.p>
+            <motion.p variants={itemVariants} className="lead !text-muted-foreground">Last updated: {new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</motion.p>
             
             <motion.p variants={itemVariants}>Evertrust Digital Bank ("we," "our," or "us") is committed to protecting your privacy. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you use our services. Please read this policy carefully. If you do not agree with the terms of this privacy policy, please do not access our services.</motion.p>
 
             <motion.h2 variants={itemVariants}>1. Information We Collect</motion.h2>
             <motion.p variants={itemVariants}>We may collect personal information from you in a variety of ways, including, but not limited to, when you open an account, apply for a loan, make transactions, or use our website and mobile app. The types of personal information we may collect include:</motion.p>
-            <motion.ul variants={itemVariants}>
-              <li><strong>Personal Identification Information:</strong> Name, address, email address, phone number, date of birth, Social Security number.</li>
-              <li><strong>Financial Information:</strong> Bank account numbers, credit and debit card numbers, transaction history, credit history.</li>
-              <li><strong>Technical Information:</strong> IP address, browser type, operating system, and information about the device you use to access our services.</li>
+            <motion.ul variants={itemVariants} className="space-y-2">
+              <motion.li variants={itemVariants}><strong>Personal Identification Information:</strong> Name, address, email address, phone number, date of birth, Social Security number.</motion.li>
+              <motion.li variants={itemVariants}><strong>Financial Information:</strong> Bank account numbers, credit and debit card numbers, transaction history, credit history.</motion.li>
+              <motion.li variants={itemVariants}><strong>Technical Information:</strong> IP address, browser type, operating system, and information about the device you use to access our services.</motion.li>
             </motion.ul>
 
             <motion.h2 variants={itemVariants}>2. How We Use Your Information</motion.h2>
             <motion.p variants={itemVariants}>We use the information we collect for various purposes, including to:</motion.p>
-            <motion.ul variants={itemVariants}>
-              <li>Provide, operate, and maintain our services.</li>
-              <li>Process your transactions and manage your accounts.</li>
-              <li>Improve, personalize, and expand our services.</li>
-              <li>Communicate with you, including for customer service and to provide you with updates and other information relating to the service.</li>
-              <li>Detect and prevent fraud and enhance the security of our services.</li>
-              <li>Comply with legal and regulatory obligations.</li>
+            <motion.ul variants={itemVariants} className="space-y-2">
+              <motion.li variants={itemVariants}>Provide, operate, and maintain our services.</motion.li>
+              <motion.li variants={itemVariants}>Process your transactions and manage your accounts.</motion.li>
+              <motion.li variants={itemVariants}>Improve, personalize, and expand our services.</motion.li>
+              <motion.li variants={itemVariants}>Communicate with you, including for customer service and to provide you with updates and other information relating to the service.</motion.li>
+              <motion.li variants={itemVariants}>Detect and prevent fraud and enhance the security of our services.</motion.li>
+              <motion.li variants={itemVariants}>Comply with legal and regulatory obligations.</motion.li>
             </motion.ul>
 
             <motion.h2 variants={itemVariants}>3. How We Share Your Information</motion.h2>
             <motion.p variants={itemVariants}>We do not share your personal information with third parties except as described in this Privacy Policy. We may share information with:</motion.p>
-            <motion.ul variants={itemVariants}>
-              <li><strong>Service Providers:</strong> We may share your information with third-party vendors and service providers that perform services for us or on our behalf.</li>
-              <li><strong>Legal Requirements:</strong> We may disclose your information if required to do so by law or in response to valid requests by public authorities.</li>
+            <motion.ul variants={itemVariants} className="space-y-2">
+              <motion.li variants={itemVariants}><strong>Service Providers:</strong> We may share your information with third-party vendors and service providers that perform services for us or on our behalf.</motion.li>
+              <motion.li variants={itemVariants}><strong>Legal Requirements:</strong> We may disclose your information if required to do so by law or in response to valid requests by public authorities.</motion.li>
             </motion.ul>
 
             <motion.h2 variants={itemVariants}>4. Data Security</motion.h2>

@@ -35,7 +35,7 @@ export default function TermsOfServicePage() {
             animate="visible"
           >
             <motion.h1 variants={itemVariants}>Terms of Service</motion.h1>
-            <motion.p variants={itemVariants} className="lead text-muted-foreground">Last updated: {new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</motion.p>
+            <motion.p variants={itemVariants} className="lead !text-muted-foreground">Last updated: {new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</motion.p>
 
             <motion.p variants={itemVariants}>Please read these Terms of Service ("Terms") carefully before using the services offered by Evertrust Digital Bank ("Evertrust", "we", "us", "our"). By using our services, you agree to be bound by these Terms.</motion.p>
 
