@@ -1,6 +1,9 @@
+'use client';
+
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Fingerprint, Shield, DatabaseZap, Lock } from "lucide-react";
+import { motion } from "framer-motion";
 
 const securityLayers = {
     savings: [
@@ -41,37 +44,54 @@ const securityLayers = {
     ]
 }
 
+const itemVariants = {
+    hidden: { y: 20, opacity: 0 },
+    visible: { y: 0, opacity: 1, transition: { duration: 0.6 } }
+};
+
+
 export function SecuritySection() {
   return (
-    <section id="security" className="bg-secondary py-20 sm:py-28">
+    <motion.section 
+        id="security" 
+        className="bg-secondary py-20 sm:py-28"
+        initial="hidden"
+        whileInView="visible"
+        viewport={{ once: true, amount: 0.2 }}
+    >
       <div className="container">
-        <div className="mx-auto max-w-2xl text-center">
-          <h2 className="font-headline text-3xl font-bold tracking-tight text-primary sm:text-4xl">
+        <motion.div 
+            className="mx-auto max-w-2xl text-center"
+            variants={{ hidden: { opacity: 0 }, visible: { opacity: 1, transition: { staggerChildren: 0.3 } } }}
+        >
+          <motion.h2 variants={itemVariants} className="font-headline text-3xl font-bold tracking-tight text-primary sm:text-4xl">
             Your Security is Our Priority
-          </h2>
-          <p className="mt-6 text-lg leading-8 text-muted-foreground">
+          </motion.h2>
+          <motion.p variants={itemVariants} className="mt-6 text-lg leading-8 text-muted-foreground">
             Explore the layers of protection we've built to safeguard your finances. Select a service to see how we keep you secure.
-          </p>
-        </div>
+          </motion.p>
+        </motion.div>
 
-        <Tabs defaultValue="savings" className="mt-12 max-w-4xl mx-auto">
-          <TabsList className="grid w-full grid-cols-3 bg-primary/10">
-            <TabsTrigger value="savings">Savings Services</TabsTrigger>
-            <TabsTrigger value="loans">Loan Services</TabsTrigger>
-            <TabsTrigger value="trading">Stock Trading</TabsTrigger>
-          </TabsList>
-          <TabsContent value="savings" className="mt-6">
-            <SecurityAccordion layers={securityLayers.savings} />
-          </TabsContent>
-          <TabsContent value="loans" className="mt-6">
-            <SecurityAccordion layers={securityLayers.loans} />
-          </TabsContent>
-          <TabsContent value="trading" className="mt-6">
-            <SecurityAccordion layers={securityLayers.trading} />
-          </TabsContent>
-        </Tabs>
+        <motion.div variants={itemVariants}>
+            <Tabs defaultValue="savings" className="mt-12 max-w-4xl mx-auto">
+            <TabsList className="grid w-full grid-cols-3 bg-primary/10">
+                <TabsTrigger value="savings">Savings Services</TabsTrigger>
+                <TabsTrigger value="loans">Loan Services</TabsTrigger>
+                <TabsTrigger value="trading">Stock Trading</TabsTrigger>
+            </TabsList>
+            <TabsContent value="savings" className="mt-6">
+                <SecurityAccordion layers={securityLayers.savings} />
+            </TabsContent>
+            <TabsContent value="loans" className="mt-6">
+                <SecurityAccordion layers={securityLayers.loans} />
+            </TabsContent>
+            <TabsContent value="trading" className="mt-6">
+                <SecurityAccordion layers={securityLayers.trading} />
+            </TabsContent>
+            </Tabs>
+        </motion.div>
       </div>
-    </section>
+    </motion.section>
   );
 }
 

@@ -1,11 +1,13 @@
+'use client';
 
 import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
-import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card";
+import { Card, CardHeader, CardTitle, CardContent, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { CheckCircle, ArrowRight, Gift, Plane, Star } from "lucide-react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import Image from "next/image";
+import { motion } from "framer-motion";
 
 const cardsData = [
     {
@@ -66,6 +68,15 @@ const cardComparison = [
     { feature: "Purchase APR", cashback: "18.24% - 28.24% Variable", travel: "19.24% - 29.24% Variable", premium: "20.24% - 30.24% Variable" },
 ];
 
+const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: { opacity: 1, transition: { staggerChildren: 0.2 } }
+};
+
+const itemVariants = {
+    hidden: { y: 20, opacity: 0 },
+    visible: { y: 0, opacity: 1, transition: { duration: 0.5 } }
+};
 
 export default function CardsPage() {
   return (
@@ -73,22 +84,41 @@ export default function CardsPage() {
       <Header />
       <main className="flex-1">
         {/* Hero Section */}
-        <section className="bg-primary/5 py-20 text-center">
+        <motion.section 
+            className="bg-primary/5 py-20 text-center"
+            initial="hidden"
+            animate="visible"
+            variants={containerVariants}
+        >
             <div className="container">
-                <h1 className="font-headline text-4xl font-bold tracking-tight text-primary sm:text-5xl md:text-6xl">
+                <motion.h1 variants={itemVariants} className="font-headline text-4xl font-bold tracking-tight text-primary sm:text-5xl md:text-6xl">
                     The Perfect Card for You
-                </h1>
-                <p className="mt-6 max-w-3xl mx-auto text-lg text-muted-foreground md:text-xl">
+                </motion.h1>
+                <motion.p variants={itemVariants} className="mt-6 max-w-3xl mx-auto text-lg text-muted-foreground md:text-xl">
                     Discover a card that matches your lifestyle. From generous cashback to exclusive travel perks, find the perfect fit and start earning rewards today.
-                </p>
+                </motion.p>
             </div>
-        </section>
+        </motion.section>
 
         {/* Cards Details Section */}
-        <section id="cards-details" className="py-20 sm:py-28">
+        <motion.section 
+            id="cards-details" 
+            className="py-20 sm:py-28"
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, amount: 0.1 }}
+            variants={containerVariants}
+        >
             <div className="container space-y-24">
                 {cardsData.map((card, index) => (
-                    <div key={card.title} className={`flex flex-col gap-12 lg:items-center ${index % 2 === 0 ? 'lg:flex-row' : 'lg:flex-row-reverse'}`}>
+                    <motion.div 
+                        key={card.title} 
+                        className={`flex flex-col gap-12 lg:items-center ${index % 2 === 0 ? 'lg:flex-row' : 'lg:flex-row-reverse'}`}
+                        initial={{ opacity: 0, x: index % 2 === 0 ? -50 : 50 }}
+                        whileInView={{ opacity: 1, x: 0 }}
+                        viewport={{ once: true, amount: 0.3 }}
+                        transition={{ duration: 0.6 }}
+                    >
                         <div className="lg:w-1/2">
                              <div className="relative aspect-video">
                                 <Image 
@@ -118,52 +148,61 @@ export default function CardsPage() {
                                 Learn More <ArrowRight className="ml-2 h-5 w-5" />
                             </Button>
                         </div>
-                    </div>
+                    </motion.div>
                 ))}
             </div>
-        </section>
+        </motion.section>
 
         {/* Comparison Section */}
-        <section id="comparison" className="bg-secondary py-20 sm:py-28">
+        <motion.section 
+            id="comparison" 
+            className="bg-secondary py-20 sm:py-28"
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, amount: 0.2 }}
+            variants={containerVariants}
+        >
             <div className="container">
-                <div className="mx-auto max-w-2xl text-center">
+                <motion.div variants={itemVariants} className="mx-auto max-w-2xl text-center">
                     <h2 className="font-headline text-3xl font-bold tracking-tight text-primary sm:text-4xl">
                         Compare Our Cards
                     </h2>
                     <p className="mt-6 text-lg leading-8 text-muted-foreground">
                         Find the card that aligns with your spending habits and financial goals.
                     </p>
-                </div>
-                <Card className="mt-16 bg-card shadow-lg">
-                    <CardContent className="pt-6">
-                        <Table>
-                            <TableHeader>
-                                <TableRow>
-                                <TableHead>Feature</TableHead>
-                                <TableHead>Cashback Plus</TableHead>
-                                <TableHead>Traveler Elite</TableHead>
-                                <TableHead>Premium Access</TableHead>
-                                </TableRow>
-                            </TableHeader>
-                            <TableBody>
-                                {cardComparison.map((item) => (
-                                <TableRow key={item.feature}>
-                                    <TableCell className="font-medium">{item.feature}</TableCell>
-                                    <TableCell>{item.cashback}</TableCell>
-                                    <TableCell>{item.travel}</TableCell>
-                                    <TableCell>{item.premium}</TableCell>
-                                </TableRow>
-                                ))}
-                            </TableBody>
-                        </Table>
-                    </CardContent>
-                    <CardFooter className="justify-center gap-4 pt-6">
-                        <Button style={{ backgroundColor: 'hsl(var(--accent))', color: 'hsl(var(--accent-foreground))' }}>Apply Now</Button>
-                        <Button variant="outline">See Full Details</Button>
-                    </CardFooter>
-                </Card>
+                </motion.div>
+                <motion.div variants={itemVariants}>
+                    <Card className="mt-16 bg-card shadow-lg">
+                        <CardContent className="pt-6">
+                            <Table>
+                                <TableHeader>
+                                    <TableRow>
+                                    <TableHead>Feature</TableHead>
+                                    <TableHead>Cashback Plus</TableHead>
+                                    <TableHead>Traveler Elite</TableHead>
+                                    <TableHead>Premium Access</TableHead>
+                                    </TableRow>
+                                </TableHeader>
+                                <TableBody>
+                                    {cardComparison.map((item) => (
+                                    <TableRow key={item.feature}>
+                                        <TableCell className="font-medium">{item.feature}</TableCell>
+                                        <TableCell>{item.cashback}</TableCell>
+                                        <TableCell>{item.travel}</TableCell>
+                                        <TableCell>{item.premium}</TableCell>
+                                    </TableRow>
+                                    ))}
+                                </TableBody>
+                            </Table>
+                        </CardContent>
+                        <CardFooter className="justify-center gap-4 pt-6">
+                            <Button style={{ backgroundColor: 'hsl(var(--accent))', color: 'hsl(var(--accent-foreground))' }}>Apply Now</Button>
+                            <Button variant="outline">See Full Details</Button>
+                        </CardFooter>
+                    </Card>
+                </motion.div>
             </div>
-        </section>
+        </motion.section>
 
       </main>
       <Footer />

@@ -1,10 +1,12 @@
+'use client';
 
 import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { CheckCircle, ArrowRight, DollarSign, PiggyBank, CalendarClock } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { motion } from "framer-motion";
 
 const checkingFeatures = [
     { feature: "Minimum Opening Deposit", basic: "$25", premium: "$100" },
@@ -30,6 +32,15 @@ const cdFeatures = [
     { term: "5 Years", apy: "4.25%", minDeposit: "$500" },
 ];
 
+const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: { opacity: 1, transition: { staggerChildren: 0.2 } }
+};
+
+const itemVariants = {
+    hidden: { y: 20, opacity: 0 },
+    visible: { y: 0, opacity: 1, transition: { duration: 0.5 } }
+};
 
 export default function DepositsPage() {
   return (
@@ -37,22 +48,34 @@ export default function DepositsPage() {
       <Header />
       <main className="flex-1">
         {/* Hero Section */}
-        <section className="bg-primary/5 py-20 text-center">
+        <motion.section 
+            className="bg-primary/5 py-20 text-center"
+            initial="hidden"
+            animate="visible"
+            variants={containerVariants}
+        >
             <div className="container">
-                <h1 className="font-headline text-4xl font-bold tracking-tight text-primary sm:text-5xl md:text-6xl">
+                <motion.h1 variants={itemVariants} className="font-headline text-4xl font-bold tracking-tight text-primary sm:text-5xl md:text-6xl">
                     Secure Your Future with Our Deposit Accounts
-                </h1>
-                <p className="mt-6 max-w-3xl mx-auto text-lg text-muted-foreground md:text-xl">
+                </motion.h1>
+                <motion.p variants={itemVariants} className="mt-6 max-w-3xl mx-auto text-lg text-muted-foreground md:text-xl">
                     Whether you're saving for a rainy day, managing daily expenses, or investing for the long term, we have the right account to help you reach your goals.
-                </p>
+                </motion.p>
             </div>
-        </section>
+        </motion.section>
 
         {/* Checking Accounts Section */}
-        <section id="checking" className="py-20 sm:py-28">
+        <motion.section 
+            id="checking" 
+            className="py-20 sm:py-28"
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, amount: 0.2 }}
+            variants={containerVariants}
+        >
           <div className="container">
             <div className="flex flex-col lg:flex-row lg:items-center gap-12">
-                <div className="lg:w-1/3">
+                <motion.div variants={itemVariants} className="lg:w-1/3">
                     <div className="inline-block rounded-lg bg-primary/10 px-3 py-1 text-sm font-medium text-primary mb-4">
                         Checking
                     </div>
@@ -61,8 +84,8 @@ export default function DepositsPage() {
                     <Button size="lg" className="mt-6" style={{ backgroundColor: 'hsl(var(--accent))', color: 'hsl(var(--accent-foreground))' }}>
                         Open a Checking Account <ArrowRight className="ml-2 h-5 w-5" />
                     </Button>
-                </div>
-                <div className="lg:w-2/3">
+                </motion.div>
+                <motion.div variants={itemVariants} className="lg:w-2/3">
                      <Card className="bg-card shadow-lg">
                         <CardHeader>
                             <CardTitle>Checking Account Comparison</CardTitle>
@@ -88,16 +111,23 @@ export default function DepositsPage() {
                             </Table>
                         </CardContent>
                     </Card>
-                </div>
+                </motion.div>
             </div>
           </div>
-        </section>
+        </motion.section>
         
         {/* Savings Accounts Section */}
-        <section id="savings" className="bg-secondary py-20 sm:py-28">
+        <motion.section 
+            id="savings" 
+            className="bg-secondary py-20 sm:py-28"
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, amount: 0.2 }}
+            variants={containerVariants}
+        >
             <div className="container">
                 <div className="flex flex-col lg:flex-row-reverse lg:items-center gap-12">
-                    <div className="lg:w-1/3">
+                    <motion.div variants={itemVariants} className="lg:w-1/3">
                         <div className="inline-block rounded-lg bg-primary/10 px-3 py-1 text-sm font-medium text-primary mb-4">
                             Savings
                         </div>
@@ -106,8 +136,8 @@ export default function DepositsPage() {
                          <Button size="lg" className="mt-6" style={{ backgroundColor: 'hsl(var(--accent))', color: 'hsl(var(--accent-foreground))' }}>
                             Start Saving Today <ArrowRight className="ml-2 h-5 w-5" />
                         </Button>
-                    </div>
-                    <div className="lg:w-2/3">
+                    </motion.div>
+                    <motion.div variants={itemVariants} className="lg:w-2/3">
                         <Card className="bg-card shadow-lg">
                             <CardHeader>
                                 <CardTitle>Savings Account Comparison</CardTitle>
@@ -133,15 +163,22 @@ export default function DepositsPage() {
                                 </Table>
                             </CardContent>
                         </Card>
-                    </div>
+                    </motion.div>
                 </div>
             </div>
-        </section>
+        </motion.section>
 
         {/* CDs Section */}
-        <section id="cds" className="py-20 sm:py-28">
+        <motion.section 
+            id="cds" 
+            className="py-20 sm:py-28"
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, amount: 0.2 }}
+            variants={containerVariants}
+        >
           <div className="container">
-             <div className="mx-auto max-w-2xl text-center">
+             <motion.div variants={itemVariants} className="mx-auto max-w-2xl text-center">
                 <div className="inline-block rounded-lg bg-primary/10 px-3 py-1 text-sm font-medium text-primary mb-4">
                     Certificates of Deposit
                 </div>
@@ -151,8 +188,8 @@ export default function DepositsPage() {
                 <p className="mt-6 text-lg leading-8 text-muted-foreground">
                     Certificates of Deposit (CDs) offer a fixed interest rate for a fixed term, providing a safe and predictable way to grow your savings.
                 </p>
-            </div>
-            <div className="mt-16">
+            </motion.div>
+            <motion.div variants={itemVariants} className="mt-16">
                  <Card className="bg-card shadow-lg">
                     <CardHeader>
                         <CardTitle>Current CD Rates</CardTitle>
@@ -184,9 +221,9 @@ export default function DepositsPage() {
                         </Button>
                     </CardFooter>
                 </Card>
-            </div>
+            </motion.div>
           </div>
-        </section>
+        </motion.section>
 
       </main>
       <Footer />

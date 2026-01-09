@@ -1,10 +1,12 @@
+'use client';
 
 import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
-import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, HeartHandshake, Home, Car, ShieldCheck } from "lucide-react";
 import Image from "next/image";
+import { motion } from "framer-motion";
 
 const insuranceProducts = [
     {
@@ -60,34 +62,67 @@ const insuranceProducts = [
     }
 ];
 
+const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: { opacity: 1, transition: { staggerChildren: 0.2 } }
+};
+
+const itemVariants = {
+    hidden: { y: 20, opacity: 0 },
+    visible: { y: 0, opacity: 1, transition: { duration: 0.5 } }
+};
+
+const cardHover = {
+    hover: { scale: 1.03, transition: { duration: 0.3 } }
+};
+
 export default function InsurancePage() {
   return (
     <div className="flex min-h-screen flex-col bg-background">
       <Header />
       <main className="flex-1">
         {/* Hero Section */}
-        <section className="bg-primary/5 py-20 text-center">
+        <motion.section 
+            className="bg-primary/5 py-20 text-center"
+            initial="hidden"
+            animate="visible"
+            variants={containerVariants}
+        >
             <div className="container">
-                <h1 className="font-headline text-4xl font-bold tracking-tight text-primary sm:text-5xl md:text-6xl">
+                <motion.h1 variants={itemVariants} className="font-headline text-4xl font-bold tracking-tight text-primary sm:text-5xl md:text-6xl">
                     Protect What Matters Most
-                </h1>
-                <p className="mt-6 max-w-3xl mx-auto text-lg text-muted-foreground md:text-xl">
+                </motion.h1>
+                <motion.p variants={itemVariants} className="mt-6 max-w-3xl mx-auto text-lg text-muted-foreground md:text-xl">
                     From your family's future to your most valuable assets, Evertrust offers a range of insurance solutions to give you peace of mind and comprehensive protection.
-                </p>
-                 <div className="mt-10 flex items-center justify-center gap-x-6">
+                </motion.p>
+                 <motion.div variants={itemVariants} className="mt-10 flex items-center justify-center gap-x-6">
                     <Button size="lg" style={{ backgroundColor: 'hsl(var(--accent))', color: 'hsl(var(--accent-foreground))' }}>
                         Get a Quote
                         <ArrowRight className="ml-2 h-5 w-5" />
                     </Button>
-                </div>
+                </motion.div>
             </div>
-        </section>
+        </motion.section>
 
         {/* Insurance Products Section */}
-        <section id="insurance-products" className="py-20 sm:py-28">
+        <motion.section 
+            id="insurance-products" 
+            className="py-20 sm:py-28"
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, amount: 0.1 }}
+            variants={containerVariants}
+        >
             <div className="container space-y-24">
                 {insuranceProducts.map((insurance, index) => (
-                    <div key={insurance.title} className={`flex flex-col gap-12 lg:items-center ${index % 2 === 0 ? 'lg:flex-row' : 'lg:flex-row-reverse'}`}>
+                    <motion.div 
+                        key={insurance.title} 
+                        className={`flex flex-col gap-12 lg:items-center ${index % 2 === 0 ? 'lg:flex-row' : 'lg:flex-row-reverse'}`}
+                        initial={{ opacity: 0, x: index % 2 === 0 ? -50 : 50 }}
+                        whileInView={{ opacity: 1, x: 0 }}
+                        viewport={{ once: true, amount: 0.3 }}
+                        transition={{ duration: 0.6 }}
+                    >
                         <div className="lg:w-1/2">
                              <div className="relative aspect-video">
                                 <Image 
@@ -117,50 +152,69 @@ export default function InsurancePage() {
                                 {insurance.cta} <ArrowRight className="ml-2 h-5 w-5" />
                             </Button>
                         </div>
-                    </div>
+                    </motion.div>
                 ))}
             </div>
-        </section>
+        </motion.section>
         
         {/* How to Apply Section */}
-        <section id="get-a-quote" className="bg-secondary py-20 sm:py-28">
+        <motion.section 
+            id="get-a-quote" 
+            className="bg-secondary py-20 sm:py-28"
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, amount: 0.2 }}
+            variants={containerVariants}
+        >
             <div className="container">
-                 <div className="mx-auto max-w-2xl text-center">
+                 <motion.div variants={itemVariants} className="mx-auto max-w-2xl text-center">
                     <h2 className="font-headline text-3xl font-bold tracking-tight text-primary sm:text-4xl">
                         Simple Steps to Get Covered
                     </h2>
                     <p className="mt-6 text-lg leading-8 text-muted-foreground">
                         Getting the right insurance coverage is easier than you think. Our streamlined process helps you get a personalized quote in minutes.
                     </p>
-                </div>
+                </motion.div>
                 <div className="mt-16 grid grid-cols-1 gap-8 md:grid-cols-3">
-                    <Card className="text-center bg-card shadow-lg">
-                        <CardHeader>
-                            <CardTitle className="font-headline text-xl">1. Tell Us About You</CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                            <p className="text-muted-foreground">Provide some basic information so we can understand your unique needs and situation.</p>
-                        </CardContent>
-                    </Card>
-                     <Card className="text-center bg-card shadow-lg">
-                        <CardHeader>
-                            <CardTitle className="font-headline text-xl">2. Compare Your Options</CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                            <p className="text-muted-foreground">Review personalized quotes from top carriers and choose the policy that's right for you.</p>
-                        </CardContent>
-                    </Card>
-                     <Card className="text-center bg-card shadow-lg">
-                        <CardHeader>
-                            <CardTitle className="font-headline text-xl">3. Get Covered Instantly</CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                            <p className="text-muted-foreground">Finalize your policy online and get immediate proof of coverage. It's that simple.</p>
-                        </CardContent>
-                    </Card>
+                    <motion.div variants={itemVariants} whileHover="hover">
+                        <motion.div variants={cardHover}>
+                            <Card className="text-center bg-card shadow-lg h-full">
+                                <CardHeader>
+                                    <CardTitle className="font-headline text-xl">1. Tell Us About You</CardTitle>
+                                </CardHeader>
+                                <CardContent>
+                                    <p className="text-muted-foreground">Provide some basic information so we can understand your unique needs and situation.</p>
+                                </CardContent>
+                            </Card>
+                        </motion.div>
+                    </motion.div>
+                     <motion.div variants={itemVariants} whileHover="hover">
+                        <motion.div variants={cardHover}>
+                            <Card className="text-center bg-card shadow-lg h-full">
+                                <CardHeader>
+                                    <CardTitle className="font-headline text-xl">2. Compare Your Options</CardTitle>
+                                </CardHeader>
+                                <CardContent>
+                                    <p className="text-muted-foreground">Review personalized quotes from top carriers and choose the policy that's right for you.</p>
+                                </CardContent>
+                            </Card>
+                        </motion.div>
+                    </motion.div>
+                     <motion.div variants={itemVariants} whileHover="hover">
+                        <motion.div variants={cardHover}>
+                            <Card className="text-center bg-card shadow-lg h-full">
+                                <CardHeader>
+                                    <CardTitle className="font-headline text-xl">3. Get Covered Instantly</CardTitle>
+                                </CardHeader>
+                                <CardContent>
+                                    <p className="text-muted-foreground">Finalize your policy online and get immediate proof of coverage. It's that simple.</p>
+                                </CardContent>
+                            </Card>
+                        </motion.div>
+                    </motion.div>
                 </div>
             </div>
-        </section>
+        </motion.section>
 
       </main>
       <Footer />

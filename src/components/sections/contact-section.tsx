@@ -13,6 +13,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Mail, Send } from "lucide-react";
+import { motion } from "framer-motion";
 
 const contactFormSchema = z.object({
   name: z.string().min(2, { message: "Name must be at least 2 characters." }),
@@ -25,6 +26,19 @@ type ContactFormValues = z.infer<typeof contactFormSchema>;
 const initialState = {
   message: "",
   errors: undefined,
+};
+
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: { 
+    opacity: 1,
+    transition: { staggerChildren: 0.3 }
+  }
+};
+
+const itemVariants = {
+  hidden: { y: 20, opacity: 0 },
+  visible: { y: 0, opacity: 1, transition: { duration: 0.6 } }
 };
 
 export function ContactSection() {
@@ -57,9 +71,16 @@ export function ContactSection() {
   }, [state, toast, form]);
 
   return (
-    <section id="contact" className="py-20 sm:py-28">
+    <motion.section 
+      id="contact" 
+      className="py-20 sm:py-28"
+      initial="hidden"
+      whileInView="visible"
+      viewport={{ once: true, amount: 0.2 }}
+      variants={containerVariants}
+    >
       <div className="container grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-        <div className="space-y-6">
+        <motion.div className="space-y-6" variants={itemVariants}>
            <div className="inline-block rounded-lg bg-primary/10 px-3 py-1 text-sm font-medium text-primary">
               Contact Us
             </div>
@@ -73,55 +94,57 @@ export function ContactSection() {
             <Mail className="h-6 w-6 text-primary" />
             <span>support@evertrust.bank</span>
           </div>
-        </div>
+        </motion.div>
         
-        <Form {...form}>
-          <form action={formAction} className="space-y-6">
-            <FormField
-              control={form.control}
-              name="name"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Full Name</FormLabel>
-                  <FormControl>
-                    <Input placeholder="John Doe" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="email"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Email Address</FormLabel>
-                  <FormControl>
-                    <Input placeholder="john.doe@example.com" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="message"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Your Message</FormLabel>
-                  <FormControl>
-                    <Textarea placeholder="How can we help you today?" className="min-h-[120px]" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <Button type="submit" className="w-full" style={{ backgroundColor: 'hsl(var(--accent))', color: 'hsl(var(--accent-foreground))' }} disabled={form.formState.isSubmitting}>
-              Send Message <Send className="ml-2 h-4 w-4" />
-            </Button>
-          </form>
-        </Form>
+        <motion.div variants={itemVariants}>
+          <Form {...form}>
+            <form action={formAction} className="space-y-6">
+              <FormField
+                control={form.control}
+                name="name"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Full Name</FormLabel>
+                    <FormControl>
+                      <Input placeholder="John Doe" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="email"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Email Address</FormLabel>
+                    <FormControl>
+                      <Input placeholder="john.doe@example.com" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="message"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Your Message</FormLabel>
+                    <FormControl>
+                      <Textarea placeholder="How can we help you today?" className="min-h-[120px]" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <Button type="submit" className="w-full" style={{ backgroundColor: 'hsl(var(--accent))', color: 'hsl(var(--accent-foreground))' }} disabled={form.formState.isSubmitting}>
+                Send Message <Send className="ml-2 h-4 w-4" />
+              </Button>
+            </form>
+          </Form>
+        </motion.div>
       </div>
-    </section>
+    </motion.section>
   );
 }
