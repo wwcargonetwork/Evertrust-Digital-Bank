@@ -15,7 +15,7 @@ const cardsData = [
         description: "Maximize your everyday spending with industry-leading cashback on groceries, gas, and dining. Simple, rewarding, and no annual fee.",
         icon: <Gift className="h-8 w-8 text-primary" />,
         image: {
-            src: "https://picsum.photos/seed/card1/600/400",
+            src: "https://i.ibb.co/gbgRXKGL/cashback.png",
             alt: "A modern and clean looking credit card for cashback rewards.",
             hint: "credit card design"
         },
@@ -31,7 +31,7 @@ const cardsData = [
         description: "Explore the world with points on every purchase. Enjoy premium travel perks like lounge access and travel credits.",
         icon: <Plane className="h-8 w-8 text-primary" />,
         image: {
-            src: "https://picsum.photos/seed/card2/600/400",
+            src: "https://i.ibb.co/KcyQqHhW/traveler.png",
             alt: "A stylish credit card with a world map design, for travel enthusiasts.",
             hint: "travel credit card"
         },
@@ -47,7 +47,7 @@ const cardsData = [
         description: "Unlock a world of luxury. This card offers exclusive access, concierge services, and top-tier rewards for our most discerning clients.",
         icon: <Star className="h-8 w-8 text-primary" />,
         image: {
-            src: "https://picsum.photos/seed/card3/600/400",
+            src: "https://i.ibb.co/4ZXJ2J3y/premium.png",
             alt: "A luxurious, metallic credit card symbolizing premium access.",
             hint: "luxury credit card"
         },
@@ -125,7 +125,7 @@ export default function CardsPage() {
                                     src={card.image.src}
                                     alt={card.image.alt}
                                     fill
-                                    className="rounded-xl object-cover shadow-lg"
+                                    className="rounded-xl object-contain shadow-lg"
                                     data-ai-hint={card.image.hint}
                                 />
                             </div>
