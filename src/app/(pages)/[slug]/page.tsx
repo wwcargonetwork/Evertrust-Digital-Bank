@@ -4,8 +4,13 @@ import { Footer } from "@/components/layout/footer";
 import { Building2 } from "lucide-react";
 
 export default function Page({ params }: { params: { slug: string } }) {
-  // Exclude 'deposits', 'credits', 'cards', 'investments', 'loans', 'insurance', 'personal', and 'corporate' from this generic page
-  if (['deposits', 'credits', 'cards', 'investments', 'loans', 'insurance', 'personal', 'corporate'].includes(params.slug)) {
+  // Exclude handled pages from this generic page
+  const excludedSlugs = [
+    'deposits', 'credits', 'cards', 'investments', 'loans', 'insurance', 
+    'personal', 'corporate', 'privacy-policy', 'terms-of-service', 'cookie-policy'
+  ];
+
+  if (excludedSlugs.includes(params.slug)) {
     return null;
   }
   

@@ -1,3 +1,4 @@
+
 import Link from "next/link";
 import { Landmark } from "lucide-react";
 
@@ -10,8 +11,8 @@ const socialLinks = [
 
 const footerLinks = [
     { title: "Company", links: [{name: "About Us", href:"#"}, {name: "Careers", href:"#"}, {name: "Press", href:"#"}] },
-    { title: "Services", links: [{name: "Personal Banking", href:"/banking/personal"}, {name: "Corporate Banking", href:"/banking/corporate"}, {name: "Investments", href:"/investments"}, {name: "Loans", href:"/loans"}] },
-    { title: "Legal", links: [{name: "Privacy Policy", href:"#"}, {name: "Terms of Service", href:"#"}, {name: "Cookie Policy", href:"#"}] },
+    { title: "Services", links: [{name: "Personal Banking", href:"/personal"}, {name: "Corporate Banking", href:"/corporate"}, {name: "Investments", href:"/investments"}, {name: "Loans", href:"/loans"}] },
+    { title: "Legal", links: [{name: "Privacy Policy", href:"/privacy-policy"}, {name: "Terms of Service", href:"/terms-of-service"}, {name: "Cookie Policy", href:"/cookie-policy"}] },
 ]
 
 export function Footer() {
