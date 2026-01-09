@@ -204,7 +204,7 @@ export default function AboutUsPage() {
                 <div className="mt-10">
                     <Link href="/careers" passHref>
                         <Button asChild size="lg" style={{ backgroundColor: 'hsl(var(--accent))', color: 'hsl(var(--accent-foreground))' }}>
-                            <a>View Careers <ArrowRight className="ml-2 h-5 w-5" /></a>
+                            <Link href="/careers">View Careers <ArrowRight className="ml-2 h-5 w-5" /></Link>
                         </Button>
                     </Link>
                 </div>

@@ -8,6 +8,7 @@ import { ArrowRight, Zap, Leaf, Users, BrainCircuit, Plus } from "lucide-react";
 import Image from "next/image";
 import { motion } from "framer-motion";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import Link from "next/link";
 
 const benefits = [
     { icon: <Zap className="h-8 w-8 text-primary" />, title: "Competitive Compensation", description: "We offer top-tier salaries, performance bonuses, and equity options." },
