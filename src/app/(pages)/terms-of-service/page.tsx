@@ -8,8 +8,8 @@ export default function TermsOfServicePage() {
       <Header />
       <main className="flex-1 py-12 md:py-20">
         <div className="container">
-          <div className="prose prose-lg mx-auto max-w-4xl text-foreground">
-            <h1 className="font-headline text-4xl font-bold text-primary">Terms of Service</h1>
+          <article className="prose prose-lg mx-auto max-w-4xl text-foreground prose-h1:font-headline prose-h1:text-4xl prose-h1:font-bold prose-h1:text-primary prose-a:text-primary hover:prose-a:underline">
+            <h1>Terms of Service</h1>
             <p className="lead text-muted-foreground">Last updated: {new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
 
             <p>Please read these Terms of Service ("Terms") carefully before using the services offered by Evertrust Digital Bank ("Evertrust", "we", "us", "our"). By using our services, you agree to be bound by these Terms.</p>
@@ -42,8 +42,8 @@ export default function TermsOfServicePage() {
             <p>These Terms shall be governed and construed in accordance with the laws of the jurisdiction in which our company is established, without regard to its conflict of law provisions.</p>
             
             <h2>10. Contact Us</h2>
-            <p>If you have any questions about these Terms, please contact us at <a href="mailto:support@evertrust.bank" className="text-primary hover:underline">support@evertrust.bank</a>.</p>
-          </div>
+            <p>If you have any questions about these Terms, please contact us at <a href="mailto:support@evertrust.bank">support@evertrust.bank</a>.</p>
+          </article>
         </div>
       </main>
       <Footer />

@@ -8,8 +8,8 @@ export default function PrivacyPolicyPage() {
       <Header />
       <main className="flex-1 py-12 md:py-20">
         <div className="container">
-          <div className="prose prose-lg mx-auto max-w-4xl text-foreground">
-            <h1 className="font-headline text-4xl font-bold text-primary">Privacy Policy</h1>
+          <article className="prose prose-lg mx-auto max-w-4xl text-foreground prose-h1:font-headline prose-h1:text-4xl prose-h1:font-bold prose-h1:text-primary prose-a:text-primary hover:prose-a:underline">
+            <h1>Privacy Policy</h1>
             <p className="lead text-muted-foreground">Last updated: {new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
             
             <p>Evertrust Digital Bank ("we," "our," or "us") is committed to protecting your privacy. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you use our services. Please read this policy carefully. If you do not agree with the terms of this privacy policy, please do not access our services.</p>
@@ -50,8 +50,8 @@ export default function PrivacyPolicyPage() {
             <p>We may update this Privacy Policy from time to time. We will notify you of any changes by posting the new Privacy Policy on this page. You are advised to review this Privacy Policy periodically for any changes.</p>
             
             <h2>7. Contact Us</h2>
-            <p>If you have any questions about this Privacy Policy, please contact us at <a href="mailto:support@evertrust.bank" className="text-primary hover:underline">support@evertrust.bank</a>.</p>
-          </div>
+            <p>If you have any questions about this Privacy Policy, please contact us at <a href="mailto:support@evertrust.bank">support@evertrust.bank</a>.</p>
+          </article>
         </div>
       </main>
       <Footer />

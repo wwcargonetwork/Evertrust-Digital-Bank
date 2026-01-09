@@ -8,8 +8,8 @@ export default function CookiePolicyPage() {
       <Header />
       <main className="flex-1 py-12 md:py-20">
         <div className="container">
-          <div className="prose prose-lg mx-auto max-w-4xl text-foreground">
-            <h1 className="font-headline text-4xl font-bold text-primary">Cookie Policy</h1>
+          <article className="prose prose-lg mx-auto max-w-4xl text-foreground prose-h1:font-headline prose-h1:text-4xl prose-h1:font-bold prose-h1:text-primary prose-a:text-primary hover:prose-a:underline">
+            <h1>Cookie Policy</h1>
             <p className="lead text-muted-foreground">Last updated: {new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
 
             <p>This Cookie Policy explains what cookies are and how Evertrust Digital Bank ("we," "our," or "us") uses them on our website and mobile application. We encourage you to read this policy in full so that you can understand what information we collect using cookies and how that information is used.</p>
@@ -34,8 +34,8 @@ export default function CookiePolicyPage() {
             <p>We may update this Cookie Policy from time to time in order to reflect, for example, changes to the cookies we use or for other operational, legal, or regulatory reasons. Please therefore re-visit this Cookie Policy regularly to stay informed about our use of cookies and related technologies.</p>
 
             <h2>5. Contact Us</h2>
-            <p>If you have any questions about our use of cookies or other technologies, please email us at <a href="mailto:support@evertrust.bank" className="text-primary hover:underline">support@evertrust.bank</a>.</p>
-          </div>
+            <p>If you have any questions about our use of cookies or other technologies, please email us at <a href="mailto:support@evertrust.bank">support@evertrust.bank</a>.</p>
+          </article>
         </div>
       </main>
       <Footer />
