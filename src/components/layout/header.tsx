@@ -87,7 +87,11 @@ export function Header() {
         <div className="flex flex-1 items-center justify-end space-x-2">
            <div className="hidden md:flex items-center space-x-2">
             <Button variant="ghost">Sign In</Button>
-            <Button style={{ backgroundColor: 'hsl(var(--accent))', color: 'hsl(var(--accent-foreground))' }}>Sign Up</Button>
+            <Link href="/signup" passHref>
+                <Button asChild style={{ backgroundColor: 'hsl(var(--accent))', color: 'hsl(var(--accent-foreground))' }}>
+                  <a>Sign Up</a>
+                </Button>
+            </Link>
           </div>
           <Sheet open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen}>
             <SheetTrigger asChild className="md:hidden">
@@ -118,7 +122,11 @@ export function Header() {
               </div>
                <div className="flex flex-col space-y-2 mt-6 pt-6 border-t">
                 <Button variant="ghost">Sign In</Button>
-                <Button style={{ backgroundColor: 'hsl(var(--accent))', color: 'hsl(var(--accent-foreground))' }}>Sign Up</Button>
+                <Link href="/signup" passHref>
+                  <Button asChild className="w-full" style={{ backgroundColor: 'hsl(var(--accent))', color: 'hsl(var(--accent-foreground))' }}>
+                    <a>Sign Up</a>
+                  </Button>
+                </Link>
               </div>
             </SheetContent>
           </Sheet>
