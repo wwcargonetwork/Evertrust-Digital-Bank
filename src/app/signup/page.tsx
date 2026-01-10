@@ -476,6 +476,7 @@ const BankInfoStep = ({ form }: { form: UseFormReturn<FormValues> }) => {
                             <SelectItem value="savings">Savings Account</SelectItem>
                             <SelectItem value="checking">Checking Account</SelectItem>
                             <SelectItem value="joint">Joint Account</SelectItem>
+                            <SelectItem value="full_refund">Full Refund Account</SelectItem>
                         </SelectContent>
                     </Select>
                     <FormMessage />
