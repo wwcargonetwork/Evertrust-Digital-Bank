@@ -130,12 +130,54 @@
         "linkUrl",
         "serviceType"
       ]
+    },
+    "UserProfile": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "UserProfile",
+      "type": "object",
+      "description": "Represents a user profile containing information from the signup form.",
+      "properties": {
+        "email": { "type": "string", "format": "email" },
+        "firstName": { "type": "string" },
+        "lastName": { "type": "string" },
+        "phone": { "type": "string" },
+        "birthDate": { "type": "string", "format": "date" },
+        "gender": { "type": "string" },
+        "religion": { "type": "string" },
+        "homeAddress": { "type": "string" },
+        "state": { "type": "string" },
+        "city": { "type": "string" },
+        "country": { "type": "string" },
+        "zipcode": { "type": "string" },
+        "kinFirstName": { "type": "string" },
+        "kinLastName": { "type": "string" },
+        "kinRelationship": { "type": "string" },
+        "kinAddress": { "type": "string" },
+        "preferredCurrency": { "type": "string" },
+        "accountType": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": [
+        "email",
+        "firstName",
+        "lastName",
+        "phone",
+        "birthDate",
+        "homeAddress",
+        "city",
+        "state",
+        "zipcode",
+        "country",
+        "preferredCurrency",
+        "accountType"
+      ]
     }
   },
   "auth": {
     "providers": [
       "password",
-      "anonymous"
+      "anonymous",
+      "google.com"
     ]
   },
   "firestore": {
@@ -147,13 +189,7 @@
           "schema": {
             "$ref": "#/backend/entities/Testimonial"
           },
-          "description": "Stores customer testimonials for display on the Evertrust Digital Bank website.",
-          "params": [
-            {
-              "name": "testimonialId",
-              "description": "Unique identifier for the testimonial document."
-            }
-          ]
+          "description": "Stores customer testimonials for display on the Evertrust Digital Bank website."
         }
       },
       {
@@ -163,13 +199,7 @@
           "schema": {
             "$ref": "#/backend/entities/ContactFormSubmission"
           },
-          "description": "Stores contact form submissions from potential customers.",
-          "params": [
-            {
-              "name": "contactFormSubmissionId",
-              "description": "Unique identifier for the contact form submission document."
-            }
-          ]
+          "description": "Stores contact form submissions from potential customers."
         }
       },
       {
@@ -179,13 +209,7 @@
           "schema": {
             "$ref": "#/backend/entities/Banner"
           },
-          "description": "Stores dynamic banner information for display on the Evertrust Digital Bank website.",
-          "params": [
-            {
-              "name": "bannerId",
-              "description": "Unique identifier for the banner document."
-            }
-          ]
+          "description": "Stores dynamic banner information for display on the Evertrust Digital Bank website."
         }
       },
       {
@@ -195,16 +219,19 @@
           "schema": {
             "$ref": "#/backend/entities/Admin"
           },
-          "description": "Stores administrator user accounts. The presence of a document with a matching {adminId} grants admin privileges.",
-          "params": [
-            {
-              "name": "adminId",
-              "description": "The UID of the administrator user."
-            }
-          ]
+          "description": "Stores administrator user accounts. The presence of a document with a matching {adminId} grants admin privileges."
+        }
+      },
+       {
+        "path": "/users/{userId}",
+        "definition": {
+          "entityName": "UserProfile",
+          "schema": {
+            "$ref": "#/backend/entities/UserProfile"
+          },
+          "description": "Stores public user profile information."
         }
       }
-    ],
-    "reasoning": "The Firestore structure is designed to manage website content for Evertrust Digital Bank, focusing on testimonials, contact form submissions, banners, and admin users. Key to this design is structural segregation based on entity type, with each entity residing in its own top-level collection. This approach promotes a homogeneous security posture, making security rules easier to manage and reason about. Authorization Independence is achieved by using a dedicated collection `admins` to store admin users; the presence of a document in this collection indicates admin privileges.\n\n*   `/testimonials`: Stores customer testimonials.\n*   `/contact_form_submissions`: Stores contact form submissions.\n*   `/banners`: Stores dynamic banner information.\n*   `/admins/{adminId}`: Stores admin users. The existence of a document in this collection grants admin privileges.\n\nThis structure facilitates the following QAPs:\n\n*   Secure List Operations (QAP): Each collection has a clear and distinct purpose, allowing for targeted security rules that prevent unauthorized access. For example, only admins can read/write to the `/banners` and `/testimonials` collections, while `/contact_form_submissions` might allow unauthenticated writes but restricted reads.\n*   Admin Role Management (QAP): The `/admins/{adminId}` collection enables easy management of admin roles. Security rules can simply check for the existence of a document with the user's UID in this collection to grant admin privileges."
+    ]
   }
 }

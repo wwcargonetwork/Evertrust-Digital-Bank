@@ -5,39 +5,26 @@
  * website where content is managed by a trusted set of administrators.
  *
  * Data Structure:
- * The data is organized into four distinct, top-level collections:
+ * The data is organized into five distinct, top-level collections:
  * - /testimonials: Publicly readable content managed by Admins.
  * - /banners: Publicly readable content managed by Admins.
  * - /contact_form_submissions: A write-only "dropbox" for public users, readable
  *   only by Admins.
  * - /admins: A collection where the existence of a document signifies a user has
  *   Admin privileges.
+ * - /users: Stores public profiles for registered users.
  *
  * Key Security Decisions:
  * - Admin Role by Existence: A user is considered an Admin if a document exists for
  *   them at the path `/admins/{userId}`. This is a highly performant and simple way
  *   to manage roles without relying on custom claims.
+ * - Owner-Only Writes: For the `/users` collection, users can only write to their
+ *   own document, ensuring data privacy and integrity.
  * - Public Read, Admin Write: Collections intended for public display (/testimonials,
- *   /banners) are readable by anyone (including unauthenticated users) but can only
- *   be created, updated, or deleted by Admins.
- * - Segregated Private Data: User-submitted contact forms are stored in a separate
- *   collection. This allows public `create` access while strictly denying any read
- *   access to non-Admins, protecting user privacy.
- * - Admin Management: Only existing Admins can add or remove other Admins, preventing
- *   unauthorized privilege escalation.
- *
- * Denormalization for Authorization:
- * The primary denormalization strategy is the `/admins` collection itself. Instead of
- * storing a role field on a user object or in a separate lookup table, we use the
- * document's existence as the authorization token. This allows for a fast `exists()`
- * check in the rules, which is significantly more performant than a `get()` call.
- *
- * Structural Segregation:
- * The ruleset leverages separate collections for public content (/banners, /testimonials)
- * and private, user-submitted data (/contact_form_submissions). This segregation
- * makes security rules simpler and safer, especially for list operations, by ensuring
- * that a public query on one collection cannot accidentally expose sensitive data
- * from another.
+ *   /banners) are readable by anyone but can only be managed by Admins.
+ * - Segregated Private Data: User-submitted contact forms are stored separately,
+ *   allowing public `create` while restricting reads to Admins.
+ * - Admin Management: Only Admins can add or remove other Admins.
  */
 rules_version = '2';
 service cloud.firestore {
@@ -71,18 +58,37 @@ service cloud.firestore {
       return isAdmin() && resource != null;
     }
 
+    /**
+     * Checks if the requesting user is the owner of the document.
+     */
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
     // -------------------------------------------------------------------------
     // Collection Rules
     // -------------------------------------------------------------------------
 
     /**
+     * @description Manages public user profiles. Users can create, read, and update
+     *              their own profile. Admins have read-only access.
+     * @path /users/{userId}
+     * @allow (create, read, update) A user can manage their own profile.
+     * @allow (get, list) Admins can read user profiles.
+     * @deny (delete) No one can delete user profiles directly.
+     * @deny (write) A user cannot write to another user's profile.
+     */
+    match /users/{userId} {
+      allow create: if isOwner(userId);
+      allow read, update: if isOwner(userId);
+      allow get, list: if isAdmin();
+      allow delete: if false; // Deletion should be handled by a backend process
+    }
+
+    /**
      * @description Manages customer testimonials. These are public for anyone to read,
      *              but only administrators can create, update, or delete them.
      * @path /testimonials/{testimonialId}
-     * @allow (get) Any user, signed in or not, can read a specific testimonial.
-     * @deny (create) A non-admin user attempts to create a new testimonial.
-     * @principle Public Read with Admin-Only Writes. Ensures website content is
-     *            viewable by all but managed by a trusted group.
      */
     match /testimonials/{testimonialId} {
       allow get: if true;
@@ -94,12 +100,8 @@ service cloud.firestore {
 
     /**
      * @description Stores contact form submissions from the website. Anyone can submit
-     *              a new form, but only administrators can read or manage the submissions.
+     *              a new form, but only administrators can read or manage them.
      * @path /contact_form_submissions/{contactFormSubmissionId}
-     * @allow (create) An unauthenticated website visitor submits the contact form.
-     * @deny (get) A regular signed-in user tries to read another user's submission.
-     * @principle Dropbox Pattern. Allows public write access while keeping all submitted
-     *            data private and visible only to administrators.
      */
     match /contact_form_submissions/{contactFormSubmissionId} {
       allow get: if isAdmin();
@@ -113,10 +115,6 @@ service cloud.firestore {
      * @description Manages dynamic website banners. Banners are public for anyone to
      *              read, but only administrators can manage their content.
      * @path /banners/{bannerId}
-     * @allow (list) Any user's client app can fetch the list of all banners to display.
-     * @deny (update) A non-admin user attempts to change a banner's image URL.
-     * @principle Public Read with Admin-Only Writes. Allows marketing content to be
-     *            publicly visible while restricting management to authorized staff.
      */
     match /banners/{bannerId} {
       allow get: if true;
@@ -128,16 +126,8 @@ service cloud.firestore {
 
     /**
      * @description Manages administrator accounts. The existence of a document here
-     *              grants a user admin privileges across the application. Only other
-     *              admins can view, add, or remove administrators.
+     *              grants a user admin privileges. Only other admins can manage this list.
      * @path /admins/{adminId}
-     * @allow (create) An existing admin adds a new user's UID to the collection,
-     *              granting them admin rights.
-     * @deny (list) A regular user attempts to see the list of all administrators.
-     * @deny (delete) A regular user attempts to delete an admin document to revoke
-     *             privileges.
-     * @principle Role-Based Access Control. This collection is the source of truth for
-     *            admin privileges and is strictly self-managed by other admins.
      */
     match /admins/{adminId} {
       allow get: if isAdmin();

@@ -1,12 +1,14 @@
-
 'use client';
 
 import { useState } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { useForm, type UseFormReturn } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { motion, AnimatePresence } from 'framer-motion';
+import { createUserWithEmailAndPassword } from 'firebase/auth';
+import { doc, setDoc } from 'firebase/firestore';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -21,6 +23,10 @@ import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
+import { useAuth, useFirebase } from '@/firebase';
+import { useToast } from '@/hooks/use-toast';
+import { setDocumentNonBlocking } from '@/firebase/non-blocking-updates';
+
 
 const formSchema = z.object({
   // Step 1: Authentication
@@ -76,6 +82,10 @@ const steps = [
 
 export default function SignupPage() {
   const [currentStep, setCurrentStep] = useState(0);
+  const auth = useAuth();
+  const { firestore } = useFirebase();
+  const router = useRouter();
+  const { toast } = useToast();
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -105,12 +115,36 @@ export default function SignupPage() {
   });
 
   async function processForm(values: FormValues) {
-    // In a real app, you'd handle form submission (e.g., call a Firebase function)
-    console.log(values);
-    alert('Signup successful! (Check console for data)');
-    // Potentially reset form and step
-    // form.reset();
-    // setCurrentStep(0);
+    try {
+        const userCredential = await createUserWithEmailAndPassword(auth, values.email, values.password);
+        const user = userCredential.user;
+
+        // Don't store sensitive info like password or PIN in Firestore
+        const { password, confirmPassword, pin, confirmPin, ...userProfileData } = values;
+
+        const userProfile = {
+            ...userProfileData,
+            createdAt: new Date(),
+        };
+
+        const userDocRef = doc(firestore, 'users', user.uid);
+        setDocumentNonBlocking(userDocRef, userProfile, { merge: true });
+
+        toast({
+            title: 'Signup Successful!',
+            description: 'Your account has been created.',
+        });
+
+        router.push('/');
+
+    } catch (error: any) {
+        console.error('Signup Error:', error);
+        toast({
+            variant: 'destructive',
+            title: 'Signup Failed',
+            description: error.message || 'An unexpected error occurred.',
+        });
+    }
   }
 
   type FieldName = keyof FormValues;
@@ -181,7 +215,7 @@ export default function SignupPage() {
                   <Button type="button" onClick={prev} disabled={currentStep === 0} variant="outline">
                     <ArrowLeft className="mr-2 h-4 w-4" /> Previous
                   </Button>
-                  <Button type="button" onClick={next} style={{ backgroundColor: 'hsl(var(--accent))', color: 'hsl(var(--accent-foreground))' }}>
+                  <Button type="button" onClick={next} style={{ backgroundColor: 'hsl(var(--accent))', color: 'hsl(var(--accent-foreground))' }} disabled={form.formState.isSubmitting}>
                     {currentStep === steps.length - 1 ? 'Submit' : 'Next'}
                     <ArrowRight className="ml-2 h-4 w-4" />
                   </Button>
@@ -485,5 +519,3 @@ const BankInfoStep = ({ form }: { form: UseFormReturn<FormValues> }) => {
         </div>
     )
 }
-
-    
