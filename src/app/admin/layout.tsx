@@ -25,10 +25,9 @@ import {
   SidebarFooter,
   SidebarInset,
 } from '@/components/ui/sidebar';
-import { useUser, useAuth, useFirebase } from '@/firebase';
+import { useUser, useAuth } from '@/firebase';
 import { useRouter } from 'next/navigation';
 import { signOut } from 'firebase/auth';
-import { doc, getDoc } from 'firebase/firestore';
 import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Input } from '@/components/ui/input';
@@ -40,37 +39,20 @@ export default function AdminLayout({
 }) {
   const { user, isUserLoading } = useUser();
   const auth = useAuth();
-  const { firestore } = useFirebase();
   const router = useRouter();
-  const [isAdmin, setIsAdmin] = React.useState(false);
 
   React.useEffect(() => {
-    if (!isUserLoading) {
-      if (!user) {
-        router.replace('/admin/login');
-      } else {
-        // Check if the user is an admin
-        const adminDocRef = doc(firestore, 'admins', user.uid);
-        getDoc(adminDocRef).then((docSnap) => {
-          if (docSnap.exists()) {
-            setIsAdmin(true);
-          } else {
-            // Not an admin, sign out and redirect
-            signOut(auth).then(() => {
-              router.replace('/admin/login?error=auth');
-            });
-          }
-        });
-      }
+    if (!isUserLoading && !user) {
+      router.replace('/admin/login');
     }
-  }, [user, isUserLoading, auth, router, firestore]);
+  }, [user, isUserLoading, router]);
 
   const handleLogout = async () => {
     await signOut(auth);
     router.replace('/admin/login');
   };
   
-  if (isUserLoading || !isAdmin) {
+  if (isUserLoading || !user) {
     // You can show a loading spinner here
     return (
         <div className="flex h-screen items-center justify-center">
