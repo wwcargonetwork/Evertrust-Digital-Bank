@@ -1,0 +1,210 @@
+{
+  "entities": {
+    "Admin": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Admin",
+      "type": "object",
+      "description": "Represents an administrator user for managing the Evertrust Digital Bank website.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the Admin entity."
+        },
+        "username": {
+          "type": "string",
+          "description": "The username of the administrator."
+        },
+        "email": {
+          "type": "string",
+          "description": "The email address of the administrator.",
+          "format": "email"
+        }
+      },
+      "required": [
+        "id",
+        "username",
+        "email"
+      ]
+    },
+    "Testimonial": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Testimonial",
+      "type": "object",
+      "description": "Represents a customer testimonial displayed on the Evertrust Digital Bank website.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the Testimonial entity."
+        },
+        "customerName": {
+          "type": "string",
+          "description": "The name of the customer providing the testimonial."
+        },
+        "testimonialText": {
+          "type": "string",
+          "description": "The text content of the testimonial."
+        },
+        "imageURL": {
+          "type": "string",
+          "description": "URL to a high resolution image of the customer.",
+          "format": "uri"
+        }
+      },
+      "required": [
+        "id",
+        "customerName",
+        "testimonialText",
+        "imageURL"
+      ]
+    },
+    "ContactFormSubmission": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "ContactFormSubmission",
+      "type": "object",
+      "description": "Represents a contact form submission from a potential customer.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the ContactFormSubmission entity."
+        },
+        "name": {
+          "type": "string",
+          "description": "The name of the person submitting the form."
+        },
+        "email": {
+          "type": "string",
+          "description": "The email address of the person submitting the form.",
+          "format": "email"
+        },
+        "message": {
+          "type": "string",
+          "description": "The message content submitted through the form."
+        },
+        "submissionDate": {
+          "type": "string",
+          "description": "The date and time the form was submitted.",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "email",
+        "message",
+        "submissionDate"
+      ]
+    },
+    "Banner": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Banner",
+      "type": "object",
+      "description": "Represents a dynamic banner displayed on the Evertrust Digital Bank website.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the Banner entity."
+        },
+        "title": {
+          "type": "string",
+          "description": "The title of the banner."
+        },
+        "imageUrl": {
+          "type": "string",
+          "description": "URL to the banner image.",
+          "format": "uri"
+        },
+        "linkUrl": {
+          "type": "string",
+          "description": "URL the banner links to when clicked.",
+          "format": "uri"
+        },
+        "serviceType": {
+          "type": "string",
+          "description": "The type of service this banner promotes (e.g., Loan Services, Savings Services, Stock Trading Services)."
+        }
+      },
+      "required": [
+        "id",
+        "title",
+        "imageUrl",
+        "linkUrl",
+        "serviceType"
+      ]
+    }
+  },
+  "auth": {
+    "providers": [
+      "password",
+      "anonymous"
+    ]
+  },
+  "firestore": {
+    "structure": [
+      {
+        "path": "/testimonials/{testimonialId}",
+        "definition": {
+          "entityName": "Testimonial",
+          "schema": {
+            "$ref": "#/backend/entities/Testimonial"
+          },
+          "description": "Stores customer testimonials for display on the Evertrust Digital Bank website.",
+          "params": [
+            {
+              "name": "testimonialId",
+              "description": "Unique identifier for the testimonial document."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/contact_form_submissions/{contactFormSubmissionId}",
+        "definition": {
+          "entityName": "ContactFormSubmission",
+          "schema": {
+            "$ref": "#/backend/entities/ContactFormSubmission"
+          },
+          "description": "Stores contact form submissions from potential customers.",
+          "params": [
+            {
+              "name": "contactFormSubmissionId",
+              "description": "Unique identifier for the contact form submission document."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/banners/{bannerId}",
+        "definition": {
+          "entityName": "Banner",
+          "schema": {
+            "$ref": "#/backend/entities/Banner"
+          },
+          "description": "Stores dynamic banner information for display on the Evertrust Digital Bank website.",
+          "params": [
+            {
+              "name": "bannerId",
+              "description": "Unique identifier for the banner document."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/admins/{adminId}",
+        "definition": {
+          "entityName": "Admin",
+          "schema": {
+            "$ref": "#/backend/entities/Admin"
+          },
+          "description": "Stores administrator user accounts. The presence of a document with a matching {adminId} grants admin privileges.",
+          "params": [
+            {
+              "name": "adminId",
+              "description": "The UID of the administrator user."
+            }
+          ]
+        }
+      }
+    ],
+    "reasoning": "The Firestore structure is designed to manage website content for Evertrust Digital Bank, focusing on testimonials, contact form submissions, banners, and admin users. Key to this design is structural segregation based on entity type, with each entity residing in its own top-level collection. This approach promotes a homogeneous security posture, making security rules easier to manage and reason about. Authorization Independence is achieved by using a dedicated collection `admins` to store admin users; the presence of a document in this collection indicates admin privileges.\n\n*   `/testimonials`: Stores customer testimonials.\n*   `/contact_form_submissions`: Stores contact form submissions.\n*   `/banners`: Stores dynamic banner information.\n*   `/admins/{adminId}`: Stores admin users. The existence of a document in this collection grants admin privileges.\n\nThis structure facilitates the following QAPs:\n\n*   Secure List Operations (QAP): Each collection has a clear and distinct purpose, allowing for targeted security rules that prevent unauthorized access. For example, only admins can read/write to the `/banners` and `/testimonials` collections, while `/contact_form_submissions` might allow unauthenticated writes but restricted reads.\n*   Admin Role Management (QAP): The `/admins/{adminId}` collection enables easy management of admin roles. Security rules can simply check for the existence of a document with the user's UID in this collection to grant admin privileges."
+  }
+}
