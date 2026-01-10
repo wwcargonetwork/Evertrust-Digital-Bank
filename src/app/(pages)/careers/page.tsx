@@ -4,7 +4,7 @@
 import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, Zap, Leaf, Users, BrainCircuit, Plus } from "lucide-react";
+import { ArrowRight, Zap, Leaf, Users, BrainCircuit } from "lucide-react";
 import Image from "next/image";
 import { motion } from "framer-motion";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
@@ -25,7 +25,7 @@ const jobOpenings = {
     ],
     "Design": [
         { title: "Senior Product Designer", location: "Remote, USA", type: "Full-time" },
-        { title: "UX Researcher", location: "New York, NY", type_h: "Full-time" },
+        { title: "UX Researcher", location: "New York, NY", type: "Full-time" },
     ],
     "Marketing": [
         { title: "Content Marketing Manager", location: "Remote, USA", type: "Full-time" },
@@ -126,24 +126,16 @@ export default function CareersPage() {
                             <h3 className="font-headline text-2xl font-semibold text-primary mb-4">{department}</h3>
                             <div className="rounded-lg border bg-card shadow-sm">
                                 {jobs.map((job, index) => (
-                                    <div key={job.title}>
-                                        <Accordion type="single" collapsible>
-                                            <AccordionItem value={`item-${index}`} className="border-b-0">
-                                                <AccordionTrigger className="flex w-full items-center justify-between p-6 text-left hover:bg-primary/5 transition-colors [&[data-state=open]]:bg-primary/5">
-                                                    <div className="flex-1">
-                                                        <p className="text-lg font-semibold text-primary">{job.title}</p>
-                                                        <p className="text-sm text-muted-foreground">{job.location} &middot; {job.type}</p>
-                                                    </div>
-                                                    <Button variant="ghost" className="hidden md:inline-flex">Apply</Button>
-                                                    <Plus className="h-5 w-5 shrink-0 text-primary transition-transform duration-200" />
-                                                </AccordionTrigger>
-                                                <AccordionContent className="p-6 pt-0">
-                                                    <p className="text-muted-foreground mb-4">Job description summary... We're looking for a motivated individual with experience in X, Y, and Z to join our dynamic team. You'll be responsible for...</p>
-                                                    <Button style={{ backgroundColor: 'hsl(var(--accent))', color: 'hsl(var(--accent-foreground))' }}>View Details & Apply</Button>
-                                                </AccordionContent>
-                                            </AccordionItem>
-                                        </Accordion>
-                                        {index < jobs.length - 1 && <div className="border-b border-border"></div>}
+                                    <div key={job.title} className="border-b last:border-b-0">
+                                        <div className="flex items-center justify-between p-6">
+                                            <div>
+                                                <p className="text-lg font-semibold text-primary">{job.title}</p>
+                                                <p className="text-sm text-muted-foreground">{job.location} &middot; {job.type}</p>
+                                            </div>
+                                            <Button asChild style={{ backgroundColor: 'hsl(var(--accent))', color: 'hsl(var(--accent-foreground))' }}>
+                                                <a href="#">Apply Now</a>
+                                            </Button>
+                                        </div>
                                     </div>
                                 ))}
                             </div>
@@ -162,3 +154,5 @@ export default function CareersPage() {
     </div>
   );
 }
+
+    
