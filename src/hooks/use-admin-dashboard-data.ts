@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { collection, query, orderBy, limit, getDocs, onSnapshot, where } from 'firebase/firestore';
+import { collection, query, orderBy, limit, getDocs, onSnapshot, where, doc as firestoreDoc } from 'firebase/firestore';
 import { useFirestore, useMemoFirebase } from '@/firebase';
 import { WithId } from '@/firebase/firestore/use-collection';
 
@@ -17,7 +17,7 @@ export type Transaction = WithId<{
   amount: number;
   type: string;
   status: 'approved' | 'pending' | 'declined';
-  createdAt: { toDate: () => Date };
+  createdAt: string | Date; // Can be a string or Date object
   user?: UserProfile; // Optional: enriched data
 }>;
 
@@ -80,20 +80,21 @@ export function useAdminDashboardData(): UseAdminDashboardDataResult {
         // Process recent users
         const recentUsers = recentUsersSnapshot.docs.map(doc => ({ ...doc.data(), id: doc.id } as UserProfile));
 
+        // Create a map of all users for quick lookup
+        const allUsersMap = new Map<string, UserProfile>();
+        allUsersSnapshot.docs.forEach(doc => {
+            allUsersMap.set(doc.id, { ...doc.data(), id: doc.id } as UserProfile);
+        });
+
         // Process recent transactions and enrich with user data
-        const recentTransactions = await Promise.all(
-          recentTransactionsSnapshot.docs.map(async (doc) => {
+        const recentTransactions: Transaction[] = recentTransactionsSnapshot.docs.map(doc => {
             const txData = { ...doc.data(), id: doc.id, createdAt: doc.data().createdAt.toDate() } as Transaction;
-            
-            // Find the user for this transaction from the already-fetched recentUsers list
-            const user = recentUsers.find(u => u.id === txData.userId) || 
-                         allUsersSnapshot.docs.find(u => u.id === txData.userId)?.data() as UserProfile | undefined;
+            const user = allUsersMap.get(txData.userId);
             if(user){
                txData.user = user;
             }
             return txData;
-          })
-        );
+          });
         
         setData({
           totalUsers,

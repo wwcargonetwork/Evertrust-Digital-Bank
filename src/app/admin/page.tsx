@@ -78,9 +78,10 @@ export default function AdminDashboard() {
     recentUsers,
   } = data || {};
 
-  const getInitials = (name: string) => {
+  const getInitials = (name: string | undefined | null) => {
+    if (!name) return '??';
     const names = name.split(' ');
-    if (names.length > 1) {
+    if (names.length > 1 && names[0] && names[names.length - 1]) {
         return `${names[0][0]}${names[names.length - 1][0]}`.toUpperCase();
     }
     return name.substring(0, 2).toUpperCase();
@@ -166,7 +167,7 @@ export default function AdminDashboard() {
                     <TableCell className="hidden xl:table-cell">
                       <Badge className="text-xs capitalize" variant={tx.status === 'approved' ? 'default' : tx.status === 'pending' ? 'secondary' : 'destructive'}>{tx.status}</Badge>
                     </TableCell>
-                    <TableCell className="hidden md:table-cell">{format(tx.createdAt, 'PP')}</TableCell>
+                    <TableCell className="hidden md:table-cell">{format(new Date(tx.createdAt), 'PP')}</TableCell>
                     <TableCell className="text-right">{formatCurrency(tx.amount)}</TableCell>
                   </TableRow>
                 ))}
