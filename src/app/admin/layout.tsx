@@ -26,7 +26,8 @@ import {
   SidebarFooter,
   SidebarInset,
 } from '@/components/ui/sidebar';
-import { useUser, useAuth } from '@/firebase';
+import { useUser, useFirestore, useDoc, useMemoFirebase } from '@/firebase';
+import { doc } from 'firebase/firestore';
 import { useRouter, usePathname } from 'next/navigation';
 import { signOut } from 'firebase/auth';
 import { Button } from '@/components/ui/button';
@@ -34,6 +35,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel,
 import { Input } from '@/components/ui/input';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Toaster } from '@/components/ui/toaster';
+import { Skeleton } from '@/components/ui/skeleton';
 
 export default function AdminLayout({
   children,
@@ -41,31 +43,58 @@ export default function AdminLayout({
   children: React.ReactNode;
 }) {
   const { user, isUserLoading } = useUser();
-  const auth = useAuth();
+  const firestore = useFirestore();
   const router = useRouter();
   const pathname = usePathname();
 
+  // Memoize the document reference to prevent re-renders
+  const userDocRef = useMemoFirebase(() => {
+    if (!user) return null;
+    return doc(firestore, 'users', user.uid);
+  }, [firestore, user]);
+
+  const { data: userProfile, isLoading: isProfileLoading } = useDoc(userDocRef);
+
   React.useEffect(() => {
-    if (!isUserLoading && !user && pathname !== '/admin/login') {
+    // Don't run auth logic on the login page itself
+    if (pathname === '/admin/login') return;
+
+    // If initial auth state or profile is still loading, do nothing yet
+    if (isUserLoading || isProfileLoading) return;
+
+    // If not logged in, redirect to admin login
+    if (!user) {
       router.replace('/admin/login');
+      return;
     }
-  }, [user, isUserLoading, router, pathname]);
+
+    // If a user profile exists, they are a regular user, not an admin.
+    // Redirect them away from the admin panel.
+    if (userProfile) {
+      router.replace('/dashboard'); // Or show an "Access Denied" page
+    }
+    
+    // If user exists and userProfile does NOT, they are an admin. Allow access.
+
+  }, [user, userProfile, isUserLoading, isProfileLoading, router, pathname]);
 
   const handleLogout = async () => {
-    if (auth) {
-      await signOut(auth);
+    if (firestore.app) { // Check if app is available from firestore instance
+      await signOut(doc(firestore, 'users', 'dummy').firestore.app.options.auth!);
     }
     router.replace('/admin/login');
   };
   
+  // Render only the children (the login page) if we are on the login route
   if (pathname === '/admin/login') {
     return <>{children}</>;
   }
 
-  if (isUserLoading || !user) {
+  // Show a loading screen while we verify the user's admin status
+  if (isUserLoading || isProfileLoading || !user || userProfile) {
     return (
         <div className="flex h-screen items-center justify-center bg-background">
-            <p>Loading...</p>
+            <p>Verifying administrative access...</p>
         </div>
     );
   }
