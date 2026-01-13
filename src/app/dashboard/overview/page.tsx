@@ -91,7 +91,7 @@ function RecentActivity() {
                     </div>
                     <div className="flex-1 space-y-1">
                         <p className="text-sm font-medium capitalize leading-none">{tx.type}</p>
-                        <p className="text-sm text-muted-foreground">{format(tx.createdAt.toDate(), 'PPP')}</p>
+                        <p className="text-sm text-muted-foreground">{tx.createdAt ? format(tx.createdAt.toDate(), 'PPP') : 'Pending...'}</p>
                     </div>
                     <div className={`font-medium ${tx.type === 'deposit' ? 'text-green-600' : 'text-foreground'}`}>
                         {tx.type === 'deposit' ? '+' : '-'}
