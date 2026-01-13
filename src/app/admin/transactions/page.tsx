@@ -45,9 +45,9 @@ import {
 import { Skeleton } from '@/components/ui/skeleton';
 import { useAdminUsersData } from '@/hooks/use-admin-users-data';
 import { useAdminTransactionsData, type Transaction } from '@/hooks/use-admin-transactions-data';
-import { useFirestore } from '@/firebase';
+import { useFirestore, addDocumentNonBlocking } from '@/firebase';
 import { useToast } from '@/hooks/use-toast';
-import { collection, serverTimestamp, addDoc } from 'firebase/firestore';
+import { collection, serverTimestamp } from 'firebase/firestore';
 import { format } from 'date-fns';
 
 const transactionFormSchema = z.object({
@@ -98,29 +98,20 @@ export default function TransactionsPage() {
   async function onSubmit(values: TransactionFormValues) {
     if (!firestore) return;
 
-    try {
-        const userTransactionsRef = collection(firestore, 'users', values.userId, 'transactions');
-        await addDoc(userTransactionsRef, {
-            amount: values.amount,
-            description: values.description,
-            type: values.type,
-            status: 'pending',
-            createdAt: serverTimestamp(),
-        });
+    const userTransactionsRef = collection(firestore, 'users', values.userId, 'transactions');
+    addDocumentNonBlocking(userTransactionsRef, {
+        amount: values.amount,
+        description: values.description,
+        type: values.type,
+        status: 'pending',
+        createdAt: serverTimestamp(),
+    });
 
-        toast({
-            title: 'Success!',
-            description: `Successfully created a pending ${values.type}. Please approve it in the Approvals page.`,
-        });
-        form.reset();
-    } catch (error: any) {
-      console.error('Transaction creation failed:', error);
-      toast({
-        variant: 'destructive',
-        title: 'Transaction Failed',
-        description: error.message || 'An unexpected error occurred.',
-      });
-    }
+    toast({
+        title: 'Success!',
+        description: `Successfully created a pending ${values.type}. Please approve it in the Approvals page.`,
+    });
+    form.reset();
   }
 
   const getStatusBadgeVariant = (status: Transaction['status']) => {
