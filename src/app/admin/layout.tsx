@@ -26,11 +26,13 @@ import {
   SidebarInset,
 } from '@/components/ui/sidebar';
 import { useUser, useAuth } from '@/firebase';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 import { signOut } from 'firebase/auth';
 import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Input } from '@/components/ui/input';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Toaster } from '@/components/ui/toaster';
 
 export default function AdminLayout({
   children,
@@ -40,6 +42,7 @@ export default function AdminLayout({
   const { user, isUserLoading } = useUser();
   const auth = useAuth();
   const router = useRouter();
+  const pathname = usePathname();
 
   React.useEffect(() => {
     if (!isUserLoading && !user) {
@@ -53,27 +56,32 @@ export default function AdminLayout({
   };
   
   if (isUserLoading || !user) {
-    // You can show a loading spinner here
     return (
-        <div className="flex h-screen items-center justify-center">
+        <div className="flex h-screen items-center justify-center bg-background">
             <p>Loading...</p>
         </div>
     );
   }
+
+  const getInitials = (email: string) => {
+    return email.charAt(0).toUpperCase();
+  }
+
+  const isActive = (path: string) => pathname === path;
 
   return (
     <SidebarProvider>
       <Sidebar>
         <SidebarHeader>
           <Link href="/admin" className="flex items-center gap-2 font-semibold">
-            <Package2 className="h-6 w-6" />
+            <Package2 className="h-6 w-6 text-primary" />
             <span className="">Evertrust Admin</span>
           </Link>
         </SidebarHeader>
         <SidebarContent>
           <SidebarMenu>
             <SidebarMenuItem>
-              <SidebarMenuButton asChild>
+              <SidebarMenuButton asChild isActive={isActive('/admin')}>
                 <Link href="/admin">
                   <Home />
                   Dashboard
@@ -81,7 +89,7 @@ export default function AdminLayout({
               </SidebarMenuButton>
             </SidebarMenuItem>
             <SidebarMenuItem>
-              <SidebarMenuButton asChild>
+              <SidebarMenuButton asChild isActive={isActive('/admin/users')}>
                 <Link href="/admin/users">
                   <Users />
                   Users
@@ -89,7 +97,7 @@ export default function AdminLayout({
               </SidebarMenuButton>
             </SidebarMenuItem>
             <SidebarMenuItem>
-              <SidebarMenuButton asChild>
+              <SidebarMenuButton asChild isActive={isActive('/admin/transactions')}>
                 <Link href="/admin/transactions">
                   <CreditCard />
                   Transactions
@@ -97,7 +105,7 @@ export default function AdminLayout({
               </SidebarMenuButton>
             </SidebarMenuItem>
             <SidebarMenuItem>
-              <SidebarMenuButton asChild>
+              <SidebarMenuButton asChild isActive={isActive('/admin/analytics')}>
                 <Link href="/admin/analytics">
                   <LineChart />
                   Analytics
@@ -109,57 +117,46 @@ export default function AdminLayout({
         <SidebarFooter>
           <SidebarMenu>
             <SidebarMenuItem>
-              <SidebarMenuButton asChild>
+              <SidebarMenuButton asChild isActive={isActive('/admin/settings')}>
                 <Link href="/admin/settings">
                   <Settings />
                   Settings
                 </Link>
               </SidebarMenuButton>
             </SidebarMenuItem>
-            <SidebarMenuItem>
-              <SidebarMenuButton onClick={handleLogout}>
-                <LogOut />
-                Logout
-              </SidebarMenuButton>
-            </SidebarMenuItem>
           </SidebarMenu>
         </SidebarFooter>
       </Sidebar>
       <SidebarInset>
-        <header className="flex h-14 items-center gap-4 border-b bg-muted/40 px-4 lg:h-[60px] lg:px-6">
+        <header className="flex h-14 items-center gap-4 border-b bg-background px-4 lg:h-[60px] lg:px-6">
           <SidebarTrigger className="md:hidden" />
           <div className="w-full flex-1">
-            <form>
-              <div className="relative">
-                <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-                <Input
-                  type="search"
-                  placeholder="Search..."
-                  className="w-full appearance-none bg-background pl-8 shadow-none md:w-2/3 lg:w-1/3"
-                />
-              </div>
-            </form>
+             {/* The search form is part of the original design, can be kept or removed */}
           </div>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="secondary" size="icon" className="rounded-full">
-                <Bell className="h-5 w-5" />
+                <Avatar className="h-8 w-8">
+                  <AvatarImage src={user.photoURL || ''} alt={user.email || ''} />
+                  <AvatarFallback>{getInitials(user.email || 'A')}</AvatarFallback>
+                </Avatar>
                 <span className="sr-only">Toggle user menu</span>
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
               <DropdownMenuLabel>My Account</DropdownMenuLabel>
               <DropdownMenuSeparator />
-              <DropdownMenuItem>Settings</DropdownMenuItem>
+              <DropdownMenuItem onClick={() => router.push('/admin/settings')}>Settings</DropdownMenuItem>
               <DropdownMenuItem>Support</DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem onClick={handleLogout}>Logout</DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         </header>
-        <main className="flex flex-1 flex-col gap-4 p-4 lg:gap-6 lg:p-6">
+        <main className="flex flex-1 flex-col gap-4 p-4 lg:gap-6 lg:p-6 bg-muted/40">
           {children}
         </main>
+        <Toaster />
       </SidebarInset>
     </SidebarProvider>
   );

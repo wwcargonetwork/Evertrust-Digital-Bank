@@ -51,7 +51,7 @@ export function Header() {
 
   const handleLogout = async () => {
       await signOut(auth);
-      router.push('/signin');
+      router.push('/');
   };
 
   return (
@@ -99,7 +99,7 @@ export function Header() {
            <div className="hidden md:flex items-center space-x-2">
             {!isUserLoading && user ? (
                 <>
-                    <Button variant="ghost" onClick={() => router.push('/dashboard')}>
+                    <Button variant="ghost" onClick={() => router.push('/dashboard/overview')}>
                         <LayoutDashboard className="mr-2 h-4 w-4" />
                         Dashboard
                     </Button>
@@ -151,7 +151,7 @@ export function Header() {
                <div className="flex flex-col space-y-2 mt-6 pt-6 border-t">
                 {!isUserLoading && user ? (
                     <>
-                        <Button variant="ghost" className="w-full justify-start" onClick={() => {router.push('/dashboard'); setIsMobileMenuOpen(false);}}>
+                        <Button variant="ghost" className="w-full justify-start" onClick={() => {router.push('/dashboard/overview'); setIsMobileMenuOpen(false);}}>
                             <LayoutDashboard className="mr-2 h-4 w-4" />
                             Dashboard
                         </Button>
@@ -188,6 +188,7 @@ const ListItem = React.forwardRef<
   return (
     <li>
       <NavigationMenuLink asChild>
+        <Link href={props.href!} legacyBehavior passHref>
         <a
           ref={ref}
           className={cn(
@@ -201,6 +202,7 @@ const ListItem = React.forwardRef<
             {children}
           </p>
         </a>
+        </Link>
       </NavigationMenuLink>
     </li>
   )
