@@ -5,8 +5,8 @@ import * as React from 'react';
 import {
   CheckCircle,
   XCircle,
+  Search,
 } from 'lucide-react';
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
   Card,
@@ -16,6 +16,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
 import {
   Table,
   TableBody,
@@ -52,6 +53,7 @@ export default function ApprovalsPage() {
   const { transactions, isLoading: transactionsLoading } = useAdminTransactionsData();
   const { approveTransaction, declineTransaction, isUpdating } = useTransactionActions();
   const { toast } = useToast();
+  const [searchQuery, setSearchQuery] = React.useState('');
 
   const handleApprove = async (tx: Transaction) => {
     await approveTransaction(tx);
@@ -64,8 +66,17 @@ export default function ApprovalsPage() {
   };
   
   const pendingTransactions = React.useMemo(() => {
-    return transactions?.filter(tx => tx.status === 'pending') ?? [];
-  }, [transactions]);
+    const pending = transactions?.filter(tx => tx.status === 'pending') ?? [];
+    if (!searchQuery) {
+      return pending;
+    }
+    return pending.filter(tx => {
+      const searchLower = searchQuery.toLowerCase();
+      const nameMatch = tx.user?.displayName?.toLowerCase().includes(searchLower);
+      const emailMatch = tx.user?.email?.toLowerCase().includes(searchLower);
+      return nameMatch || emailMatch;
+    });
+  }, [transactions, searchQuery]);
 
 
   const renderTableContent = () => {
@@ -77,7 +88,7 @@ export default function ApprovalsPage() {
       return (
         <TableRow>
           <TableCell colSpan={5} className="text-center h-24">
-            No pending transactions found.
+            No pending transactions found {searchQuery && 'matching your search'}.
           </TableCell>
         </TableRow>
       );
@@ -110,10 +121,23 @@ export default function ApprovalsPage() {
   return (
     <Card>
     <CardHeader>
-        <CardTitle>Transaction Approvals</CardTitle>
-        <CardDescription>
-        Review and approve or decline pending transactions from users.
-        </CardDescription>
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div>
+                <CardTitle>Transaction Approvals</CardTitle>
+                <CardDescription>
+                Review and approve or decline pending transactions from users.
+                </CardDescription>
+            </div>
+            <div className="relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input 
+                    placeholder="Filter by name or email..." 
+                    className="pl-9"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                />
+            </div>
+        </div>
     </CardHeader>
     <CardContent>
         <Table>
