@@ -22,29 +22,24 @@ service cloud.firestore {
     }
 
     // -------------------------------------------------------------------------
-    // Collection Group Rules
-    // -------------------------------------------------------------------------
-
-    // This rule is necessary for the admin panel to query across all users' transactions.
-    match /{path=**}/transactions/{transactionId} {
-        allow list: if isAdmin();
-    }
-    
-    // -------------------------------------------------------------------------
     // Collection Rules
     // -------------------------------------------------------------------------
 
     match /users/{userId} {
       allow create: if true; // Anyone can create a user profile (sign up)
-      allow get: if isOwner(userId);
+      allow get: if isOwner(userId) || isAdmin();
       allow list: if isAdmin();
       allow update: if isOwner(userId) || isAdmin();
       allow delete: if false; // Don't allow users to delete their accounts
 
       match /transactions/{transactionId} {
-        allow read: if isOwner(userId) || isAdmin();
+        // Admins can list all transactions (for collection group query) and read any single one.
+        // Owners can only read their own.
+        allow list, read: if isAdmin() || isOwner(userId);
+        
         // Allow users to create 'pending' transactions, but not 'approved' ones.
         allow create: if isOwner(userId) && request.resource.data.status == 'pending';
+        
         // Only admins can update (approve/decline) or delete transactions.
         allow update, delete: if isAdmin();
       }
