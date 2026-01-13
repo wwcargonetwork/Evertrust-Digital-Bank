@@ -37,8 +37,8 @@ service cloud.firestore {
         // Owners can only read their own.
         allow list, read: if isAdmin() || isOwner(userId);
         
-        // Allow users to create 'pending' transactions, but not 'approved' ones.
-        allow create: if isOwner(userId) && request.resource.data.status == 'pending';
+        // Allow users OR admins to create 'pending' transactions.
+        allow create: if (isOwner(userId) || isAdmin()) && request.resource.data.status == 'pending';
         
         // Only admins can update (approve/decline) or delete transactions.
         allow update, delete: if isAdmin();
