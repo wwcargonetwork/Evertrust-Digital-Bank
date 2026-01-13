@@ -1,3 +1,4 @@
+
 /**
  * Core Philosophy:
  * This ruleset implements a Role-Based Access Control (RBAC) model centered around a
@@ -9,16 +10,14 @@
  * - /testimonials: Publicly readable content managed by Admins.
  * - /banners: Publicly readable content managed by Admins.
  * - /contact_form_submissions: A write-only "dropbox" for public users, readable only by Admins.
- * - /admins: A collection where the existence of a document signifies a user has Admin privileges.
  * - /users: Stores public profiles for registered users.
  * - /transactions: Stores financial transactions, readable only by Admins or the user who owns them.
  *
  * Key Security Decisions:
- * - Admin Role by Existence: A user is considered an Admin if a document exists for them at the path `/admins/{userId}`.
+ * - Admin Role by Absence: A user is considered an Admin if they are authenticated but do NOT have a document in the `/users` collection. This prevents regular users from accessing admin privileges.
  * - Owner-Only Writes: Users can only write to their own document in `/users` and create their own transactions in `/transactions`.
  * - Public Read, Admin Write: Collections for public display (/testimonials, /banners) are readable by anyone but managed only by Admins.
  * - Segregated Private Data: Contact forms and transactions are separated to control access strictly.
- * - Admin Management: Only Admins can manage other Admins.
  */
 rules_version = '2';
 service cloud.firestore {
@@ -37,21 +36,14 @@ service cloud.firestore {
 
     /**
      * Checks if the authenticated user is an administrator.
-     * Admin status is granted by the existence of a document in the /admins collection
-     * with an ID matching the user's UID.
+     * Admin status is granted if the user is signed in but does NOT have a
+     * corresponding document in the /users collection. This prevents regular
+     * users from gaining admin access.
      */
     function isAdmin() {
-      return isSignedIn() && exists(/databases/$(database)/documents/admins/$(request.auth.uid));
+      return isSignedIn() && !exists(/databases/$(database)/documents/users/$(request.auth.uid));
     }
-
-    /**
-     * A robust check for admin-only write operations (update, delete).
-     * Ensures the user is an admin AND the document they are trying to modify exists.
-     */
-    function isExistingAdmin() {
-      return isAdmin() && resource != null;
-    }
-
+    
     /**
      * Checks if the requesting user is the owner of the document.
      */
@@ -100,14 +92,6 @@ service cloud.firestore {
     match /banners/{bannerId} {
       allow get, list: if true;
       allow create, update, delete: if isAdmin();
-    }
-
-    /**
-     * @description Manages administrator accounts. Only other admins can manage this list.
-     * @path /admins/{adminId}
-     */
-    match /admins/{adminId} {
-      allow read, write: if isAdmin();
     }
     
     /**
