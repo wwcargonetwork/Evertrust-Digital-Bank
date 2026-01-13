@@ -9,7 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Skeleton } from '@/components/ui/skeleton';
-import { ArrowRight, User, Shield, Bell, Landmark } from 'lucide-react';
+import { ArrowRight, User, Shield, Bell, Landmark, DollarSign } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 // Define the shape of the user profile data
@@ -19,6 +19,7 @@ interface UserProfile {
     email: string;
     accountType: string;
     preferredCurrency: string;
+    accountBalance: number;
 }
 
 const containerVariants = {
@@ -54,6 +55,13 @@ export default function OverviewPage() {
             router.replace('/signin');
         }
     }, [user, isUserLoading, router]);
+
+    const formatCurrency = (amount: number, currency: string) => {
+        return new Intl.NumberFormat('en-US', {
+            style: 'currency',
+            currency: currency.toUpperCase(),
+        }).format(amount);
+    }
 
     // Show a loading state while user or profile is being fetched
     if (isUserLoading || isProfileLoading || !user) {
@@ -107,24 +115,18 @@ export default function OverviewPage() {
             </motion.div>
 
             <motion.div variants={itemVariants} className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-                <Card className="shadow-sm hover:shadow-md transition-shadow">
-                    <CardHeader>
-                        <CardTitle className="font-headline text-xl text-primary">Account Overview</CardTitle>
-                        <CardDescription>Your primary account details.</CardDescription>
+                <Card className="shadow-sm hover:shadow-md transition-shadow md:col-span-2 lg:col-span-1">
+                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                        <CardTitle className="font-headline text-xl text-primary">Current Balance</CardTitle>
+                        <DollarSign className="h-6 w-6 text-muted-foreground" />
                     </CardHeader>
-                    <CardContent className="space-y-4">
-                        <div>
-                            <p className="text-sm font-medium text-muted-foreground">Account Type</p>
-                            <p className="text-lg font-semibold">{userProfile.accountType}</p>
-                        </div>
-                        <div>
-                            <p className="text-sm font-medium text-muted-foreground">Email</p>
-                            <p className="text-lg font-semibold">{userProfile.email}</p>
-                        </div>
-                        <div>
-                            <p className="text-sm font-medium text-muted-foreground">Preferred Currency</p>
-                            <p className="text-lg font-semibold">{userProfile.preferredCurrency.toUpperCase()}</p>
-                        </div>
+                    <CardContent>
+                        <p className="text-4xl font-bold">
+                            {formatCurrency(userProfile.accountBalance || 0, userProfile.preferredCurrency)}
+                        </p>
+                        <p className="text-xs text-muted-foreground">
+                            {userProfile.accountType} Account
+                        </p>
                     </CardContent>
                 </Card>
 

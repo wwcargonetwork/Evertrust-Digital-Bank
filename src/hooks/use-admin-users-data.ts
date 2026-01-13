@@ -13,6 +13,7 @@ export type UserProfile = WithId<{
   accountType: string;
   createdAt: { toDate: () => Date };
   status: UserStatus;
+  accountBalance: number;
 }>;
 
 interface UseAdminUsersDataResult {

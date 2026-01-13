@@ -157,6 +157,7 @@
         "preferredCurrency": { "type": "string" },
         "accountType": { "type": "string" },
         "createdAt": { "type": "string", "format": "date-time" },
+        "accountBalance": { "type": "number", "description": "The user's current account balance." },
         "status": {
           "type": "string",
           "enum": ["active", "inactive", "suspended"],
@@ -177,7 +178,8 @@
         "country",
         "preferredCurrency",
         "accountType",
-        "status"
+        "status",
+        "accountBalance"
       ]
     },
     "Transaction": {
@@ -190,6 +192,7 @@
         "amount": { "type": "number", "description": "The amount of the transaction." },
         "type": { "type": "string", "enum": ["deposit", "withdrawal", "transfer", "sale", "refund"], "description": "The type of transaction." },
         "status": { "type": "string", "enum": ["approved", "pending", "declined"], "description": "The status of the transaction." },
+        "sender": { "type": "string", "description": "Details of the transaction sender for deposits." },
         "createdAt": { "type": "string", "format": "date-time", "description": "Timestamp of the transaction." }
       },
       "required": ["userId", "amount", "type", "status", "createdAt"]
