@@ -140,6 +140,7 @@
         "email": { "type": "string", "format": "email" },
         "firstName": { "type": "string" },
         "lastName": { "type": "string" },
+        "displayName": { "type": "string", "description": "The user's full name."},
         "phone": { "type": "string" },
         "birthDate": { "type": "string", "format": "date" },
         "gender": { "type": "string" },
@@ -161,6 +162,7 @@
         "email",
         "firstName",
         "lastName",
+        "displayName",
         "phone",
         "birthDate",
         "homeAddress",
@@ -171,6 +173,20 @@
         "preferredCurrency",
         "accountType"
       ]
+    },
+    "Transaction": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Transaction",
+      "type": "object",
+      "description": "Represents a financial transaction in the system.",
+      "properties": {
+        "userId": { "type": "string", "description": "The ID of the user performing the transaction." },
+        "amount": { "type": "number", "description": "The amount of the transaction." },
+        "type": { "type": "string", "enum": ["deposit", "withdrawal", "transfer", "sale", "refund"], "description": "The type of transaction." },
+        "status": { "type": "string", "enum": ["approved", "pending", "declined"], "description": "The status of the transaction." },
+        "createdAt": { "type": "string", "format": "date-time", "description": "Timestamp of the transaction." }
+      },
+      "required": ["userId", "amount", "type", "status", "createdAt"]
     }
   },
   "auth": {
@@ -222,7 +238,7 @@
           "description": "Stores administrator user accounts. The presence of a document with a matching {adminId} grants admin privileges."
         }
       },
-       {
+      {
         "path": "/users/{userId}",
         "definition": {
           "entityName": "UserProfile",
@@ -230,6 +246,16 @@
             "$ref": "#/backend/entities/UserProfile"
           },
           "description": "Stores public user profile information."
+        }
+      },
+      {
+        "path": "/transactions/{transactionId}",
+        "definition": {
+            "entityName": "Transaction",
+            "schema": {
+                "$ref": "#/backend/entities/Transaction"
+            },
+            "description": "Stores all financial transactions for users."
         }
       }
     ]

@@ -124,6 +124,7 @@ export default function SignupPage() {
 
         const userProfile = {
             ...userProfileData,
+            displayName: `${values.firstName} ${values.lastName}`,
             birthDate: format(userProfileData.birthDate, 'yyyy-MM-dd'),
             createdAt: serverTimestamp(),
         };

@@ -1,0 +1,127 @@
+'use client';
+
+import { useEffect, useState } from 'react';
+import { collection, query, orderBy, limit, getDocs, onSnapshot, where } from 'firebase/firestore';
+import { useFirestore, useMemoFirebase } from '@/firebase';
+import { WithId } from '@/firebase/firestore/use-collection';
+
+// Define types for our data
+export type UserProfile = WithId<{
+  displayName: string;
+  email: string;
+  createdAt: { toDate: () => Date };
+}>;
+
+export type Transaction = WithId<{
+  userId: string;
+  amount: number;
+  type: string;
+  status: 'approved' | 'pending' | 'declined';
+  createdAt: { toDate: () => Date };
+  user?: UserProfile; // Optional: enriched data
+}>;
+
+// The shape of the data returned by the hook
+interface DashboardData {
+  totalRevenue: number;
+  revenueChange: string;
+  totalUsers: number;
+  userChange: string;
+  totalTransactions: number;
+  transactionChange: string;
+  recentTransactions: Transaction[];
+  recentUsers: UserProfile[];
+}
+
+interface UseAdminDashboardDataResult {
+  data: DashboardData | null;
+  isLoading: boolean;
+  error: Error | null;
+}
+
+export function useAdminDashboardData(): UseAdminDashboardDataResult {
+  const firestore = useFirestore();
+  const [data, setData] = useState<DashboardData | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<Error | null>(null);
+
+  // Memoize collection references
+  const usersRef = useMemoFirebase(() => collection(firestore, 'users'), [firestore]);
+  const transactionsRef = useMemoFirebase(() => collection(firestore, 'transactions'), [firestore]);
+
+  useEffect(() => {
+    if (!usersRef || !transactionsRef) return;
+
+    const fetchData = async () => {
+      setIsLoading(true);
+      try {
+        // Queries for recent data
+        const recentUsersQuery = query(usersRef, orderBy('createdAt', 'desc'), limit(5));
+        const recentTransactionsQuery = query(transactionsRef, orderBy('createdAt', 'desc'), limit(5));
+        
+        // Fetch all data in parallel
+        const [
+          allUsersSnapshot, 
+          allTransactionsSnapshot,
+          recentUsersSnapshot, 
+          recentTransactionsSnapshot
+        ] = await Promise.all([
+          getDocs(usersRef),
+          getDocs(query(transactionsRef, where('status', '==', 'approved'))),
+          getDocs(recentUsersQuery),
+          getDocs(recentTransactionsQuery)
+        ]);
+        
+        // Process totals
+        const totalUsers = allUsersSnapshot.size;
+        const totalRevenue = allTransactionsSnapshot.docs.reduce((acc, doc) => acc + doc.data().amount, 0);
+        const totalTransactions = allTransactionsSnapshot.size;
+
+        // Process recent users
+        const recentUsers = recentUsersSnapshot.docs.map(doc => ({ ...doc.data(), id: doc.id } as UserProfile));
+
+        // Process recent transactions and enrich with user data
+        const recentTransactions = await Promise.all(
+          recentTransactionsSnapshot.docs.map(async (doc) => {
+            const txData = { ...doc.data(), id: doc.id, createdAt: doc.data().createdAt.toDate() } as Transaction;
+            
+            // Find the user for this transaction from the already-fetched recentUsers list
+            const user = recentUsers.find(u => u.id === txData.userId) || 
+                         allUsersSnapshot.docs.find(u => u.id === txData.userId)?.data() as UserProfile | undefined;
+            if(user){
+               txData.user = user;
+            }
+            return txData;
+          })
+        );
+        
+        setData({
+          totalUsers,
+          totalRevenue,
+          totalTransactions,
+          recentUsers,
+          recentTransactions,
+          // Placeholder values for changes
+          revenueChange: '+20.1%', 
+          userChange: '+18.3%',
+          transactionChange: '+19.0%',
+        });
+
+      } catch (err) {
+        console.error("Error fetching admin dashboard data:", err);
+        setError(err instanceof Error ? err : new Error('An unknown error occurred'));
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchData();
+
+    // Set up listeners for real-time updates (optional, can be complex)
+    // For simplicity, this example only fetches once. Real-time updates
+    // would require more complex state management.
+
+  }, [usersRef, transactionsRef]);
+
+  return { data, isLoading, error };
+}

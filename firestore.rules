@@ -5,26 +5,20 @@
  * website where content is managed by a trusted set of administrators.
  *
  * Data Structure:
- * The data is organized into five distinct, top-level collections:
+ * The data is organized into several distinct, top-level collections:
  * - /testimonials: Publicly readable content managed by Admins.
  * - /banners: Publicly readable content managed by Admins.
- * - /contact_form_submissions: A write-only "dropbox" for public users, readable
- *   only by Admins.
- * - /admins: A collection where the existence of a document signifies a user has
- *   Admin privileges.
+ * - /contact_form_submissions: A write-only "dropbox" for public users, readable only by Admins.
+ * - /admins: A collection where the existence of a document signifies a user has Admin privileges.
  * - /users: Stores public profiles for registered users.
+ * - /transactions: Stores financial transactions, readable only by Admins or the user who owns them.
  *
  * Key Security Decisions:
- * - Admin Role by Existence: A user is considered an Admin if a document exists for
- *   them at the path `/admins/{userId}`. This is a highly performant and simple way
- *   to manage roles without relying on custom claims.
- * - Owner-Only Writes: For the `/users` collection, users can only write to their
- *   own document, ensuring data privacy and integrity.
- * - Public Read, Admin Write: Collections intended for public display (/testimonials,
- *   /banners) are readable by anyone but can only be managed by Admins.
- * - Segregated Private Data: User-submitted contact forms are stored separately,
- *   allowing public `create` while restricting reads to Admins.
- * - Admin Management: Only Admins can add or remove other Admins.
+ * - Admin Role by Existence: A user is considered an Admin if a document exists for them at the path `/admins/{userId}`.
+ * - Owner-Only Writes: Users can only write to their own document in `/users` and create their own transactions in `/transactions`.
+ * - Public Read, Admin Write: Collections for public display (/testimonials, /banners) are readable by anyone but managed only by Admins.
+ * - Segregated Private Data: Contact forms and transactions are separated to control access strictly.
+ * - Admin Management: Only Admins can manage other Admins.
  */
 rules_version = '2';
 service cloud.firestore {
@@ -73,10 +67,6 @@ service cloud.firestore {
      * @description Manages public user profiles. Users can create, read, and update
      *              their own profile. Admins have read-only access.
      * @path /users/{userId}
-     * @allow (create, read, update) A user can manage their own profile.
-     * @allow (get, list) Admins can read user profiles.
-     * @deny (delete) No one can delete user profiles directly.
-     * @deny (write) A user cannot write to another user's profile.
      */
     match /users/{userId} {
       allow create: if isOwner(userId);
@@ -86,55 +76,49 @@ service cloud.firestore {
     }
 
     /**
-     * @description Manages customer testimonials. These are public for anyone to read,
-     *              but only administrators can create, update, or delete them.
+     * @description Manages customer testimonials. Publicly readable, admin-managed.
      * @path /testimonials/{testimonialId}
      */
     match /testimonials/{testimonialId} {
-      allow get: if true;
-      allow list: if true;
-      allow create: if isAdmin();
-      allow update: if isExistingAdmin();
-      allow delete: if isExistingAdmin();
+      allow get, list: if true;
+      allow create, update, delete: if isAdmin();
     }
 
     /**
-     * @description Stores contact form submissions from the website. Anyone can submit
-     *              a new form, but only administrators can read or manage them.
+     * @description Write-only dropbox for public contact forms. Readable only by admins.
      * @path /contact_form_submissions/{contactFormSubmissionId}
      */
     match /contact_form_submissions/{contactFormSubmissionId} {
-      allow get: if isAdmin();
-      allow list: if isAdmin();
       allow create: if true;
-      allow update: if isExistingAdmin();
-      allow delete: if isExistingAdmin();
+      allow read, update, delete: if isAdmin();
     }
 
     /**
-     * @description Manages dynamic website banners. Banners are public for anyone to
-     *              read, but only administrators can manage their content.
+     * @description Manages dynamic website banners. Publicly readable, admin-managed.
      * @path /banners/{bannerId}
      */
     match /banners/{bannerId} {
-      allow get: if true;
-      allow list: if true;
-      allow create: if isAdmin();
-      allow update: if isExistingAdmin();
-      allow delete: if isExistingAdmin();
+      allow get, list: if true;
+      allow create, update, delete: if isAdmin();
     }
 
     /**
-     * @description Manages administrator accounts. The existence of a document here
-     *              grants a user admin privileges. Only other admins can manage this list.
+     * @description Manages administrator accounts. Only other admins can manage this list.
      * @path /admins/{adminId}
      */
     match /admins/{adminId} {
-      allow get: if isAdmin();
-      allow list: if isAdmin();
-      allow create: if isAdmin();
-      allow update: if isExistingAdmin();
-      allow delete: if isExistingAdmin();
+      allow read, write: if isAdmin();
+    }
+    
+    /**
+     * @description Manages financial transactions. Users can create their own transactions.
+     *              Admins have full read/write access for management.
+     * @path /transactions/{transactionId}
+     */
+    match /transactions/{transactionId} {
+        allow create: if isSignedIn() && request.resource.data.userId == request.auth.uid;
+        allow read: if isAdmin() || isOwner(resource.data.userId);
+        allow list, update, delete: if isAdmin();
     }
   }
 }
