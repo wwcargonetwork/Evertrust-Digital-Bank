@@ -1,16 +1,17 @@
 'use client';
 
 import * as React from 'react';
-import { useUser, useDoc, useMemoFirebase } from '@/firebase';
+import { useUser, useDoc, useMemoFirebase, useFirestore } from '@/firebase';
 import { useRouter } from 'next/navigation';
 import { doc } from 'firebase/firestore';
-import { useFirestore } from '@/firebase';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Skeleton } from '@/components/ui/skeleton';
-import { ArrowRight, User, Shield, Bell, Landmark, DollarSign } from 'lucide-react';
+import { ArrowRight, User, Shield, Bell, Landmark, DollarSign, ArrowUp, ArrowDown } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { useUserTransactions, type UserTransaction } from '@/hooks/use-user-transactions';
+import { format } from 'date-fns';
 
 // Define the shape of the user profile data
 interface UserProfile {
@@ -36,6 +37,56 @@ const itemVariants = {
     visible: { y: 0, opacity: 1 }
 };
 
+const formatCurrency = (amount: number, currency: string) => {
+    return new Intl.NumberFormat('en-US', {
+        style: 'currency',
+        currency: currency.toUpperCase(),
+    }).format(amount);
+}
+
+function RecentActivity() {
+    const { transactions, isLoading } = useUserTransactions(3);
+
+    if (isLoading) {
+        return (
+            <div className="space-y-4">
+                <div className="flex items-center space-x-4"><Skeleton className="h-10 w-10 rounded-full" /><div className="space-y-2"><Skeleton className="h-4 w-[150px]" /><Skeleton className="h-4 w-[100px]" /></div></div>
+                <div className="flex items-center space-x-4"><Skeleton className="h-10 w-10 rounded-full" /><div className="space-y-2"><Skeleton className="h-4 w-[150px]" /><Skeleton className="h-4 w-[100px]" /></div></div>
+                <div className="flex items-center space-x-4"><Skeleton className="h-10 w-10 rounded-full" /><div className="space-y-2"><Skeleton className="h-4 w-[150px]" /><Skeleton className="h-4 w-[100px]" /></div></div>
+            </div>
+        );
+    }
+
+    if (!transactions || transactions.length === 0) {
+        return (
+            <div className="text-center text-muted-foreground py-8">
+                <Bell className="mx-auto h-8 w-8 mb-2"/>
+                <p>No recent activity to display.</p>
+            </div>
+        );
+    }
+
+    return (
+        <div className="space-y-6">
+            {transactions.map((tx: UserTransaction) => (
+                <div key={tx.id} className="flex items-center">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 mr-4">
+                        {tx.type === 'deposit' ? <ArrowDown className="h-5 w-5 text-green-500" /> : <ArrowUp className="h-5 w-5 text-red-500" />}
+                    </div>
+                    <div className="flex-1 space-y-1">
+                        <p className="text-sm font-medium capitalize leading-none">{tx.type}</p>
+                        <p className="text-sm text-muted-foreground">{format(tx.createdAt.toDate(), 'PPP')}</p>
+                    </div>
+                    <div className={`font-medium ${tx.type === 'deposit' ? 'text-green-600' : 'text-foreground'}`}>
+                        {tx.type === 'deposit' ? '+' : '-'}
+                        {formatCurrency(tx.amount, 'USD')}
+                    </div>
+                </div>
+            ))}
+        </div>
+    );
+}
+
 export default function OverviewPage() {
     const { user, isUserLoading } = useUser();
     const router = useRouter();
@@ -55,14 +106,7 @@ export default function OverviewPage() {
             router.replace('/signin');
         }
     }, [user, isUserLoading, router]);
-
-    const formatCurrency = (amount: number, currency: string) => {
-        return new Intl.NumberFormat('en-US', {
-            style: 'currency',
-            currency: currency.toUpperCase(),
-        }).format(amount);
-    }
-
+    
     // Show a loading state while user or profile is being fetched
     if (isUserLoading || isProfileLoading || !user) {
         return (
@@ -154,10 +198,7 @@ export default function OverviewPage() {
                         <CardDescription>Your latest transactions.</CardDescription>
                     </CardHeader>
                     <CardContent>
-                        <div className="text-center text-muted-foreground py-8">
-                            <Bell className="mx-auto h-8 w-8 mb-2"/>
-                            <p>No recent activity to display.</p>
-                        </div>
+                        <RecentActivity />
                     </CardContent>
                 </Card>
             </motion.div>
