@@ -50,13 +50,16 @@ import { useToast } from '@/hooks/use-toast';
 import { collection, serverTimestamp, addDoc } from 'firebase/firestore';
 import { format } from 'date-fns';
 
-const topUpFormSchema = z.object({
+const transactionFormSchema = z.object({
   userId: z.string().min(1, { message: 'Please select a user.' }),
-  sender: z.string().min(2, { message: 'Sender details are required.' }),
+  description: z.string().min(2, { message: 'Description is required.' }),
   amount: z.coerce.number().positive({ message: 'Amount must be positive.' }),
+  type: z.enum(['deposit', 'withdrawal', 'transfer', 'sale', 'refund'], {
+    required_error: 'You need to select a transaction type.',
+  }),
 });
 
-type TopUpFormValues = z.infer<typeof topUpFormSchema>;
+type TransactionFormValues = z.infer<typeof transactionFormSchema>;
 
 function formatCurrency(amount: number) {
   return new Intl.NumberFormat('en-US', {
@@ -83,38 +86,38 @@ export default function TransactionsPage() {
   const firestore = useFirestore();
   const { toast } = useToast();
 
-  const form = useForm<TopUpFormValues>({
-    resolver: zodResolver(topUpFormSchema),
+  const form = useForm<TransactionFormValues>({
+    resolver: zodResolver(transactionFormSchema),
     defaultValues: {
       userId: '',
-      sender: '',
+      description: '',
       amount: 0,
     },
   });
 
-  async function onSubmit(values: TopUpFormValues) {
+  async function onSubmit(values: TransactionFormValues) {
     if (!firestore) return;
 
     try {
         const userTransactionsRef = collection(firestore, 'users', values.userId, 'transactions');
         await addDoc(userTransactionsRef, {
             amount: values.amount,
-            description: values.sender,
-            type: 'deposit',
+            description: values.description,
+            type: values.type,
             status: 'pending',
             createdAt: serverTimestamp(),
         });
 
         toast({
             title: 'Success!',
-            description: `Successfully created a pending deposit. Please approve it in the Approvals page.`,
+            description: `Successfully created a pending ${values.type}. Please approve it in the Approvals page.`,
         });
         form.reset();
     } catch (error: any) {
-      console.error('Top-up creation failed:', error);
+      console.error('Transaction creation failed:', error);
       toast({
         variant: 'destructive',
-        title: 'Top-up Failed',
+        title: 'Transaction Failed',
         description: error.message || 'An unexpected error occurred.',
       });
     }
@@ -165,24 +168,24 @@ export default function TransactionsPage() {
     <div className="grid gap-8">
       <Card>
         <CardHeader>
-          <CardTitle>Create Deposit Request</CardTitle>
+          <CardTitle>Create Transaction Request</CardTitle>
           <CardDescription>
-            Create a pending deposit transaction for a user. It will appear in the 'Approvals' page for review.
+            Create a pending transaction for a user. It will appear in the 'Approvals' page for review.
           </CardDescription>
         </CardHeader>
         <CardContent>
           <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+            <form onSubmit={form.handleSubmit(onSubmit)} className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <FormField
                 control={form.control}
                 name="userId"
                 render={({ field }) => (
-                  <FormItem>
+                  <FormItem className="md:col-span-2">
                     <FormLabel>Select User</FormLabel>
                     <Select onValueChange={field.onChange} value={field.value} disabled={usersLoading}>
                       <FormControl>
                         <SelectTrigger>
-                          <SelectValue placeholder={usersLoading ? "Loading users..." : "Select a user to create a deposit for"} />
+                          <SelectValue placeholder={usersLoading ? "Loading users..." : "Select a user to create a transaction for"} />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
@@ -199,13 +202,24 @@ export default function TransactionsPage() {
               />
               <FormField
                 control={form.control}
-                name="sender"
+                name="type"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Description / Sender</FormLabel>
-                    <FormControl>
-                      <Input placeholder="e.g., 'Admin Deposit' or 'Manual Correction'" {...field} />
-                    </FormControl>
+                    <FormLabel>Transaction Type</FormLabel>
+                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select a transaction type" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="deposit">Deposit</SelectItem>
+                        <SelectItem value="withdrawal">Withdrawal</SelectItem>
+                        <SelectItem value="transfer">Transfer</SelectItem>
+                        <SelectItem value="sale">Sale</SelectItem>
+                        <SelectItem value="refund">Refund</SelectItem>
+                      </SelectContent>
+                    </Select>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -223,9 +237,24 @@ export default function TransactionsPage() {
                   </FormItem>
                 )}
               />
-              <Button type="submit" style={{ backgroundColor: 'hsl(var(--accent))', color: 'hsl(var(--accent-foreground))' }} disabled={form.formState.isSubmitting}>
-                Create Deposit Request <Send className="ml-2 h-4 w-4" />
-              </Button>
+              <FormField
+                control={form.control}
+                name="description"
+                render={({ field }) => (
+                  <FormItem className="md:col-span-2">
+                    <FormLabel>Description</FormLabel>
+                    <FormControl>
+                      <Input placeholder="e.g., 'Manual Correction' or 'Product Refund'" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <div className="md:col-span-2">
+                <Button type="submit" style={{ backgroundColor: 'hsl(var(--accent))', color: 'hsl(var(--accent-foreground))' }} disabled={form.formState.isSubmitting}>
+                  Create Transaction Request <Send className="ml-2 h-4 w-4" />
+                </Button>
+              </div>
             </form>
           </Form>
         </CardContent>
