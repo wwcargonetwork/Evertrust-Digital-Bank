@@ -128,7 +128,9 @@ function ChatPanel({ conversation }: { conversation: ConversationWithUserData })
                                 msg.senderType === 'admin' ? "bg-primary text-primary-foreground" : "bg-muted"
                             )}>
                                 <p className="text-sm">{msg.text}</p>
-                                <p className="text-xs text-right mt-1 opacity-70">{format(msg.createdAt.toDate(), 'p')}</p>
+                                <p className="text-xs text-right mt-1 opacity-70">
+                                    {msg.createdAt ? format(msg.createdAt.toDate(), 'p') : ''}
+                                </p>
                             </div>
                              {msg.senderType === 'admin' && <Avatar className="h-8 w-8"><AvatarFallback>A</AvatarFallback></Avatar>}
                         </div>
