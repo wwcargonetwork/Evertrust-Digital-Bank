@@ -98,7 +98,7 @@ function ChatPanel({ conversation }: { conversation: ConversationWithUserData })
             text: newMessage,
             senderId: adminUser.uid,
             senderType: 'admin'
-        });
+        }, conversation.userId);
         setNewMessage("");
     };
 

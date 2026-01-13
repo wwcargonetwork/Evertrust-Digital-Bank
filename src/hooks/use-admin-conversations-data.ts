@@ -3,7 +3,7 @@
 
 import { useEffect, useState, useCallback } from 'react';
 import { collection, query, orderBy, onSnapshot, addDoc, updateDoc, doc, serverTimestamp } from 'firebase/firestore';
-import { useFirestore, useMemoFirebase, WithId, useAuth } from '@/firebase';
+import { useFirestore, useMemoFirebase, WithId, useAuth, addDocumentNonBlocking } from '@/firebase';
 
 export type Conversation = WithId<{
   userId: string;
@@ -95,17 +95,20 @@ export function useConversationMessages(conversationId: string | null) {
         return () => unsubscribe();
     }, [messagesQuery, conversationId, firestore]);
 
-    const sendMessage = useCallback(async (message: Omit<Message, 'id' | 'createdAt'>) => {
+    const sendMessage = useCallback(async (message: Omit<Message, 'id' | 'createdAt'>, targetUserId: string) => {
         if (!firestore || !conversationId) return;
 
         const messagesColRef = collection(firestore, `conversations/${conversationId}/messages`);
         const conversationRef = doc(firestore, 'conversations', conversationId);
+        const notificationColRef = collection(firestore, `users/${targetUserId}/notifications`);
 
-        // Add the new message to the subcollection
-        await addDoc(messagesColRef, {
+        const messageData = {
             ...message,
             createdAt: serverTimestamp()
-        });
+        };
+
+        // Add the new message to the subcollection
+        await addDoc(messagesColRef, messageData);
 
         // Update the parent conversation document
         await updateDoc(conversationRef, {
@@ -114,6 +117,16 @@ export function useConversationMessages(conversationId: string | null) {
             isReadByUser: false, // Mark as unread for the user
             isReadByAdmin: true, // Admin has just sent it, so it's read by admin
         });
+        
+        // Create a notification for the user
+        const notification = {
+            title: "New Message from Support",
+            message: `You have a new message: "${message.text.substring(0, 30)}..."`,
+            link: "/dashboard/messages",
+            isRead: false,
+            createdAt: serverTimestamp(),
+        };
+        addDocumentNonBlocking(notificationColRef, notification);
 
     }, [firestore, conversationId]);
 

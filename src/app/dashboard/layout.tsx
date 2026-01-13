@@ -29,9 +29,12 @@ import { useUser, useAuth } from '@/firebase';
 import { useRouter, usePathname } from 'next/navigation';
 import { signOut } from 'firebase/auth';
 import { Button } from '@/components/ui/button';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger, DropdownMenuGroup } from '@/components/ui/dropdown-menu';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Toaster } from '@/components/ui/toaster';
+import { useNotifications } from '@/hooks/use-notifications';
+import { formatDistanceToNow } from 'date-fns';
+import { cn } from '@/lib/utils';
 
 export default function DashboardLayout({
   children,
@@ -42,6 +45,7 @@ export default function DashboardLayout({
   const auth = useAuth();
   const router = useRouter();
   const pathname = usePathname();
+  const { notifications, unreadCount, markAsRead } = useNotifications();
 
   React.useEffect(() => {
     if (!isUserLoading && !user) {
@@ -52,6 +56,11 @@ export default function DashboardLayout({
   const handleLogout = async () => {
     await signOut(auth);
     router.replace('/');
+  };
+
+  const handleNotificationClick = (notificationId: string, link: string) => {
+    markAsRead(notificationId);
+    router.push(link);
   };
   
   if (isUserLoading || !user) {
@@ -149,14 +158,43 @@ export default function DashboardLayout({
             {/* Can add breadcrumbs or page title here */}
           </div>
           <div className="flex items-center gap-4">
-            <Button variant="ghost" size="icon" className="relative rounded-full">
-              <Bell className="h-5 w-5" />
-              <span className="absolute top-1 right-1 flex h-2 w-2">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-accent opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-accent"></span>
-              </span>
-              <span className="sr-only">Toggle notifications</span>
-            </Button>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="icon" className="relative rounded-full">
+                  <Bell className="h-5 w-5" />
+                  {unreadCount > 0 && (
+                    <span className="absolute top-1 right-1 flex h-2.5 w-2.5">
+                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-accent opacity-75"></span>
+                      <span className="relative inline-flex rounded-full h-2 w-2 bg-accent"></span>
+                    </span>
+                  )}
+                  <span className="sr-only">Toggle notifications</span>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-80">
+                <DropdownMenuLabel>Notifications</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuGroup>
+                  {notifications && notifications.length > 0 ? (
+                    notifications.map((notif) => (
+                      <DropdownMenuItem key={notif.id} onSelect={() => handleNotificationClick(notif.id, notif.link)} className="flex items-start gap-3 p-3 cursor-pointer">
+                        <div className={cn("mt-1 h-2 w-2 rounded-full", !notif.isRead ? "bg-accent" : "bg-transparent")} />
+                        <div className="flex-1 space-y-1">
+                          <p className="text-sm font-medium">{notif.title}</p>
+                          <p className="text-sm text-muted-foreground">{notif.message}</p>
+                          <p className="text-xs text-muted-foreground">{formatDistanceToNow(notif.createdAt, { addSuffix: true })}</p>
+                        </div>
+                      </DropdownMenuItem>
+                    ))
+                  ) : (
+                    <div className="p-4 text-sm text-center text-muted-foreground">
+                      You're all caught up!
+                    </div>
+                  )}
+                </DropdownMenuGroup>
+              </DropdownMenuContent>
+            </DropdownMenu>
+
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="secondary" size="icon" className="rounded-full">

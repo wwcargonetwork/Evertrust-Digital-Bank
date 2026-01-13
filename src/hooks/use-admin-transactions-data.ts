@@ -2,8 +2,8 @@
 'use client';
 
 import { useEffect, useState, useCallback } from 'react';
-import { collection, query, orderBy, onSnapshot, getDocs, doc, writeBatch, increment } from 'firebase/firestore';
-import { useFirestore, useMemoFirebase } from '@/firebase';
+import { collection, query, orderBy, onSnapshot, getDocs, doc, writeBatch, increment, serverTimestamp } from 'firebase/firestore';
+import { useFirestore, useMemoFirebase, addDocumentNonBlocking } from '@/firebase';
 import { WithId } from '@/firebase/firestore/use-collection';
 import { UserProfile } from './use-admin-users-data';
 
@@ -127,6 +127,18 @@ export function useTransactionActions() {
   const firestore = useFirestore();
   const [isUpdating, setIsUpdating] = useState(false);
 
+  const createNotification = (userId: string, title: string, message: string) => {
+      const notificationColRef = collection(firestore, `users/${userId}/notifications`);
+      const notification = {
+        title,
+        message,
+        link: "/dashboard/transactions",
+        isRead: false,
+        createdAt: serverTimestamp(),
+      };
+      addDocumentNonBlocking(notificationColRef, notification);
+  };
+
   const approveTransaction = useCallback(async (tx: Transaction) => {
     if (!firestore) return;
     setIsUpdating(true);
@@ -143,6 +155,9 @@ export function useTransactionActions() {
       batch.update(userDocRef, { accountBalance: increment(amount) });
       
       await batch.commit();
+
+      createNotification(tx.userId, "Transaction Approved", `Your ${tx.type} of ${tx.amount} was approved.`);
+
     } catch (error) {
       console.error("Failed to approve transaction:", error);
       throw error;
@@ -157,6 +172,9 @@ export function useTransactionActions() {
     try {
       const txDocRef = doc(firestore, 'users', tx.userId, 'transactions', tx.id);
       await writeBatch(firestore).update(txDocRef, { status: 'declined' }).commit();
+      
+      createNotification(tx.userId, "Transaction Declined", `Your ${tx.type} of ${tx.amount} was declined.`);
+
     } catch (error) {
       console.error("Failed to decline transaction:", error);
       throw error;

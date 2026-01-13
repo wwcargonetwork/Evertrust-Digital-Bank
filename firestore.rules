@@ -43,6 +43,15 @@ service cloud.firestore {
         // Only admins can update (approve/decline) or delete transactions.
         allow update, delete: if isAdmin();
       }
+
+      match /notifications/{notificationId} {
+        // User can read and list their own notifications.
+        allow get, list: if isOwner(userId);
+        // User can update their own notifications (e.g., mark as read).
+        allow update: if isOwner(userId);
+        // Admin can create notifications for users.
+        allow create: if isAdmin();
+      }
     }
     
     match /conversations/{conversationId} {
