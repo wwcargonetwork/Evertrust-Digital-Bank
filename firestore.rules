@@ -62,7 +62,7 @@ service cloud.firestore {
      */
     match /users/{userId} {
       allow create: if isOwner(userId);
-      allow read: if isOwner(userId) || isAdmin();
+      allow get: if isOwner(userId) || isAdmin();
       allow update: if isOwner(userId) || isAdmin(); // Admins can update status, balance, etc.
       allow list: if isAdmin();
       allow delete: if false; // Deletion should be handled by a backend process
@@ -102,10 +102,10 @@ service cloud.firestore {
      */
     match /transactions/{transactionId} {
         // Only admins can create transactions (e.g., top-ups)
-        // Regular users creating their own transactions might be a feature later, but for now it's admin-only
         allow create: if isAdmin(); 
-        allow read: if isAdmin() || isOwner(resource.data.userId);
-        allow list, update, delete: if isAdmin();
+        allow get: if isAdmin() || isOwner(resource.data.userId);
+        allow list: if isAdmin() || (isSignedIn() && request.query.where.userId == request.auth.uid);
+        allow update, delete: if isAdmin();
     }
   }
 }
