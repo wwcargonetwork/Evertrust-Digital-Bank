@@ -1,23 +1,4 @@
 
-/**
- * Core Philosophy:
- * This ruleset implements a Role-Based Access Control (RBAC) model centered around a
- * single "Admin" role. The security posture is designed to support a public-facing
- * website where content is managed by a trusted set of administrators.
- *
- * Data Structure:
- * - /testimonials: Publicly readable content managed by Admins.
- * - /banners: Publicly readable content managed by Admins.
- * - /contact_form_submissions: A write-only "dropbox" for public users, readable only by Admins.
- * - /users/{userId}: Stores public profiles for registered users.
- *   - /users/{userId}/transactions/{transactionId}: Stores financial transactions for a specific user.
- *
- * Key Security Decisions:
- * - Admin Role by Absence: A user is considered an Admin if they are authenticated but do NOT have a document in the `/users` collection. This prevents regular users from accessing admin privileges.
- * - Owner-Only Writes: Users can only write to their own document in `/users`.
- * - Public Read, Admin Write: Collections for public display (/testimonials, /banners) are readable by anyone but managed only by Admins.
- * - Segregated Private Data: Contact forms and transactions are separated to control access strictly.
- */
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
@@ -26,26 +7,14 @@ service cloud.firestore {
     // Helper Functions
     // -------------------------------------------------------------------------
 
-    /**
-     * Checks if the user is authenticated.
-     */
     function isSignedIn() {
       return request.auth != null;
     }
 
-    /**
-     * Checks if the authenticated user is an administrator.
-     * Admin status is granted if the user is signed in but does NOT have a
-     * corresponding document in the /users collection. This prevents regular
-     * users from gaining admin access.
-     */
     function isAdmin() {
       return isSignedIn() && !exists(/databases/$(database)/documents/users/$(request.auth.uid));
     }
     
-    /**
-     * Checks if the requesting user is the owner of the document.
-     */
     function isOwner(userId) {
       return isSignedIn() && request.auth.uid == userId;
     }
@@ -54,54 +23,31 @@ service cloud.firestore {
     // Collection Rules
     // -------------------------------------------------------------------------
 
-    /**
-     * @description Manages public user profiles. Users can create, read, and update
-     *              their own profile. Admins have read and update access.
-     * @path /users/{userId}
-     */
     match /users/{userId} {
       allow create: if isOwner(userId);
-      allow get: if isOwner(userId) || isAdmin();
-      allow update: if isOwner(userId) || isAdmin(); // Admins can update status, balance, etc.
-      allow list: if isAdmin();
-      allow delete: if false; // Deletion should be handled by a backend process
+      allow get, list: if isAdmin();
+      allow update: if isOwner(userId) || isAdmin();
+      allow delete: if false;
 
-      /**
-       * @description Manages financial transactions for a specific user.
-       *              - The user can read their own transactions.
-       *              - Admins can create (top-up), read, and manage all transactions.
-       * @path /users/{userId}/transactions/{transactionId}
-       */
       match /transactions/{transactionId} {
-        allow read: if isOwner(userId) || isAdmin();
-        allow list: if isOwner(userId) || isAdmin();
-        allow create: if isAdmin(); // Only Admins can create new transactions (deposits)
+        allow read, list: if isOwner(userId) || isAdmin();
+        // Allow users to create 'pending' transactions, but not 'approved' ones.
+        allow create: if isOwner(userId) && request.resource.data.status == 'pending';
+        // Only admins can update (approve/decline) or delete transactions.
         allow update, delete: if isAdmin();
       }
     }
 
-    /**
-     * @description Manages customer testimonials. Publicly readable, admin-managed.
-     * @path /testimonials/{testimonialId}
-     */
     match /testimonials/{testimonialId} {
       allow get, list: if true;
       allow create, update, delete: if isAdmin();
     }
 
-    /**
-     * @description Write-only dropbox for public contact forms. Readable only by admins.
-     * @path /contact_form_submissions/{contactFormSubmissionId}
-     */
     match /contact_form_submissions/{contactFormSubmissionId} {
       allow create: if true;
       allow read, update, delete: if isAdmin();
     }
 
-    /**
-     * @description Manages dynamic website banners. Publicly readable, admin-managed.
-     * @path /banners/{bannerId}
-     */
     match /banners/{bannerId} {
       allow get, list: if true;
       allow create, update, delete: if isAdmin();

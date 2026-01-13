@@ -1,8 +1,7 @@
-
 'use client';
 
-import { useEffect, useState } from 'react';
-import { collection, query, orderBy, onSnapshot, getDocs, collectionGroup } from 'firebase/firestore';
+import { useEffect, useState, useCallback } from 'react';
+import { collection, query, orderBy, onSnapshot, getDocs, collectionGroup, doc, writeBatch, increment } from 'firebase/firestore';
 import { useFirestore, useMemoFirebase } from '@/firebase';
 import { WithId } from '@/firebase/firestore/use-collection';
 import { UserProfile } from './use-admin-users-data';
@@ -11,7 +10,7 @@ import { UserProfile } from './use-admin-users-data';
 export type Transaction = WithId<{
   userId: string;
   amount: number;
-  type: string;
+  type: 'deposit' | 'withdrawal';
   status: 'approved' | 'pending' | 'declined';
   createdAt: string | Date; // Can be a string from server or Date object after conversion
   user?: Pick<UserProfile, 'displayName' | 'email'>; // Optional: enriched data
@@ -113,3 +112,47 @@ export function useAdminTransactionsData(): UseAdminTransactionsResult {
   return { transactions, isLoading, error };
 }
 
+export function useTransactionActions() {
+  const firestore = useFirestore();
+  const [isUpdating, setIsUpdating] = useState(false);
+
+  const approveTransaction = useCallback(async (tx: Transaction) => {
+    if (!firestore) return;
+    setIsUpdating(true);
+    try {
+      const batch = writeBatch(firestore);
+      const userDocRef = doc(firestore, 'users', tx.userId);
+      const txDocRef = doc(userDocRef, 'transactions', tx.id);
+      
+      // Update transaction status
+      batch.update(txDocRef, { status: 'approved' });
+
+      // Update user balance
+      const amount = tx.type === 'deposit' ? tx.amount : -tx.amount;
+      batch.update(userDocRef, { accountBalance: increment(amount) });
+      
+      await batch.commit();
+    } catch (error) {
+      console.error("Failed to approve transaction:", error);
+      throw error;
+    } finally {
+      setIsUpdating(false);
+    }
+  }, [firestore]);
+
+  const declineTransaction = useCallback(async (tx: Transaction) => {
+    if (!firestore) return;
+    setIsUpdating(true);
+    try {
+      const txDocRef = doc(firestore, 'users', tx.userId, 'transactions', tx.id);
+      await writeBatch(firestore).update(txDocRef, { status: 'declined' }).commit();
+    } catch (error) {
+      console.error("Failed to decline transaction:", error);
+      throw error;
+    } finally {
+      setIsUpdating(false);
+    }
+  }, [firestore]);
+
+  return { approveTransaction, declineTransaction, isUpdating };
+}

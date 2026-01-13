@@ -1,17 +1,33 @@
 'use client';
 
 import * as React from 'react';
-import { useUser, useDoc, useMemoFirebase, useFirestore } from '@/firebase';
+import { useUser, useDoc, useMemoFirebase, useFirestore, addDocumentNonBlocking } from '@/firebase';
 import { useRouter } from 'next/navigation';
-import { doc } from 'firebase/firestore';
+import { doc, collection, serverTimestamp } from 'firebase/firestore';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Skeleton } from '@/components/ui/skeleton';
-import { ArrowRight, User, Shield, Bell, Landmark, DollarSign, ArrowUp, ArrowDown } from 'lucide-react';
+import { ArrowRight, User, Shield, Bell, Landmark, DollarSign, ArrowUp, ArrowDown, PlusCircle, MinusCircle } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useUserTransactions, type UserTransaction } from '@/hooks/use-user-transactions';
 import { format } from 'date-fns';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { useToast } from '@/hooks/use-toast';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import * as z from 'zod';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 
 // Define the shape of the user profile data
 interface UserProfile {
@@ -87,10 +103,123 @@ function RecentActivity() {
     );
 }
 
+const transactionSchema = z.object({
+  amount: z.coerce.number().positive({ message: "Amount must be a positive number." }),
+  description: z.string().min(2, { message: "Description is required." }),
+  recipient: z.string().optional(),
+});
+
+type TransactionFormValues = z.infer<typeof transactionSchema>;
+
+function TransactionDialog({ type, onOpenChange, open }: { type: 'deposit' | 'withdrawal', onOpenChange: (open: boolean) => void, open: boolean }) {
+  const { toast } = useToast();
+  const firestore = useFirestore();
+  const { user } = useUser();
+  
+  const form = useForm<TransactionFormValues>({
+    resolver: zodResolver(transactionSchema),
+    defaultValues: {
+      amount: 0,
+      description: "",
+      recipient: "",
+    },
+  });
+
+  const onSubmit = async (values: TransactionFormValues) => {
+    if (!firestore || !user) {
+      toast({ variant: 'destructive', title: 'Error', description: 'User not authenticated.' });
+      return;
+    }
+
+    const transactionData = {
+      amount: values.amount,
+      description: values.description,
+      type,
+      status: 'pending',
+      createdAt: serverTimestamp(),
+      ...(type === 'withdrawal' && { recipient: values.recipient }),
+    };
+
+    try {
+      const colRef = collection(firestore, 'users', user.uid, 'transactions');
+      addDocumentNonBlocking(colRef, transactionData);
+      toast({ title: 'Success!', description: `Your ${type} request has been submitted for approval.` });
+      onOpenChange(false);
+      form.reset();
+    } catch (error: any) {
+      toast({ variant: 'destructive', title: 'Error', description: error.message });
+    }
+  };
+  
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="sm:max-w-[425px]">
+        <DialogHeader>
+          <DialogTitle className="capitalize">{type} Funds</DialogTitle>
+          <DialogDescription>
+            Enter the details for your {type} request. It will be sent to an admin for approval.
+          </DialogDescription>
+        </DialogHeader>
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+            <FormField
+              control={form.control}
+              name="amount"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Amount</FormLabel>
+                  <FormControl>
+                    <Input type="number" placeholder="0.00" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+             <FormField
+              control={form.control}
+              name="description"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Description</FormLabel>
+                  <FormControl>
+                    <Input placeholder="e.g., Monthly Savings" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            {type === 'withdrawal' && (
+              <FormField
+                control={form.control}
+                name="recipient"
+                render={({ field }) => (
+                    <FormItem>
+                    <FormLabel>Recipient</FormLabel>
+                    <FormControl>
+                        <Input placeholder="e.g., Bank account number" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                    </FormItem>
+                )}
+              />
+            )}
+            <DialogFooter>
+              <Button type="submit" disabled={form.formState.isSubmitting}>Submit Request</Button>
+            </DialogFooter>
+          </form>
+        </Form>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+
 export default function OverviewPage() {
     const { user, isUserLoading } = useUser();
     const router = useRouter();
     const firestore = useFirestore();
+    const [dialog, setDialog] = React.useState<{open: boolean, type: 'deposit' | 'withdrawal' | null}>({open: false, type: null});
+
 
     // Memoize the document reference to prevent re-renders
     const userDocRef = useMemoFirebase(() => {
@@ -139,69 +268,72 @@ export default function OverviewPage() {
     };
 
     return (
-        <motion.div 
-            className="space-y-6"
-            variants={containerVariants}
-            initial="hidden"
-            animate="visible"
-        >
-            <motion.div variants={itemVariants} className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-2">
-                <div>
-                    <h1 className="font-headline text-3xl font-bold text-primary sm:text-4xl">
-                        Welcome Back, {userProfile.firstName}!
-                    </h1>
-                    <p className="mt-2 text-lg text-muted-foreground">Here’s a summary of your account.</p>
-                </div>
-                 <Avatar className="h-16 w-16 mt-4 sm:mt-0">
-                    <AvatarImage src={user?.photoURL || ''} alt={`${userProfile.firstName} ${userProfile.lastName}`} />
-                    <AvatarFallback>{getInitials(userProfile.firstName, userProfile.lastName)}</AvatarFallback>
-                </Avatar>
+        <>
+            <motion.div 
+                className="space-y-6"
+                variants={containerVariants}
+                initial="hidden"
+                animate="visible"
+            >
+                <motion.div variants={itemVariants} className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-2">
+                    <div>
+                        <h1 className="font-headline text-3xl font-bold text-primary sm:text-4xl">
+                            Welcome Back, {userProfile.firstName}!
+                        </h1>
+                        <p className="mt-2 text-lg text-muted-foreground">Here’s a summary of your account.</p>
+                    </div>
+                    <Avatar className="h-16 w-16 mt-4 sm:mt-0">
+                        <AvatarImage src={user?.photoURL || ''} alt={`${userProfile.firstName} ${userProfile.lastName}`} />
+                        <AvatarFallback>{getInitials(userProfile.firstName, userProfile.lastName)}</AvatarFallback>
+                    </Avatar>
+                </motion.div>
+
+                <motion.div variants={itemVariants} className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                    <Card className="shadow-sm hover:shadow-md transition-shadow md:col-span-2 lg:col-span-1">
+                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                            <CardTitle className="font-headline text-xl text-primary">Current Balance</CardTitle>
+                            <DollarSign className="h-6 w-6 text-muted-foreground" />
+                        </CardHeader>
+                        <CardContent>
+                            <p className="text-4xl font-bold">
+                                {formatCurrency(userProfile.accountBalance || 0, userProfile.preferredCurrency)}
+                            </p>
+                            <p className="text-xs text-muted-foreground">
+                                {userProfile.accountType} Account
+                            </p>
+                        </CardContent>
+                    </Card>
+
+                    <Card className="shadow-sm hover:shadow-md transition-shadow">
+                        <CardHeader>
+                            <CardTitle className="font-headline text-xl text-primary">Quick Actions</CardTitle>
+                            <CardDescription>Manage your account efficiently.</CardDescription>
+                        </CardHeader>
+                        <CardContent className="flex flex-col space-y-3">
+                            <Button variant="outline" className="justify-start" onClick={() => setDialog({open: true, type: 'deposit'})}>
+                                <PlusCircle className="mr-2 h-4 w-4" /> Top Up Account
+                            </Button>
+                            <Button variant="outline" className="justify-start" onClick={() => setDialog({open: true, type: 'withdrawal'})}>
+                                <MinusCircle className="mr-2 h-4 w-4" /> Withdraw Funds
+                            </Button>
+                             <Button variant="outline" className="justify-start" onClick={() => router.push('/dashboard/transactions')}>
+                                <ArrowRight className="mr-2 h-4 w-4" /> View All Transactions
+                            </Button>
+                        </CardContent>
+                    </Card>
+
+                    <Card className="shadow-sm hover:shadow-md transition-shadow">
+                        <CardHeader>
+                            <CardTitle className="font-headline text-xl text-primary">Recent Activity</CardTitle>
+                            <CardDescription>Your latest transactions.</CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                            <RecentActivity />
+                        </CardContent>
+                    </Card>
+                </motion.div>
             </motion.div>
-
-            <motion.div variants={itemVariants} className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-                <Card className="shadow-sm hover:shadow-md transition-shadow md:col-span-2 lg:col-span-1">
-                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                        <CardTitle className="font-headline text-xl text-primary">Current Balance</CardTitle>
-                        <DollarSign className="h-6 w-6 text-muted-foreground" />
-                    </CardHeader>
-                    <CardContent>
-                        <p className="text-4xl font-bold">
-                            {formatCurrency(userProfile.accountBalance || 0, userProfile.preferredCurrency)}
-                        </p>
-                        <p className="text-xs text-muted-foreground">
-                            {userProfile.accountType} Account
-                        </p>
-                    </CardContent>
-                </Card>
-
-                <Card className="shadow-sm hover:shadow-md transition-shadow">
-                    <CardHeader>
-                        <CardTitle className="font-headline text-xl text-primary">Quick Actions</CardTitle>
-                        <CardDescription>Manage your account efficiently.</CardDescription>
-                    </CardHeader>
-                    <CardContent className="flex flex-col space-y-3">
-                        <Button variant="outline" className="justify-start" onClick={() => router.push('/dashboard/transactions')}>
-                            <ArrowRight className="mr-2 h-4 w-4" /> Transfer Funds
-                        </Button>
-                        <Button variant="outline" className="justify-start" onClick={() => router.push('/dashboard/profile')}>
-                            <User className="mr-2 h-4 w-4" /> View Profile
-                        </Button>
-                         <Button variant="outline" className="justify-start" onClick={() => router.push('/dashboard/settings')}>
-                            <Shield className="mr-2 h-4 w-4" /> Security Settings
-                        </Button>
-                    </CardContent>
-                </Card>
-
-                <Card className="shadow-sm hover:shadow-md transition-shadow">
-                    <CardHeader>
-                        <CardTitle className="font-headline text-xl text-primary">Recent Activity</CardTitle>
-                        <CardDescription>Your latest transactions.</CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                        <RecentActivity />
-                    </CardContent>
-                </Card>
-            </motion.div>
-        </motion.div>
+            {dialog.type && <TransactionDialog type={dialog.type} open={dialog.open} onOpenChange={(open) => setDialog({open, type: dialog.type})} />}
+        </>
     );
 }

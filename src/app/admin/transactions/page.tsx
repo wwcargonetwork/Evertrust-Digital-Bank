@@ -1,6 +1,6 @@
-
 'use client';
 
+import * as React from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -10,6 +10,8 @@ import {
   MoreHorizontal,
   PlusCircle,
   Send,
+  CheckCircle,
+  XCircle,
 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -47,7 +49,7 @@ import {
 } from '@/components/ui/table';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useAdminUsersData } from '@/hooks/use-admin-users-data';
-import { useAdminTransactionsData, type Transaction } from '@/hooks/use-admin-transactions-data';
+import { useAdminTransactionsData, type Transaction, useTransactionActions } from '@/hooks/use-admin-transactions-data';
 import { useFirestore } from '@/firebase';
 import { useToast } from '@/hooks/use-toast';
 import { collection, doc, writeBatch, serverTimestamp, increment } from 'firebase/firestore';
@@ -76,6 +78,7 @@ function TransactionRowSkeleton() {
       <TableCell><Skeleton className="h-6 w-20 rounded-full" /></TableCell>
       <TableCell><Skeleton className="h-5 w-24" /></TableCell>
       <TableCell className="text-right"><Skeleton className="h-5 w-20 ml-auto" /></TableCell>
+      <TableCell><Skeleton className="h-8 w-24" /></TableCell>
     </TableRow>
   )
 }
@@ -83,6 +86,7 @@ function TransactionRowSkeleton() {
 export default function TransactionsPage() {
   const { users, isLoading: usersLoading } = useAdminUsersData();
   const { transactions, isLoading: transactionsLoading } = useAdminTransactionsData();
+  const { approveTransaction, declineTransaction, isUpdating } = useTransactionActions();
   const firestore = useFirestore();
   const { toast } = useToast();
 
@@ -100,19 +104,19 @@ export default function TransactionsPage() {
 
     try {
       const batch = writeBatch(firestore);
+      const userDocRef = doc(firestore, 'users', values.userId);
 
       // 1. Create a new transaction document in the subcollection
-      const newTransactionRef = doc(collection(firestore, 'users', values.userId, 'transactions'));
+      const newTransactionRef = doc(collection(userDocRef, 'transactions'));
       batch.set(newTransactionRef, {
         amount: values.amount,
-        sender: values.sender,
+        description: values.sender,
         type: 'deposit',
         status: 'approved',
         createdAt: serverTimestamp(),
       });
 
       // 2. Update the user's account balance
-      const userDocRef = doc(firestore, 'users', values.userId);
       batch.update(userDocRef, {
         accountBalance: increment(values.amount),
       });
@@ -134,6 +138,25 @@ export default function TransactionsPage() {
     }
   }
 
+  const handleApprove = async (tx: Transaction) => {
+    await approveTransaction(tx);
+    toast({ title: 'Transaction Approved', description: `Transaction ID: ${tx.id} has been approved.` });
+  };
+
+  const handleDecline = async (tx: Transaction) => {
+    await declineTransaction(tx);
+    toast({ title: 'Transaction Declined', description: `Transaction ID: ${tx.id} has been declined.` });
+  };
+
+  const getStatusBadgeVariant = (status: Transaction['status']) => {
+    switch(status) {
+      case 'approved': return 'default';
+      case 'pending': return 'secondary';
+      case 'declined': return 'destructive';
+      default: return 'outline';
+    }
+  }
+
   const renderTableContent = () => {
     if (transactionsLoading) {
       return Array.from({ length: 5 }).map((_, i) => <TransactionRowSkeleton key={i} />);
@@ -142,7 +165,7 @@ export default function TransactionsPage() {
     if (!transactions || transactions.length === 0) {
       return (
         <TableRow>
-          <TableCell colSpan={5} className="text-center h-24">
+          <TableCell colSpan={6} className="text-center h-24">
             No transactions found.
           </TableCell>
         </TableRow>
@@ -157,10 +180,22 @@ export default function TransactionsPage() {
         </TableCell>
         <TableCell className="capitalize">{tx.type}</TableCell>
         <TableCell>
-          <Badge variant={tx.status === 'approved' ? 'default' : tx.status === 'pending' ? 'secondary' : 'destructive'} className="capitalize">{tx.status}</Badge>
+          <Badge variant={getStatusBadgeVariant(tx.status)} className="capitalize">{tx.status}</Badge>
         </TableCell>
         <TableCell>{format(new Date(tx.createdAt), 'PPpp')}</TableCell>
         <TableCell className="text-right">{formatCurrency(tx.amount)}</TableCell>
+        <TableCell>
+          {tx.status === 'pending' && (
+            <div className="flex gap-2 justify-end">
+              <Button size="sm" variant="outline" onClick={() => handleApprove(tx)} disabled={isUpdating}>
+                <CheckCircle className="h-4 w-4 mr-1" /> Approve
+              </Button>
+              <Button size="sm" variant="destructive" onClick={() => handleDecline(tx)} disabled={isUpdating}>
+                 <XCircle className="h-4 w-4 mr-1" /> Decline
+              </Button>
+            </div>
+          )}
+        </TableCell>
       </TableRow>
     ));
   };
@@ -170,9 +205,9 @@ export default function TransactionsPage() {
     <div className="grid gap-8">
       <Card>
         <CardHeader>
-          <CardTitle>Top-Up User Account</CardTitle>
+          <CardTitle>Admin Top-Up</CardTitle>
           <CardDescription>
-            Credit a user's account by creating a new deposit transaction.
+            Directly credit a user's account by creating an approved deposit transaction.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -207,9 +242,9 @@ export default function TransactionsPage() {
                 name="sender"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Sender Details</FormLabel>
+                    <FormLabel>Description / Sender</FormLabel>
                     <FormControl>
-                      <Input placeholder="e.g., 'Admin Deposit' or 'Bank Transfer from XYZ'" {...field} />
+                      <Input placeholder="e.g., 'Admin Deposit' or 'Manual Correction'" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -240,7 +275,7 @@ export default function TransactionsPage() {
         <CardHeader>
           <CardTitle>All Transactions</CardTitle>
           <CardDescription>
-            A list of all transactions in the system.
+            A list of all transactions in the system. Approve or decline pending requests.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -252,6 +287,7 @@ export default function TransactionsPage() {
                 <TableHead>Status</TableHead>
                 <TableHead>Date</TableHead>
                 <TableHead className="text-right">Amount</TableHead>
+                <TableHead className="text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>

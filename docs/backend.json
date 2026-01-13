@@ -191,10 +191,11 @@
         "amount": { "type": "number", "description": "The amount of the transaction." },
         "type": { "type": "string", "enum": ["deposit", "withdrawal", "transfer", "sale", "refund"], "description": "The type of transaction." },
         "status": { "type": "string", "enum": ["approved", "pending", "declined"], "description": "The status of the transaction." },
-        "sender": { "type": "string", "description": "Details of the transaction sender for deposits." },
-        "createdAt": { "type": "string", "format": "date-time", "description": "Timestamp of the transaction." }
+        "createdAt": { "type": "string", "format": "date-time", "description": "Timestamp of the transaction." },
+        "description": { "type": "string", "description": "A user-provided description for the transaction." },
+        "recipient": { "type": "string", "description": "Recipient details for withdrawals or transfers." }
       },
-      "required": ["amount", "type", "status", "createdAt"]
+      "required": ["amount", "type", "status", "createdAt", "description"]
     }
   },
   "auth": {
