@@ -5,11 +5,14 @@ import { collection, query, orderBy } from 'firebase/firestore';
 import { useFirestore, useCollection, useMemoFirebase, WithId } from '@/firebase';
 
 // Define the shape of the user profile data for this page
+export type UserStatus = 'active' | 'inactive' | 'suspended';
+
 export type UserProfile = WithId<{
   displayName: string;
   email: string;
   accountType: string;
   createdAt: { toDate: () => Date };
+  status: UserStatus;
 }>;
 
 interface UseAdminUsersDataResult {

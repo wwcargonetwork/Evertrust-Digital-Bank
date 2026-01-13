@@ -127,6 +127,7 @@ export default function SignupPage() {
             displayName: `${values.firstName} ${values.lastName}`,
             birthDate: format(userProfileData.birthDate, 'yyyy-MM-dd'),
             createdAt: serverTimestamp(),
+            status: 'active'
         };
 
         const userDocRef = doc(firestore, 'users', user.uid);

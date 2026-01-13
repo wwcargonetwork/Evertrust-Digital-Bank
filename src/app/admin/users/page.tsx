@@ -5,7 +5,6 @@ import {
   File,
   ListFilter,
   MoreHorizontal,
-  PlusCircle,
 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -25,6 +24,10 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
+  DropdownMenuSub,
+  DropdownMenuSubTrigger,
+  DropdownMenuPortal,
+  DropdownMenuSubContent
 } from '@/components/ui/dropdown-menu';
 import {
   Table,
@@ -41,8 +44,11 @@ import {
   TabsTrigger,
 } from '@/components/ui/tabs';
 import { Skeleton } from '@/components/ui/skeleton';
-import { useAdminUsersData, type UserProfile } from '@/hooks/use-admin-users-data';
+import { useAdminUsersData, type UserProfile, type UserStatus } from '@/hooks/use-admin-users-data';
 import { format } from 'date-fns';
+import { useFirestore, updateDocumentNonBlocking } from '@/firebase';
+import { doc } from 'firebase/firestore';
+import { useToast } from '@/hooks/use-toast';
 
 function UserRowSkeleton() {
   return (
@@ -59,6 +65,38 @@ function UserRowSkeleton() {
 
 export default function UsersPage() {
   const { users, isLoading, error } = useAdminUsersData();
+  const firestore = useFirestore();
+  const { toast } = useToast();
+
+  const handleStatusChange = async (userId: string, status: UserStatus) => {
+    const userDocRef = doc(firestore, 'users', userId);
+    try {
+      updateDocumentNonBlocking(userDocRef, { status });
+      toast({
+        title: 'Status Updated',
+        description: `User status has been changed to ${status}.`,
+      });
+    } catch (error: any) {
+      toast({
+        variant: 'destructive',
+        title: 'Error Updating Status',
+        description: error.message || 'An unexpected error occurred.',
+      });
+    }
+  };
+  
+  const getStatusBadgeVariant = (status: UserStatus) => {
+    switch (status) {
+      case 'active':
+        return 'default';
+      case 'inactive':
+        return 'secondary';
+      case 'suspended':
+        return 'destructive';
+      default:
+        return 'outline';
+    }
+  };
 
   const renderTableContent = () => {
     if (isLoading) {
@@ -90,7 +128,7 @@ export default function UsersPage() {
         <TableCell className="font-medium">{user.displayName}</TableCell>
         <TableCell>{user.email}</TableCell>
         <TableCell>
-          <Badge variant="outline">Active</Badge>
+          <Badge variant={getStatusBadgeVariant(user.status)} className="capitalize">{user.status}</Badge>
         </TableCell>
         <TableCell>{user.accountType}</TableCell>
         <TableCell className="hidden md:table-cell">
@@ -111,8 +149,18 @@ export default function UsersPage() {
             <DropdownMenuContent align="end">
               <DropdownMenuLabel>Actions</DropdownMenuLabel>
               <DropdownMenuItem>View Details</DropdownMenuItem>
-              <DropdownMenuItem>Edit</DropdownMenuItem>
-              <DropdownMenuItem>Delete</DropdownMenuItem>
+              <DropdownMenuSub>
+                <DropdownMenuSubTrigger>Change Status</DropdownMenuSubTrigger>
+                <DropdownMenuPortal>
+                  <DropdownMenuSubContent>
+                    <DropdownMenuItem onClick={() => handleStatusChange(user.id, 'active')}>Active</DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => handleStatusChange(user.id, 'inactive')}>Inactive</DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => handleStatusChange(user.id, 'suspended')}>Suspended</DropdownMenuItem>
+                  </DropdownMenuSubContent>
+                </DropdownMenuPortal>
+              </DropdownMenuSub>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem className="text-destructive">Delete User</DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         </TableCell>
@@ -126,9 +174,9 @@ export default function UsersPage() {
         <TabsList>
           <TabsTrigger value="all">All</TabsTrigger>
           <TabsTrigger value="active">Active</TabsTrigger>
-          <TabsTrigger value="draft">Inactive</TabsTrigger>
-          <TabsTrigger value="archived" className="hidden sm:flex">
-            Archived
+          <TabsTrigger value="inactive">Inactive</TabsTrigger>
+          <TabsTrigger value="suspended" className="hidden sm:flex">
+            Suspended
           </TabsTrigger>
         </TabsList>
         <div className="ml-auto flex items-center gap-2">
@@ -149,7 +197,7 @@ export default function UsersPage() {
               </DropdownMenuCheckboxItem>
               <DropdownMenuCheckboxItem>Inactive</DropdownMenuCheckboxItem>
               <DropdownMenuCheckboxItem>
-                Archived
+                Suspended
               </DropdownMenuCheckboxItem>
             </DropdownMenuContent>
           </DropdownMenu>

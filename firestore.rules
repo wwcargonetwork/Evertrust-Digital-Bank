@@ -57,13 +57,14 @@ service cloud.firestore {
 
     /**
      * @description Manages public user profiles. Users can create, read, and update
-     *              their own profile. Admins have read-only access.
+     *              their own profile. Admins have read and update access.
      * @path /users/{userId}
      */
     match /users/{userId} {
       allow create: if isOwner(userId);
-      allow read, update: if isOwner(userId);
-      allow get, list: if isAdmin();
+      allow read: if isOwner(userId) || isAdmin();
+      allow update: if isOwner(userId) || isAdmin();
+      allow list: if isAdmin();
       allow delete: if false; // Deletion should be handled by a backend process
     }
 
