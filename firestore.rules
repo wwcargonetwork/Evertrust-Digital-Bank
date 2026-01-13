@@ -15,7 +15,7 @@
  *
  * Key Security Decisions:
  * - Admin Role by Absence: A user is considered an Admin if they are authenticated but do NOT have a document in the `/users` collection. This prevents regular users from accessing admin privileges.
- * - Owner-Only Writes: Users can only write to their own document in `/users` and create their own transactions in `/transactions`.
+ * - Owner-Only Writes: Users can only write to their own document in `/users`.
  * - Public Read, Admin Write: Collections for public display (/testimonials, /banners) are readable by anyone but managed only by Admins.
  * - Segregated Private Data: Contact forms and transactions are separated to control access strictly.
  */
