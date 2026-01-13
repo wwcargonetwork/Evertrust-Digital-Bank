@@ -1,7 +1,8 @@
+
 'use client';
 
 import { useEffect, useState, useCallback } from 'react';
-import { collection, query, orderBy, onSnapshot, getDocs, collectionGroup, doc, writeBatch, increment } from 'firebase/firestore';
+import { collection, query, orderBy, onSnapshot, getDocs, doc, writeBatch, increment } from 'firebase/firestore';
 import { useFirestore, useMemoFirebase } from '@/firebase';
 import { WithId } from '@/firebase/firestore/use-collection';
 import { UserProfile } from './use-admin-users-data';
@@ -12,9 +13,12 @@ export type Transaction = WithId<{
   amount: number;
   type: 'deposit' | 'withdrawal';
   status: 'approved' | 'pending' | 'declined';
-  createdAt: string | Date; // Can be a string from server or Date object after conversion
+  createdAt: any; // Can be a string from server or Date object after conversion
+  description: string;
+  recipient?: string;
   user?: Pick<UserProfile, 'displayName' | 'email'>; // Optional: enriched data
 }>;
+
 
 interface UseAdminTransactionsResult {
   transactions: Transaction[] | null;
@@ -24,6 +28,8 @@ interface UseAdminTransactionsResult {
 
 /**
  * Hook to fetch all transactions for the admin page, enriched with user data.
+ * This hook first fetches all users, then sets up individual listeners for each user's
+ * transactions sub-collection.
  * @returns An object containing transactions, loading state, and any errors.
  */
 export function useAdminTransactionsData(): UseAdminTransactionsResult {
@@ -32,63 +38,69 @@ export function useAdminTransactionsData(): UseAdminTransactionsResult {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
 
-  const transactionsQuery = useMemoFirebase(() => {
-    if (!firestore) return null;
-    return query(collectionGroup(firestore, 'transactions'), orderBy('createdAt', 'desc'));
-  }, [firestore]);
-
   const usersRef = useMemoFirebase(() => {
     if (!firestore) return null;
     return collection(firestore, 'users');
   }, [firestore]);
 
   useEffect(() => {
-    if (!transactionsQuery || !usersRef) {
-        setIsLoading(false);
-        return;
+    if (!usersRef) {
+      setIsLoading(false);
+      return;
     }
 
+    const unsubs: (() => void)[] = [];
     let isMounted = true;
-    let unsubscribe: (() => void) | undefined;
 
-    const fetchData = async () => {
+    const fetchAllTransactions = async () => {
       setIsLoading(true);
       try {
-        // Fetch all users once to create a lookup map
         const usersSnapshot = await getDocs(usersRef);
-        const usersMap = new Map<string, Pick<UserProfile, 'displayName' | 'email'>>();
-        usersSnapshot.forEach(doc => {
-          const userData = doc.data();
-          usersMap.set(doc.id, {
-            displayName: userData.displayName,
-            email: userData.email,
-          });
-        });
-        
-        // Set up the real-time listener for transactions
-        unsubscribe = onSnapshot(transactionsQuery, (snapshot) => {
-          if (!isMounted) return;
+        if (!isMounted) return;
 
-          const enrichedTransactions = snapshot.docs.map(doc => {
-            const userId = doc.ref.parent.parent!.id; // Get userId from parent document path
-            const txData = { ...doc.data(), id: doc.id, userId, createdAt: doc.data().createdAt.toDate() } as Transaction;
-            const user = usersMap.get(userId);
-            if (user) {
-              txData.user = user;
-            }
-            return txData;
-          });
+        const allUsers = usersSnapshot.docs.map(d => ({ ...d.data(), id: d.id } as UserProfile));
+        const userMap = new Map(allUsers.map(u => [u.id, { displayName: u.displayName, email: u.email }]));
+        let allTransactions: Transaction[] = [];
+        let listenersAttached = 0;
 
-          setTransactions(enrichedTransactions);
-          setError(null);
-          setIsLoading(false);
-        }, (err) => {
-          if (isMounted) {
-            console.error("Error fetching transactions:", err);
-            setError(err);
+        if (allUsers.length === 0) {
+            setTransactions([]);
             setIsLoading(false);
-          }
+            return;
+        }
+
+        allUsers.forEach(user => {
+          const transactionsQuery = query(collection(firestore, `users/${user.id}/transactions`), orderBy('createdAt', 'desc'));
+          
+          const unsubscribe = onSnapshot(transactionsQuery, (snapshot) => {
+            if (!isMounted) return;
+
+            const userTransactions = snapshot.docs.map(d => ({
+              ...(d.data() as Omit<Transaction, 'id' | 'user' | 'userId'>),
+              id: d.id,
+              userId: user.id,
+              user: userMap.get(user.id),
+              createdAt: d.data().createdAt?.toDate() ?? new Date(),
+            }));
+            
+            // This logic replaces the transactions for a specific user while keeping others
+            allTransactions = allTransactions.filter(t => t.userId !== user.id).concat(userTransactions);
+
+            // Sort all transactions by date after each update
+            allTransactions.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+            
+            setTransactions([...allTransactions]);
+            setError(null);
+          }, (err) => {
+            console.error(`Error fetching transactions for user ${user.id}:`, err);
+            setError(err); // Consider how to handle partial errors
+          });
+
+          unsubs.push(unsubscribe);
         });
+
+        // Set initial loading to false after setting up listeners
+        setIsLoading(false);
 
       } catch (err) {
         if (isMounted) {
@@ -99,18 +111,17 @@ export function useAdminTransactionsData(): UseAdminTransactionsResult {
       }
     };
     
-    fetchData();
+    fetchAllTransactions();
 
     return () => {
       isMounted = false;
-      if (unsubscribe) {
-        unsubscribe();
-      }
+      unsubs.forEach(unsub => unsub());
     };
-  }, [transactionsQuery, usersRef]);
+  }, [usersRef, firestore]);
 
   return { transactions, isLoading, error };
 }
+
 
 export function useTransactionActions() {
   const firestore = useFirestore();
