@@ -45,10 +45,13 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { useAdminUsersData, type UserProfile } from '@/hooks/use-admin-users-data';
+import { Skeleton } from '@/components/ui/skeleton';
+import { useAdminUsersData } from '@/hooks/use-admin-users-data';
+import { useAdminTransactionsData, type Transaction } from '@/hooks/use-admin-transactions-data';
 import { useFirestore } from '@/firebase';
 import { useToast } from '@/hooks/use-toast';
 import { collection, doc, writeBatch, serverTimestamp, increment } from 'firebase/firestore';
+import { format } from 'date-fns';
 
 const topUpFormSchema = z.object({
   userId: z.string().min(1, { message: 'Please select a user.' }),
@@ -58,8 +61,28 @@ const topUpFormSchema = z.object({
 
 type TopUpFormValues = z.infer<typeof topUpFormSchema>;
 
+function formatCurrency(amount: number) {
+  return new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency: 'USD',
+  }).format(amount);
+}
+
+function TransactionRowSkeleton() {
+  return (
+    <TableRow>
+      <TableCell><Skeleton className="h-5 w-32" /></TableCell>
+      <TableCell><Skeleton className="h-5 w-16" /></TableCell>
+      <TableCell><Skeleton className="h-6 w-20 rounded-full" /></TableCell>
+      <TableCell><Skeleton className="h-5 w-24" /></TableCell>
+      <TableCell className="text-right"><Skeleton className="h-5 w-20 ml-auto" /></TableCell>
+    </TableRow>
+  )
+}
+
 export default function TransactionsPage() {
   const { users, isLoading: usersLoading } = useAdminUsersData();
+  const { transactions, isLoading: transactionsLoading } = useAdminTransactionsData();
   const firestore = useFirestore();
   const { toast } = useToast();
 
@@ -73,6 +96,8 @@ export default function TransactionsPage() {
   });
 
   async function onSubmit(values: TopUpFormValues) {
+    if (!firestore) return;
+
     try {
       const batch = writeBatch(firestore);
 
@@ -97,7 +122,7 @@ export default function TransactionsPage() {
 
       toast({
         title: 'Success!',
-        description: `Successfully topped up account for user.`,
+        description: `Successfully topped up account. The user's balance and transaction list will update shortly.`,
       });
       form.reset();
     } catch (error: any) {
@@ -109,6 +134,38 @@ export default function TransactionsPage() {
       });
     }
   }
+
+  const renderTableContent = () => {
+    if (transactionsLoading) {
+      return Array.from({ length: 5 }).map((_, i) => <TransactionRowSkeleton key={i} />);
+    }
+
+    if (!transactions || transactions.length === 0) {
+      return (
+        <TableRow>
+          <TableCell colSpan={5} className="text-center h-24">
+            No transactions found.
+          </TableCell>
+        </TableRow>
+      );
+    }
+
+    return transactions.map((tx: Transaction) => (
+      <TableRow key={tx.id}>
+        <TableCell>
+            <div className="font-medium">{tx.user?.displayName}</div>
+            <div className="text-sm text-muted-foreground">{tx.user?.email}</div>
+        </TableCell>
+        <TableCell className="capitalize">{tx.type}</TableCell>
+        <TableCell>
+          <Badge variant={tx.status === 'approved' ? 'default' : tx.status === 'pending' ? 'secondary' : 'destructive'} className="capitalize">{tx.status}</Badge>
+        </TableCell>
+        <TableCell>{format(new Date(tx.createdAt), 'PPpp')}</TableCell>
+        <TableCell className="text-right">{formatCurrency(tx.amount)}</TableCell>
+      </TableRow>
+    ));
+  };
+
 
   return (
     <div className="grid gap-8">
@@ -128,7 +185,7 @@ export default function TransactionsPage() {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Select User</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value} disabled={usersLoading}>
+                    <Select onValueChange={field.onChange} value={field.value} disabled={usersLoading}>
                       <FormControl>
                         <SelectTrigger>
                           <SelectValue placeholder={usersLoading ? "Loading users..." : "Select a user to top-up"} />
@@ -182,9 +239,9 @@ export default function TransactionsPage() {
       
       <Card>
         <CardHeader>
-          <CardTitle>Recent Transactions</CardTitle>
+          <CardTitle>All Transactions</CardTitle>
           <CardDescription>
-            A list of recent transactions.
+            A list of all transactions in the system.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -199,22 +256,13 @@ export default function TransactionsPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              <TableRow>
-                <TableCell className="font-medium">Liam Johnson</TableCell>
-                <TableCell>Deposit</TableCell>
-                <TableCell>
-                  <Badge variant="default">Approved</Badge>
-                </TableCell>
-                <TableCell>2023-06-23</TableCell>
-                <TableCell className="text-right">$250.00</TableCell>
-              </TableRow>
-              {/* Add more rows as data becomes dynamic */}
+              {renderTableContent()}
             </TableBody>
           </Table>
         </CardContent>
         <CardFooter>
             <div className="text-xs text-muted-foreground">
-              Showing <strong>1-1</strong> of <strong>1</strong> transactions
+              Showing <strong>1-{transactions?.length ?? 0}</strong> of <strong>{transactions?.length ?? 0}</strong> transactions
             </div>
           </CardFooter>
       </Card>
