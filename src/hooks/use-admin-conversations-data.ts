@@ -60,7 +60,6 @@ export function useAdminConversations() {
 
 export function useConversationMessages(conversationId: string | null) {
     const firestore = useFirestore();
-    const { user: adminUser } = useAuth();
     const [messages, setMessages] = useState<Message[]>([]);
     const [isLoading, setIsLoading] = useState(true);
 
@@ -86,7 +85,7 @@ export function useConversationMessages(conversationId: string | null) {
             setIsLoading(false);
         });
 
-        // Mark as read by admin
+        // Mark as read by admin when conversation is opened
         if(conversationId) {
             const convoRef = doc(firestore, 'conversations', conversationId);
             updateDoc(convoRef, { isReadByAdmin: true });
@@ -102,16 +101,18 @@ export function useConversationMessages(conversationId: string | null) {
         const messagesColRef = collection(firestore, `conversations/${conversationId}/messages`);
         const conversationRef = doc(firestore, 'conversations', conversationId);
 
+        // Add the new message to the subcollection
         await addDoc(messagesColRef, {
             ...message,
             createdAt: serverTimestamp()
         });
 
+        // Update the parent conversation document
         await updateDoc(conversationRef, {
             lastMessage: message.text,
             lastUpdatedAt: serverTimestamp(),
-            isReadByUser: false,
-            isReadByAdmin: true,
+            isReadByUser: false, // Mark as unread for the user
+            isReadByAdmin: true, // Admin has just sent it, so it's read by admin
         });
 
     }, [firestore, conversationId]);
