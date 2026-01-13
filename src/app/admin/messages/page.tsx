@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardTitle, CardContent, CardDescription, CardFooter } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { useAdminConversations, useConversationMessages, type ConversationWithUserData, type Message } from '@/hooks/use-admin-conversations-data';
-import { useAuth } from '@/firebase';
+import { useUser } from '@/firebase';
 import { Send } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -19,6 +19,7 @@ export default function MessagesPage() {
     const [selectedConversation, setSelectedConversation] = React.useState<ConversationWithUserData | null>(null);
 
     const getInitials = (name: string) => {
+        if (!name) return '??';
         const names = name.split(' ');
         return names.length > 1 ? `${names[0][0]}${names[1][0]}` : name.substring(0, 2);
     };
@@ -79,7 +80,7 @@ export default function MessagesPage() {
 }
 
 function ChatPanel({ conversation }: { conversation: ConversationWithUserData }) {
-    const { user: adminUser } = useAuth();
+    const { user: adminUser } = useUser();
     const { messages, isLoading, sendMessage } = useConversationMessages(conversation.id);
     const [newMessage, setNewMessage] = React.useState("");
     const scrollAreaRef = React.useRef<HTMLDivElement>(null);
@@ -121,7 +122,7 @@ function ChatPanel({ conversation }: { conversation: ConversationWithUserData })
                             "flex items-end gap-2",
                             msg.senderType === 'admin' ? "justify-end" : "justify-start"
                         )}>
-                            {msg.senderType === 'user' && <Avatar className="h-8 w-8"><AvatarFallback>{conversation.userName[0]}</AvatarFallback></Avatar>}
+                            {msg.senderType === 'user' && <Avatar className="h-8 w-8"><AvatarFallback>{conversation.userName ? conversation.userName[0] : 'U'}</AvatarFallback></Avatar>}
                             <div className={cn(
                                 "max-w-xs md:max-w-md lg:max-w-lg rounded-lg px-4 py-2",
                                 msg.senderType === 'admin' ? "bg-primary text-primary-foreground" : "bg-muted"
