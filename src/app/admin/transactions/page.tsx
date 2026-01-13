@@ -6,13 +6,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import {
-  File,
-  ListFilter,
-  MoreHorizontal,
-  PlusCircle,
   Send,
-  CheckCircle,
-  XCircle,
 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -50,10 +44,10 @@ import {
 } from '@/components/ui/table';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useAdminUsersData } from '@/hooks/use-admin-users-data';
-import { useAdminTransactionsData, type Transaction, useTransactionActions } from '@/hooks/use-admin-transactions-data';
+import { useAdminTransactionsData, type Transaction } from '@/hooks/use-admin-transactions-data';
 import { useFirestore } from '@/firebase';
 import { useToast } from '@/hooks/use-toast';
-import { collection, doc, writeBatch, serverTimestamp, increment, addDoc } from 'firebase/firestore';
+import { collection, serverTimestamp, addDoc } from 'firebase/firestore';
 import { format } from 'date-fns';
 
 const topUpFormSchema = z.object({
@@ -79,7 +73,6 @@ function TransactionRowSkeleton() {
       <TableCell><Skeleton className="h-6 w-20 rounded-full" /></TableCell>
       <TableCell><Skeleton className="h-5 w-24" /></TableCell>
       <TableCell className="text-right"><Skeleton className="h-5 w-20 ml-auto" /></TableCell>
-      <TableCell><Skeleton className="h-8 w-24" /></TableCell>
     </TableRow>
   )
 }
@@ -87,7 +80,6 @@ function TransactionRowSkeleton() {
 export default function TransactionsPage() {
   const { users, isLoading: usersLoading } = useAdminUsersData();
   const { transactions, isLoading: transactionsLoading } = useAdminTransactionsData();
-  const { approveTransaction, declineTransaction, isUpdating } = useTransactionActions();
   const firestore = useFirestore();
   const { toast } = useToast();
 
@@ -115,7 +107,7 @@ export default function TransactionsPage() {
 
         toast({
             title: 'Success!',
-            description: `Successfully created a pending deposit. Please approve it below.`,
+            description: `Successfully created a pending deposit. Please approve it in the Approvals page.`,
         });
         form.reset();
     } catch (error: any) {
@@ -127,16 +119,6 @@ export default function TransactionsPage() {
       });
     }
   }
-
-  const handleApprove = async (tx: Transaction) => {
-    await approveTransaction(tx);
-    toast({ title: 'Transaction Approved', description: `Transaction ID: ${tx.id} has been approved.` });
-  };
-
-  const handleDecline = async (tx: Transaction) => {
-    await declineTransaction(tx);
-    toast({ title: 'Transaction Declined', description: `Transaction ID: ${tx.id} has been declined.` });
-  };
 
   const getStatusBadgeVariant = (status: Transaction['status']) => {
     switch(status) {
@@ -155,7 +137,7 @@ export default function TransactionsPage() {
     if (!transactions || transactions.length === 0) {
       return (
         <TableRow>
-          <TableCell colSpan={6} className="text-center h-24">
+          <TableCell colSpan={5} className="text-center h-24">
             No transactions found.
           </TableCell>
         </TableRow>
@@ -174,18 +156,6 @@ export default function TransactionsPage() {
         </TableCell>
         <TableCell>{tx.createdAt ? format(new Date(tx.createdAt), 'PPpp') : '...'}</TableCell>
         <TableCell className="text-right">{formatCurrency(tx.amount)}</TableCell>
-        <TableCell>
-          {tx.status === 'pending' && (
-            <div className="flex gap-2 justify-end">
-              <Button size="sm" variant="outline" onClick={() => handleApprove(tx)} disabled={isUpdating}>
-                <CheckCircle className="h-4 w-4 mr-1" /> Approve
-              </Button>
-              <Button size="sm" variant="destructive" onClick={() => handleDecline(tx)} disabled={isUpdating}>
-                 <XCircle className="h-4 w-4 mr-1" /> Decline
-              </Button>
-            </div>
-          )}
-        </TableCell>
       </TableRow>
     ));
   };
@@ -197,7 +167,7 @@ export default function TransactionsPage() {
         <CardHeader>
           <CardTitle>Create Deposit Request</CardTitle>
           <CardDescription>
-            Create a pending deposit transaction for a user. It will appear in the table below for approval.
+            Create a pending deposit transaction for a user. It will appear in the 'Approvals' page for review.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -263,9 +233,9 @@ export default function TransactionsPage() {
       
       <Card>
         <CardHeader>
-          <CardTitle>All Transactions</CardTitle>
+          <CardTitle>Transaction History</CardTitle>
           <CardDescription>
-            A list of all transactions in the system. Approve or decline pending requests.
+            A historical log of all transactions in the system.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -277,7 +247,6 @@ export default function TransactionsPage() {
                 <TableHead>Status</TableHead>
                 <TableHead>Date</TableHead>
                 <TableHead className="text-right">Amount</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>

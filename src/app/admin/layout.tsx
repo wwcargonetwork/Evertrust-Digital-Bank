@@ -14,6 +14,7 @@ import {
   Search,
   LogOut,
   MessageSquare,
+  ShieldCheck,
 } from 'lucide-react';
 import {
   SidebarProvider,
@@ -129,6 +130,14 @@ export default function AdminLayout({
                 <Link href="/admin/users">
                   <Users />
                   Users
+                </Link>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+            <SidebarMenuItem>
+              <SidebarMenuButton asChild isActive={isActive('/admin/approvals')}>
+                <Link href="/admin/approvals">
+                  <ShieldCheck />
+                  Approvals
                 </Link>
               </SidebarMenuButton>
             </SidebarMenuItem>
