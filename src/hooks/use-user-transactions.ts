@@ -31,9 +31,11 @@ export function useUserTransactions(transactionLimit: number = 5): UseUserTransa
   const transactionsQuery = useMemoFirebase(() => {
     if (!firestore || !user) return null;
 
+    // Path to the subcollection: /users/{userId}/transactions
+    const transactionsPath = `users/${user.uid}/transactions`;
+
     return query(
-      collection(firestore, 'transactions'),
-      where('userId', '==', user.uid),
+      collection(firestore, transactionsPath),
       orderBy('createdAt', 'desc'),
       limit(transactionLimit)
     );

@@ -2,7 +2,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { collection, query, orderBy, onSnapshot, getDocs } from 'firebase/firestore';
+import { collection, query, orderBy, onSnapshot, getDocs, collectionGroup } from 'firebase/firestore';
 import { useFirestore, useMemoFirebase } from '@/firebase';
 import { WithId } from '@/firebase/firestore/use-collection';
 import { UserProfile } from './use-admin-users-data';
@@ -35,7 +35,7 @@ export function useAdminTransactionsData(): UseAdminTransactionsResult {
 
   const transactionsQuery = useMemoFirebase(() => {
     if (!firestore) return null;
-    return query(collection(firestore, 'transactions'), orderBy('createdAt', 'desc'));
+    return query(collectionGroup(firestore, 'transactions'), orderBy('createdAt', 'desc'));
   }, [firestore]);
 
   const usersRef = useMemoFirebase(() => {
@@ -71,8 +71,9 @@ export function useAdminTransactionsData(): UseAdminTransactionsResult {
           if (!isMounted) return;
 
           const enrichedTransactions = snapshot.docs.map(doc => {
-            const txData = { ...doc.data(), id: doc.id, createdAt: doc.data().createdAt.toDate() } as Transaction;
-            const user = usersMap.get(txData.userId);
+            const userId = doc.ref.parent.parent!.id; // Get userId from parent document path
+            const txData = { ...doc.data(), id: doc.id, userId, createdAt: doc.data().createdAt.toDate() } as Transaction;
+            const user = usersMap.get(userId);
             if (user) {
               txData.user = user;
             }

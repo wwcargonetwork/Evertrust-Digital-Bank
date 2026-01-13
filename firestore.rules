@@ -6,12 +6,11 @@
  * website where content is managed by a trusted set of administrators.
  *
  * Data Structure:
- * The data is organized into several distinct, top-level collections:
  * - /testimonials: Publicly readable content managed by Admins.
  * - /banners: Publicly readable content managed by Admins.
  * - /contact_form_submissions: A write-only "dropbox" for public users, readable only by Admins.
- * - /users: Stores public profiles for registered users.
- * - /transactions: Stores financial transactions, readable only by Admins or the user who owns them.
+ * - /users/{userId}: Stores public profiles for registered users.
+ *   - /users/{userId}/transactions/{transactionId}: Stores financial transactions for a specific user.
  *
  * Key Security Decisions:
  * - Admin Role by Absence: A user is considered an Admin if they are authenticated but do NOT have a document in the `/users` collection. This prevents regular users from accessing admin privileges.
@@ -66,6 +65,19 @@ service cloud.firestore {
       allow update: if isOwner(userId) || isAdmin(); // Admins can update status, balance, etc.
       allow list: if isAdmin();
       allow delete: if false; // Deletion should be handled by a backend process
+
+      /**
+       * @description Manages financial transactions for a specific user.
+       *              - The user can read their own transactions.
+       *              - Admins can create (top-up), read, and manage all transactions.
+       * @path /users/{userId}/transactions/{transactionId}
+       */
+      match /transactions/{transactionId} {
+        allow read: if isOwner(userId) || isAdmin();
+        allow list: if isOwner(userId) || isAdmin();
+        allow create: if isAdmin(); // Only Admins can create new transactions (deposits)
+        allow update, delete: if isAdmin();
+      }
     }
 
     /**
@@ -93,19 +105,6 @@ service cloud.firestore {
     match /banners/{bannerId} {
       allow get, list: if true;
       allow create, update, delete: if isAdmin();
-    }
-    
-    /**
-     * @description Manages financial transactions. Users can create their own transactions.
-     *              Admins have full read/write access for management.
-     * @path /transactions/{transactionId}
-     */
-    match /transactions/{transactionId} {
-        // Only admins can create transactions (e.g., top-ups)
-        allow create: if isAdmin(); 
-        allow get: if isAdmin() || isOwner(resource.data.userId);
-        allow list: if isAdmin() || (isSignedIn() && request.query.where.userId == request.auth.uid);
-        allow update, delete: if isAdmin();
     }
   }
 }

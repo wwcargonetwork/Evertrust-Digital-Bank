@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { collection, query, orderBy, limit, getDocs, onSnapshot, where, doc as firestoreDoc } from 'firebase/firestore';
+import { collection, query, orderBy, limit, getDocs, onSnapshot, where, doc as firestoreDoc, collectionGroup } from 'firebase/firestore';
 import { useFirestore, useMemoFirebase } from '@/firebase';
 import { WithId } from '@/firebase/firestore/use-collection';
 
@@ -47,17 +47,17 @@ export function useAdminDashboardData(): UseAdminDashboardDataResult {
 
   // Memoize collection references
   const usersRef = useMemoFirebase(() => collection(firestore, 'users'), [firestore]);
-  const transactionsRef = useMemoFirebase(() => collection(firestore, 'transactions'), [firestore]);
+  const transactionsGroupRef = useMemoFirebase(() => collectionGroup(firestore, 'transactions'), [firestore]);
 
   useEffect(() => {
-    if (!usersRef || !transactionsRef) return;
+    if (!usersRef || !transactionsGroupRef) return;
 
     const fetchData = async () => {
       setIsLoading(true);
       try {
         // Queries for recent data
         const recentUsersQuery = query(usersRef, orderBy('createdAt', 'desc'), limit(5));
-        const recentTransactionsQuery = query(transactionsRef, orderBy('createdAt', 'desc'), limit(5));
+        const recentTransactionsQuery = query(transactionsGroupRef, orderBy('createdAt', 'desc'), limit(5));
         
         // Fetch all data in parallel
         const [
@@ -67,7 +67,7 @@ export function useAdminDashboardData(): UseAdminDashboardDataResult {
           recentTransactionsSnapshot
         ] = await Promise.all([
           getDocs(usersRef),
-          getDocs(query(transactionsRef, where('status', '==', 'approved'))),
+          getDocs(query(transactionsGroupRef, where('status', '==', 'approved'))),
           getDocs(recentUsersQuery),
           getDocs(recentTransactionsQuery)
         ]);
@@ -88,7 +88,8 @@ export function useAdminDashboardData(): UseAdminDashboardDataResult {
 
         // Process recent transactions and enrich with user data
         const recentTransactions: Transaction[] = recentTransactionsSnapshot.docs.map(doc => {
-            const txData = { ...doc.data(), id: doc.id, createdAt: doc.data().createdAt.toDate() } as Transaction;
+            const userId = doc.ref.parent.parent!.id; // Get userId from parent document path
+            const txData = { ...doc.data(), id: doc.id, userId, createdAt: doc.data().createdAt.toDate() } as Transaction;
             const user = allUsersMap.get(txData.userId);
             if(user){
                txData.user = user;
@@ -118,11 +119,7 @@ export function useAdminDashboardData(): UseAdminDashboardDataResult {
 
     fetchData();
 
-    // Set up listeners for real-time updates (optional, can be complex)
-    // For simplicity, this example only fetches once. Real-time updates
-    // would require more complex state management.
-
-  }, [usersRef, transactionsRef]);
+  }, [usersRef, transactionsGroupRef]);
 
   return { data, isLoading, error };
 }

@@ -188,14 +188,13 @@
       "type": "object",
       "description": "Represents a financial transaction in the system.",
       "properties": {
-        "userId": { "type": "string", "description": "The ID of the user performing the transaction." },
         "amount": { "type": "number", "description": "The amount of the transaction." },
         "type": { "type": "string", "enum": ["deposit", "withdrawal", "transfer", "sale", "refund"], "description": "The type of transaction." },
         "status": { "type": "string", "enum": ["approved", "pending", "declined"], "description": "The status of the transaction." },
         "sender": { "type": "string", "description": "Details of the transaction sender for deposits." },
         "createdAt": { "type": "string", "format": "date-time", "description": "Timestamp of the transaction." }
       },
-      "required": ["userId", "amount", "type", "status", "createdAt"]
+      "required": ["amount", "type", "status", "createdAt"]
     }
   },
   "auth": {
@@ -258,13 +257,13 @@
         }
       },
       {
-        "path": "/transactions/{transactionId}",
+        "path": "/users/{userId}/transactions/{transactionId}",
         "definition": {
             "entityName": "Transaction",
             "schema": {
                 "$ref": "#/backend/entities/Transaction"
             },
-            "description": "Stores all financial transactions for users."
+            "description": "Stores all financial transactions for a specific user."
         }
       }
     ]

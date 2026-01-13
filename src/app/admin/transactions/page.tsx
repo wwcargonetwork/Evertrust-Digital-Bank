@@ -101,10 +101,9 @@ export default function TransactionsPage() {
     try {
       const batch = writeBatch(firestore);
 
-      // 1. Create a new transaction document
-      const newTransactionRef = doc(collection(firestore, 'transactions'));
+      // 1. Create a new transaction document in the subcollection
+      const newTransactionRef = doc(collection(firestore, 'users', values.userId, 'transactions'));
       batch.set(newTransactionRef, {
-        userId: values.userId,
         amount: values.amount,
         sender: values.sender,
         type: 'deposit',
