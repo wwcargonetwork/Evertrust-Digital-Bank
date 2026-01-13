@@ -15,6 +15,8 @@ service cloud.firestore {
       return isSignedIn() && request.auth.uid == userId;
     }
 
+    // An admin is any signed-in user who does NOT have a document in the /users collection.
+    // This is a simple convention for this app.
     function isAdmin() {
       return isSignedIn() && !exists(/databases/$(database)/documents/users/$(request.auth.uid));
     }
@@ -24,11 +26,11 @@ service cloud.firestore {
     // -------------------------------------------------------------------------
 
     match /users/{userId} {
-      allow create: if isOwner(userId);
+      allow create: if true; // Anyone can create a user profile (sign up)
       allow get: if isOwner(userId) || isAdmin();
       allow list: if isAdmin();
       allow update: if isOwner(userId) || isAdmin();
-      allow delete: if false;
+      allow delete: if false; // Don't allow users to delete their accounts
 
       match /transactions/{transactionId} {
         allow read, list: if isOwner(userId) || isAdmin();
@@ -37,6 +39,21 @@ service cloud.firestore {
         // Only admins can update (approve/decline) or delete transactions.
         allow update, delete: if isAdmin();
       }
+    }
+    
+    match /conversations/{conversationId} {
+        // Users can list/read conversations they are part of. Admins can read all.
+        allow list, get: if isAdmin() || (isSignedIn() && resource.data.userId == request.auth.uid);
+        // Users can create conversations. Admins can update them (e.g., mark as read).
+        allow create: if isSignedIn();
+        allow update: if isAdmin();
+
+        match /messages/{messageId} {
+            // Users can read messages in their own conversations. Admins can read all.
+            allow list, get: if isAdmin() || (isSignedIn() && get(/databases/$(database)/documents/conversations/$(conversationId)).data.userId == request.auth.uid);
+            // Users can create messages in their own conversations. Admins can create messages in any.
+            allow create: if (isAdmin() && request.resource.data.senderType == 'admin') || (isOwner(request.resource.data.senderId) && request.resource.data.senderType == 'user');
+        }
     }
 
     match /testimonials/{testimonialId} {

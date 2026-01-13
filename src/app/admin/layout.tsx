@@ -13,6 +13,7 @@ import {
   CreditCard,
   Search,
   LogOut,
+  MessageSquare,
 } from 'lucide-react';
 import {
   SidebarProvider,
@@ -136,6 +137,14 @@ export default function AdminLayout({
                 <Link href="/admin/transactions">
                   <CreditCard />
                   Transactions
+                </Link>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+             <SidebarMenuItem>
+              <SidebarMenuButton asChild isActive={isActive('/admin/messages')}>
+                <Link href="/admin/messages">
+                  <MessageSquare />
+                  Messages
                 </Link>
               </SidebarMenuButton>
             </SidebarMenuItem>

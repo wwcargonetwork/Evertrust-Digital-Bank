@@ -1,3 +1,4 @@
+
 'use client';
 
 import * as React from 'react';
@@ -10,6 +11,7 @@ import {
   User as UserIcon,
   LogOut,
   Landmark,
+  MessageSquare,
 } from 'lucide-react';
 import {
   SidebarProvider,
@@ -100,6 +102,14 @@ export default function DashboardLayout({
                 <Link href="/dashboard/transactions">
                   <CreditCard />
                   Transactions
+                </Link>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+             <SidebarMenuItem>
+              <SidebarMenuButton asChild isActive={isActive('/dashboard/messages')}>
+                <Link href="/dashboard/messages">
+                  <MessageSquare />
+                  Messages
                 </Link>
               </SidebarMenuButton>
             </SidebarMenuItem>
