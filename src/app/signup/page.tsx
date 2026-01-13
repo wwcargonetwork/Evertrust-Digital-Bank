@@ -8,7 +8,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { motion, AnimatePresence } from 'framer-motion';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
-import { doc, setDoc } from 'firebase/firestore';
+import { doc, serverTimestamp } from 'firebase/firestore';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -124,7 +124,8 @@ export default function SignupPage() {
 
         const userProfile = {
             ...userProfileData,
-            createdAt: new Date(),
+            birthDate: format(userProfileData.birthDate, 'yyyy-MM-dd'),
+            createdAt: serverTimestamp(),
         };
 
         const userDocRef = doc(firestore, 'users', user.uid);
@@ -135,7 +136,7 @@ export default function SignupPage() {
             description: 'Your account has been created.',
         });
 
-        router.push('/');
+        router.push('/dashboard');
 
     } catch (error: any) {
         console.error('Signup Error:', error);

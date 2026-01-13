@@ -43,7 +43,7 @@ export default function SigninPage() {
   async function onSubmit(values: FormValues) {
     try {
       await signInWithEmailAndPassword(auth, values.email, values.password);
-      router.push('/'); // Redirect to home page on successful login
+      router.push('/dashboard'); // Redirect to dashboard on successful login
     } catch (error: any) {
       console.error('Sign In Error:', error);
       toast({
@@ -58,7 +58,7 @@ export default function SigninPage() {
     const provider = new GoogleAuthProvider();
     try {
       await signInWithPopup(auth, provider);
-      router.push('/');
+      router.push('/dashboard');
     } catch (error: any) {
       console.error('Google Sign In Error:', error);
       toast({

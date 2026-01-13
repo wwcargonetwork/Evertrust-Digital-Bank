@@ -3,7 +3,7 @@
 
 import * as React from "react"
 import Link from "next/link"
-import { Landmark, Menu } from "lucide-react"
+import { Landmark, Menu, LogOut, LayoutDashboard } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
 import {
@@ -16,6 +16,9 @@ import {
   navigationMenuTriggerStyle,
 } from "@/components/ui/navigation-menu"
 import { cn } from "@/lib/utils"
+import { useUser, useAuth } from "@/firebase"
+import { signOut } from "firebase/auth"
+import { useRouter } from "next/navigation"
 
 const navLinks = [
   { href: "/", label: "Home" },
@@ -42,6 +45,14 @@ const bankingLinks: { title: string; href: string; description: string }[] = [
 
 export function Header() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = React.useState(false);
+  const { user, isUserLoading } = useUser();
+  const auth = useAuth();
+  const router = useRouter();
+
+  const handleLogout = async () => {
+      await signOut(auth);
+      router.push('/signin');
+  };
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -86,14 +97,29 @@ export function Header() {
 
         <div className="flex flex-1 items-center justify-end space-x-2">
            <div className="hidden md:flex items-center space-x-2">
-            <Link href="/signin" passHref>
-                <Button variant="ghost">Sign In</Button>
-            </Link>
-            <Link href="/signup" passHref>
-                <Button asChild style={{ backgroundColor: 'hsl(var(--accent))', color: 'hsl(var(--accent-foreground))' }}>
-                  <a>Sign Up</a>
-                </Button>
-            </Link>
+            {!isUserLoading && user ? (
+                <>
+                    <Button variant="ghost" onClick={() => router.push('/dashboard')}>
+                        <LayoutDashboard className="mr-2 h-4 w-4" />
+                        Dashboard
+                    </Button>
+                    <Button onClick={handleLogout} variant="outline">
+                        <LogOut className="mr-2 h-4 w-4" />
+                        Log Out
+                    </Button>
+                </>
+            ) : !isUserLoading ? (
+                <>
+                    <Link href="/signin" passHref>
+                        <Button variant="ghost">Sign In</Button>
+                    </Link>
+                    <Link href="/signup" passHref>
+                        <Button asChild style={{ backgroundColor: 'hsl(var(--accent))', color: 'hsl(var(--accent-foreground))' }}>
+                        <a>Sign Up</a>
+                        </Button>
+                    </Link>
+                </>
+            ) : null}
           </div>
           <Sheet open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen}>
             <SheetTrigger asChild className="md:hidden">
@@ -123,14 +149,29 @@ export function Header() {
                 ))}
               </div>
                <div className="flex flex-col space-y-2 mt-6 pt-6 border-t">
-                <Link href="/signin" passHref>
-                    <Button variant="ghost" className="w-full justify-start">Sign In</Button>
-                </Link>
-                <Link href="/signup" passHref>
-                  <Button asChild className="w-full" style={{ backgroundColor: 'hsl(var(--accent))', color: 'hsl(var(--accent-foreground))' }}>
-                    <a>Sign Up</a>
-                  </Button>
-                </Link>
+                {!isUserLoading && user ? (
+                    <>
+                        <Button variant="ghost" className="w-full justify-start" onClick={() => {router.push('/dashboard'); setIsMobileMenuOpen(false);}}>
+                            <LayoutDashboard className="mr-2 h-4 w-4" />
+                            Dashboard
+                        </Button>
+                        <Button onClick={handleLogout} variant="outline" className="w-full justify-start">
+                            <LogOut className="mr-2 h-4 w-4" />
+                            Log Out
+                        </Button>
+                    </>
+                ) : !isUserLoading ? (
+                    <>
+                        <Link href="/signin" passHref>
+                            <Button variant="ghost" className="w-full justify-start" onClick={() => setIsMobileMenuOpen(false)}>Sign In</Button>
+                        </Link>
+                        <Link href="/signup" passHref>
+                        <Button asChild className="w-full" style={{ backgroundColor: 'hsl(var(--accent))', color: 'hsl(var(--accent-foreground))' }} onClick={() => setIsMobileMenuOpen(false)}>
+                            <a>Sign Up</a>
+                        </Button>
+                        </Link>
+                    </>
+                ) : null }
               </div>
             </SheetContent>
           </Sheet>
