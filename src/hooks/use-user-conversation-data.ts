@@ -2,7 +2,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { collection, query, where, onSnapshot, addDoc, updateDoc, doc, serverTimestamp, getDocs, limit } from 'firebase/firestore';
+import { collection, query, where, onSnapshot, addDoc, updateDoc, doc, serverTimestamp, getDocs, limit, orderBy } from 'firebase/firestore';
 import { useFirestore, useUser, useMemoFirebase, WithId } from '@/firebase';
 
 export type Message = WithId<{
