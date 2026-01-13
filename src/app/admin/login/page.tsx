@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState } from 'react';
@@ -39,10 +40,16 @@ export default function AdminLoginPage() {
   });
 
   async function onSubmit(values: FormValues) {
+    if (!auth) {
+      toast({
+        variant: 'destructive',
+        title: 'Authentication Error',
+        description: 'Firebase Auth is not available. Please try again later.',
+      });
+      return;
+    }
     try {
       await signInWithEmailAndPassword(auth, values.email, values.password);
-      // On successful login, Firebase's onAuthStateChanged will handle the user state.
-      // We can then redirect to the admin dashboard.
       router.push('/admin');
     } catch (error: any) {
       console.error('Admin Login Error:', error);

@@ -1,3 +1,4 @@
+
 'use client';
 
 import * as React from 'react';
@@ -45,16 +46,22 @@ export default function AdminLayout({
   const pathname = usePathname();
 
   React.useEffect(() => {
-    if (!isUserLoading && !user) {
+    if (!isUserLoading && !user && pathname !== '/admin/login') {
       router.replace('/admin/login');
     }
-  }, [user, isUserLoading, router]);
+  }, [user, isUserLoading, router, pathname]);
 
   const handleLogout = async () => {
-    await signOut(auth);
+    if (auth) {
+      await signOut(auth);
+    }
     router.replace('/admin/login');
   };
   
+  if (pathname === '/admin/login') {
+    return <>{children}</>;
+  }
+
   if (isUserLoading || !user) {
     return (
         <div className="flex h-screen items-center justify-center bg-background">
