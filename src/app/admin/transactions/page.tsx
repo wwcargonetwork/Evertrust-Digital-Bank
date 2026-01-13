@@ -1,3 +1,4 @@
+
 'use client';
 
 import * as React from 'react';
@@ -52,7 +53,7 @@ import { useAdminUsersData } from '@/hooks/use-admin-users-data';
 import { useAdminTransactionsData, type Transaction, useTransactionActions } from '@/hooks/use-admin-transactions-data';
 import { useFirestore } from '@/firebase';
 import { useToast } from '@/hooks/use-toast';
-import { collection, doc, writeBatch, serverTimestamp, increment } from 'firebase/firestore';
+import { collection, doc, writeBatch, serverTimestamp, increment, addDoc } from 'firebase/firestore';
 import { format } from 'date-fns';
 
 const topUpFormSchema = z.object({
@@ -103,33 +104,22 @@ export default function TransactionsPage() {
     if (!firestore) return;
 
     try {
-      const batch = writeBatch(firestore);
-      const userDocRef = doc(firestore, 'users', values.userId);
+        const userTransactionsRef = collection(firestore, 'users', values.userId, 'transactions');
+        await addDoc(userTransactionsRef, {
+            amount: values.amount,
+            description: values.sender,
+            type: 'deposit',
+            status: 'pending',
+            createdAt: serverTimestamp(),
+        });
 
-      // 1. Create a new transaction document in the subcollection
-      const newTransactionRef = doc(collection(userDocRef, 'transactions'));
-      batch.set(newTransactionRef, {
-        amount: values.amount,
-        description: values.sender,
-        type: 'deposit',
-        status: 'approved',
-        createdAt: serverTimestamp(),
-      });
-
-      // 2. Update the user's account balance
-      batch.update(userDocRef, {
-        accountBalance: increment(values.amount),
-      });
-
-      await batch.commit();
-
-      toast({
-        title: 'Success!',
-        description: `Successfully topped up account. The user's balance and transaction list will update shortly.`,
-      });
-      form.reset();
+        toast({
+            title: 'Success!',
+            description: `Successfully created a pending deposit. Please approve it below.`,
+        });
+        form.reset();
     } catch (error: any) {
-      console.error('Top-up failed:', error);
+      console.error('Top-up creation failed:', error);
       toast({
         variant: 'destructive',
         title: 'Top-up Failed',
@@ -182,7 +172,7 @@ export default function TransactionsPage() {
         <TableCell>
           <Badge variant={getStatusBadgeVariant(tx.status)} className="capitalize">{tx.status}</Badge>
         </TableCell>
-        <TableCell>{format(new Date(tx.createdAt), 'PPpp')}</TableCell>
+        <TableCell>{tx.createdAt ? format(new Date(tx.createdAt), 'PPpp') : '...'}</TableCell>
         <TableCell className="text-right">{formatCurrency(tx.amount)}</TableCell>
         <TableCell>
           {tx.status === 'pending' && (
@@ -205,9 +195,9 @@ export default function TransactionsPage() {
     <div className="grid gap-8">
       <Card>
         <CardHeader>
-          <CardTitle>Admin Top-Up</CardTitle>
+          <CardTitle>Create Deposit Request</CardTitle>
           <CardDescription>
-            Directly credit a user's account by creating an approved deposit transaction.
+            Create a pending deposit transaction for a user. It will appear in the table below for approval.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -222,7 +212,7 @@ export default function TransactionsPage() {
                     <Select onValueChange={field.onChange} value={field.value} disabled={usersLoading}>
                       <FormControl>
                         <SelectTrigger>
-                          <SelectValue placeholder={usersLoading ? "Loading users..." : "Select a user to top-up"} />
+                          <SelectValue placeholder={usersLoading ? "Loading users..." : "Select a user to create a deposit for"} />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
@@ -264,7 +254,7 @@ export default function TransactionsPage() {
                 )}
               />
               <Button type="submit" style={{ backgroundColor: 'hsl(var(--accent))', color: 'hsl(var(--accent-foreground))' }} disabled={form.formState.isSubmitting}>
-                Submit Top-Up <Send className="ml-2 h-4 w-4" />
+                Create Deposit Request <Send className="ml-2 h-4 w-4" />
               </Button>
             </form>
           </Form>
