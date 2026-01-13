@@ -26,7 +26,7 @@ import {
   SidebarFooter,
   SidebarInset,
 } from '@/components/ui/sidebar';
-import { useUser, useFirestore, useDoc, useMemoFirebase } from '@/firebase';
+import { useUser, useFirestore, useDoc, useMemoFirebase, useAuth } from '@/firebase';
 import { doc } from 'firebase/firestore';
 import { useRouter, usePathname } from 'next/navigation';
 import { signOut } from 'firebase/auth';
@@ -44,6 +44,7 @@ export default function AdminLayout({
 }) {
   const { user, isUserLoading } = useUser();
   const firestore = useFirestore();
+  const auth = useAuth();
   const router = useRouter();
   const pathname = usePathname();
 
@@ -79,9 +80,7 @@ export default function AdminLayout({
   }, [user, userProfile, isUserLoading, isProfileLoading, router, pathname]);
 
   const handleLogout = async () => {
-    if (firestore.app) { // Check if app is available from firestore instance
-      await signOut(doc(firestore, 'users', 'dummy').firestore.app.options.auth!);
-    }
+    await signOut(auth);
     router.replace('/admin/login');
   };
   
