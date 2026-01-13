@@ -149,8 +149,12 @@ export default function DashboardLayout({
             {/* Can add breadcrumbs or page title here */}
           </div>
           <div className="flex items-center gap-4">
-            <Button variant="ghost" size="icon" className="rounded-full">
+            <Button variant="ghost" size="icon" className="relative rounded-full">
               <Bell className="h-5 w-5" />
+              <span className="absolute top-1 right-1 flex h-2 w-2">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-accent opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-accent"></span>
+              </span>
               <span className="sr-only">Toggle notifications</span>
             </Button>
             <DropdownMenu>
