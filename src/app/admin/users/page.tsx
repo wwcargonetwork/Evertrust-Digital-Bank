@@ -40,8 +40,86 @@ import {
   TabsList,
   TabsTrigger,
 } from '@/components/ui/tabs';
+import { Skeleton } from '@/components/ui/skeleton';
+import { useAdminUsersData, type UserProfile } from '@/hooks/use-admin-users-data';
+import { format } from 'date-fns';
+
+function UserRowSkeleton() {
+  return (
+    <TableRow>
+      <TableCell><Skeleton className="h-5 w-32" /></TableCell>
+      <TableCell><Skeleton className="h-5 w-40" /></TableCell>
+      <TableCell><Skeleton className="h-6 w-16 rounded-full" /></TableCell>
+      <TableCell><Skeleton className="h-5 w-24" /></TableCell>
+      <TableCell className="hidden md:table-cell"><Skeleton className="h-5 w-24" /></TableCell>
+      <TableCell><Skeleton className="h-8 w-8" /></TableCell>
+    </TableRow>
+  )
+}
 
 export default function UsersPage() {
+  const { users, isLoading, error } = useAdminUsersData();
+
+  const renderTableContent = () => {
+    if (isLoading) {
+      return Array.from({ length: 5 }).map((_, i) => <UserRowSkeleton key={i} />);
+    }
+
+    if (error) {
+      return (
+        <TableRow>
+          <TableCell colSpan={6} className="text-center text-destructive">
+            Error loading users: {error.message}
+          </TableCell>
+        </TableRow>
+      );
+    }
+    
+    if (!users || users.length === 0) {
+        return (
+            <TableRow>
+            <TableCell colSpan={6} className="text-center text-muted-foreground">
+                No users found.
+            </TableCell>
+            </TableRow>
+        );
+    }
+
+    return users.map((user) => (
+      <TableRow key={user.id}>
+        <TableCell className="font-medium">{user.displayName}</TableCell>
+        <TableCell>{user.email}</TableCell>
+        <TableCell>
+          <Badge variant="outline">Active</Badge>
+        </TableCell>
+        <TableCell>{user.accountType}</TableCell>
+        <TableCell className="hidden md:table-cell">
+          {format(user.createdAt.toDate(), 'PP')}
+        </TableCell>
+        <TableCell>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                aria-haspopup="true"
+                size="icon"
+                variant="ghost"
+              >
+                <MoreHorizontal className="h-4 w-4" />
+                <span className="sr-only">Toggle menu</span>
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuLabel>Actions</DropdownMenuLabel>
+              <DropdownMenuItem>View Details</DropdownMenuItem>
+              <DropdownMenuItem>Edit</DropdownMenuItem>
+              <DropdownMenuItem>Delete</DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </TableCell>
+      </TableRow>
+    ));
+  };
+
   return (
     <Tabs defaultValue="all">
       <div className="flex items-center">
@@ -81,12 +159,6 @@ export default function UsersPage() {
               Export
             </span>
           </Button>
-          <Button size="sm" className="h-8 gap-1">
-            <PlusCircle className="h-3.5 w-3.5" />
-            <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
-              Add User
-            </span>
-          </Button>
         </div>
       </div>
       <TabsContent value="all">
@@ -114,72 +186,13 @@ export default function UsersPage() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                <TableRow>
-                  <TableCell className="font-medium">Liam Johnson</TableCell>
-                  <TableCell>liam@example.com</TableCell>
-                  <TableCell>
-                    <Badge variant="outline">Active</Badge>
-                  </TableCell>
-                  <TableCell>Premium Checking</TableCell>
-                  <TableCell className="hidden md:table-cell">
-                    2023-06-23
-                  </TableCell>
-                  <TableCell>
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button
-                          aria-haspopup="true"
-                          size="icon"
-                          variant="ghost"
-                        >
-                          <MoreHorizontal className="h-4 w-4" />
-                          <span className="sr-only">Toggle menu</span>
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                        <DropdownMenuItem>Edit</DropdownMenuItem>
-                        <DropdownMenuItem>Delete</DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </TableCell>
-                </TableRow>
-                 <TableRow>
-                  <TableCell className="font-medium">Olivia Smith</TableCell>
-                  <TableCell>olivia@example.com</TableCell>
-                  <TableCell>
-                    <Badge variant="outline">Active</Badge>
-                  </TableCell>
-                  <TableCell>Savings Account</TableCell>
-                  <TableCell className="hidden md:table-cell">
-                    2023-08-15
-                  </TableCell>
-                  <TableCell>
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button
-                          aria-haspopup="true"
-                          size="icon"
-                          variant="ghost"
-                        >
-                          <MoreHorizontal className="h-4 w-4" />
-                          <span className="sr-only">Toggle menu</span>
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                        <DropdownMenuItem>Edit</DropdownMenuItem>
-                        <DropdownMenuItem>Delete</DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </TableCell>
-                </TableRow>
+                {renderTableContent()}
               </TableBody>
             </Table>
           </CardContent>
           <CardFooter>
             <div className="text-xs text-muted-foreground">
-              Showing <strong>1-10</strong> of <strong>32</strong> users
+              Showing <strong>1-{users?.length ?? 0}</strong> of <strong>{users?.length ?? 0}</strong> users
             </div>
           </CardFooter>
         </Card>
