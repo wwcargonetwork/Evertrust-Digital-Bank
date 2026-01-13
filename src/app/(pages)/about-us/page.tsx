@@ -202,11 +202,9 @@ export default function AboutUsPage() {
                     We're always looking for passionate and talented individuals to join our team. Explore our open roles and help us build the future of finance.
                 </p>
                 <div className="mt-10">
-                    <Link href="/careers" passHref>
-                        <Button asChild size="lg" style={{ backgroundColor: 'hsl(var(--accent))', color: 'hsl(var(--accent-foreground))' }}>
-                            <Link href="/careers">View Careers <ArrowRight className="ml-2 h-5 w-5" /></Link>
-                        </Button>
-                    </Link>
+                    <Button asChild size="lg" style={{ backgroundColor: 'hsl(var(--accent))', color: 'hsl(var(--accent-foreground))' }}>
+                        <Link href="/careers">View Careers <ArrowRight className="ml-2 h-5 w-5" /></Link>
+                    </Button>
                 </div>
             </div>
         </motion.section>

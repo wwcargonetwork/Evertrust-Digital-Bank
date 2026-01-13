@@ -68,11 +68,11 @@ export function Header() {
             <NavigationMenuList>
                 {navLinks.map(link => (
                     <NavigationMenuItem key={link.label}>
-                      <Link href={link.href} legacyBehavior passHref>
-                        <NavigationMenuLink className={navigationMenuTriggerStyle()}>
+                      <NavigationMenuLink asChild className={navigationMenuTriggerStyle()}>
+                        <Link href={link.href}>
                           {link.label}
-                        </NavigationMenuLink>
-                      </Link>
+                        </Link>
+                      </NavigationMenuLink>
                     </NavigationMenuItem>
                 ))}
               <NavigationMenuItem>
@@ -188,7 +188,6 @@ const ListItem = React.forwardRef<
   return (
     <li>
       <NavigationMenuLink asChild>
-        <Link href={props.href!} legacyBehavior passHref>
         <a
           ref={ref}
           className={cn(
@@ -202,7 +201,6 @@ const ListItem = React.forwardRef<
             {children}
           </p>
         </a>
-        </Link>
       </NavigationMenuLink>
     </li>
   )
