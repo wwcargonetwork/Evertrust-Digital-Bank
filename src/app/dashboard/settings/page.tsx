@@ -1,22 +1,43 @@
 'use client';
 
+import { useTheme } from "next-themes";
 import { Card, CardHeader, CardTitle, CardContent, CardDescription } from "@/components/ui/card";
-import { Settings } from "lucide-react";
+import { Label } from "@/components/ui/label";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 
 export default function SettingsPage() {
+    const { theme, setTheme } = useTheme();
+
     return (
-        <div>
-            <h1 className="text-3xl font-bold mb-6">Settings</h1>
+        <div className="space-y-6">
+            <h1 className="text-3xl font-bold">Settings</h1>
             <Card>
                 <CardHeader>
-                    <CardTitle>Account Settings</CardTitle>
-                    <CardDescription>Manage your notification, security, and theme preferences.</CardDescription>
+                    <CardTitle>Appearance</CardTitle>
+                    <CardDescription>Customize the look and feel of your dashboard.</CardDescription>
                 </CardHeader>
                 <CardContent>
-                    <div className="text-center text-muted-foreground py-12">
-                        <Settings className="mx-auto h-12 w-12 mb-4" />
-                        <p className="text-lg">Settings options will be available here.</p>
-                        <p>This feature is currently under construction.</p>
+                    <div className="space-y-2">
+                        <Label htmlFor="theme">Theme</Label>
+                        <RadioGroup
+                            id="theme"
+                            value={theme}
+                            onValueChange={setTheme}
+                            className="flex space-x-4"
+                        >
+                            <div className="flex items-center space-x-2">
+                                <RadioGroupItem value="light" id="light" />
+                                <Label htmlFor="light">Light</Label>
+                            </div>
+                            <div className="flex items-center space-x-2">
+                                <RadioGroupItem value="dark" id="dark" />
+                                <Label htmlFor="dark">Dark</Label>
+                            </div>
+                             <div className="flex items-center space-x-2">
+                                <RadioGroupItem value="system" id="system" />
+                                <Label htmlFor="system">System</Label>
+                            </div>
+                        </RadioGroup>
                     </div>
                 </CardContent>
             </Card>
