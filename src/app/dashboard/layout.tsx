@@ -24,6 +24,7 @@ import {
   SidebarMenuButton,
   SidebarFooter,
   SidebarInset,
+  SidebarMenuBadge,
 } from '@/components/ui/sidebar';
 import { useUser, useAuth } from '@/firebase';
 import { useRouter, usePathname } from 'next/navigation';
@@ -35,6 +36,8 @@ import { Toaster } from '@/components/ui/toaster';
 import { useNotifications } from '@/hooks/use-notifications';
 import { formatDistanceToNow } from 'date-fns';
 import { cn } from '@/lib/utils';
+import { useUserConversation } from '@/hooks/use-user-conversation-data';
+import { useUserTransactions } from '@/hooks/use-user-transactions';
 
 export default function DashboardLayout({
   children,
@@ -46,6 +49,8 @@ export default function DashboardLayout({
   const router = useRouter();
   const pathname = usePathname();
   const { notifications, unreadCount, markAsRead } = useNotifications();
+  const { unreadMessagesCount } = useUserConversation();
+  const { pendingTransactionsCount } = useUserTransactions();
 
   React.useEffect(() => {
     if (!isUserLoading && !user) {
@@ -111,6 +116,7 @@ export default function DashboardLayout({
                 <Link href="/dashboard/transactions">
                   <CreditCard />
                   Transactions
+                  {pendingTransactionsCount > 0 && <SidebarMenuBadge>{pendingTransactionsCount}</SidebarMenuBadge>}
                 </Link>
               </SidebarMenuButton>
             </SidebarMenuItem>
@@ -119,6 +125,7 @@ export default function DashboardLayout({
                 <Link href="/dashboard/messages">
                   <MessageSquare />
                   Messages
+                  {unreadMessagesCount > 0 && <SidebarMenuBadge>{unreadMessagesCount}</SidebarMenuBadge>}
                 </Link>
               </SidebarMenuButton>
             </SidebarMenuItem>

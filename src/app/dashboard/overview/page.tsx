@@ -1,3 +1,4 @@
+
 'use client';
 
 import * as React from 'react';
@@ -143,6 +144,17 @@ function TransactionDialog({ type, onOpenChange, open }: { type: 'deposit' | 'wi
     try {
       const colRef = collection(firestore, 'users', user.uid, 'transactions');
       addDocumentNonBlocking(colRef, transactionData);
+      
+      const notificationColRef = collection(firestore, `users/${user.uid}/notifications`);
+      const notification = {
+        title: "Transaction Submitted",
+        message: `Your ${type} request for ${formatCurrency(values.amount, 'USD')} is pending.`,
+        link: "/dashboard/transactions",
+        isRead: false,
+        createdAt: serverTimestamp(),
+      };
+      addDocumentNonBlocking(notificationColRef, notification);
+
       toast({ title: 'Success!', description: `Your ${type} request has been submitted for approval.` });
       onOpenChange(false);
       form.reset();

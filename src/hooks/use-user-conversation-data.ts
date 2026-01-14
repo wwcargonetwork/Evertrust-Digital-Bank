@@ -21,12 +21,21 @@ export type Conversation = WithId<{
     isReadByAdmin: boolean;
 }>;
 
-export function useUserConversation() {
+interface UseUserConversationResult {
+    conversation: Conversation | null;
+    messages: Message[];
+    isLoading: boolean;
+    sendMessage: (message: Omit<Message, 'id' | 'createdAt'>) => void;
+    unreadMessagesCount: number;
+}
+
+export function useUserConversation(): UseUserConversationResult {
     const firestore = useFirestore();
     const { user } = useUser();
     const [conversation, setConversation] = useState<Conversation | null>(null);
     const [messages, setMessages] = useState<Message[]>([]);
     const [isLoading, setIsLoading] = useState(true);
+    const [unreadMessagesCount, setUnreadMessagesCount] = useState(0);
 
     const conversationQuery = useMemoFirebase(() => {
         if (!firestore || !user) return null;
@@ -44,8 +53,10 @@ export function useUserConversation() {
                 const convoDoc = snapshot.docs[0];
                 const convoData = { ...convoDoc.data(), id: convoDoc.id } as Conversation;
                 setConversation(convoData);
+                setUnreadMessagesCount(convoData.isReadByUser ? 0 : 1); // Simple logic for one conversation
             } else {
                 setConversation(null);
+                setUnreadMessagesCount(0);
             }
             setIsLoading(false);
         });
@@ -68,8 +79,10 @@ export function useUserConversation() {
         });
         
         // Mark as read by user
-        const convoRef = doc(firestore, 'conversations', conversation.id);
-        updateDoc(convoRef, { isReadByUser: true });
+        if (!conversation.isReadByUser) {
+            const convoRef = doc(firestore, 'conversations', conversation.id);
+            updateDoc(convoRef, { isReadByUser: true });
+        }
 
         return () => unsubscribeMessages();
     }, [conversation, firestore]);
@@ -109,5 +122,5 @@ export function useUserConversation() {
 
     }, [firestore, user, conversation]);
 
-    return { conversation, messages, isLoading, sendMessage };
+    return { conversation, messages, isLoading, sendMessage, unreadMessagesCount };
 }
