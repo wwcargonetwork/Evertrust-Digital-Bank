@@ -8,6 +8,10 @@ import { CheckCircle, ArrowRight, Gift, Plane, Star } from "lucide-react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import Image from "next/image";
 import { motion } from "framer-motion";
+import { useUser } from "@/firebase";
+import { useRouter } from "next/navigation";
+import { useToast } from "@/hooks/use-toast";
+import { applyForCard } from "@/app/actions";
 
 const cardsData = [
     {
@@ -79,6 +83,36 @@ const itemVariants = {
 };
 
 export default function CardsPage() {
+  const { user } = useUser();
+  const router = useRouter();
+  const { toast } = useToast();
+
+  const handleApply = async (cardType: string) => {
+    if (!user) {
+      router.push('/signin?redirect=/cards');
+      return;
+    }
+    
+    toast({
+        title: 'Submitting Application...',
+        description: `Please wait while we process your application for the ${cardType}.`,
+    });
+
+    const result = await applyForCard(user.uid, cardType);
+    if (result.success) {
+        toast({
+            title: "Application Submitted!",
+            description: result.message,
+        });
+    } else {
+        toast({
+            title: "Application Failed",
+            description: result.message,
+            variant: "destructive",
+        });
+    }
+  };
+
   return (
     <div className="flex min-h-screen flex-col bg-background">
       <Header />
@@ -144,9 +178,11 @@ export default function CardsPage() {
                                     </li>
                                 ))}
                             </ul>
-                            <Button size="lg" className="mt-8" style={{ backgroundColor: 'hsl(var(--accent))', color: 'hsl(var(--accent-foreground))' }}>
-                                Learn More <ArrowRight className="ml-2 h-5 w-5" />
-                            </Button>
+                            <form action={() => handleApply(card.title)}>
+                                <Button size="lg" className="mt-8" style={{ backgroundColor: 'hsl(var(--accent))', color: 'hsl(var(--accent-foreground))' }}>
+                                    Learn More <ArrowRight className="ml-2 h-5 w-5" />
+                                </Button>
+                            </form>
                         </div>
                     </motion.div>
                 ))}
@@ -196,7 +232,9 @@ export default function CardsPage() {
                             </Table>
                         </CardContent>
                         <CardFooter className="justify-center gap-4 pt-6">
-                            <Button style={{ backgroundColor: 'hsl(var(--accent))', color: 'hsl(var(--accent-foreground))' }}>Apply Now</Button>
+                            <form action={() => handleApply('Preferred Card')}>
+                                <Button style={{ backgroundColor: 'hsl(var(--accent))', color: 'hsl(var(--accent-foreground))' }}>Apply Now</Button>
+                            </form>
                             <Button variant="outline">See Full Details</Button>
                         </CardFooter>
                     </Card>
