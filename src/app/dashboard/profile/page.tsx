@@ -7,7 +7,7 @@ import { User, Mail, Phone, Home, Calendar, Landmark, Globe } from "lucide-react
 import { useUser, useDoc, useMemoFirebase, useFirestore } from '@/firebase';
 import { doc } from 'firebase/firestore';
 import { Skeleton } from '@/components/ui/skeleton';
-import { format } from 'date-fns';
+import { format, isValid } from 'date-fns';
 
 interface UserProfileData {
     firstName: string;
@@ -85,6 +85,9 @@ export default function ProfilePage() {
         )
     }
 
+    const birthDateObj = new Date(userProfile.birthDate);
+    const formattedBirthDate = isValid(birthDateObj) ? format(birthDateObj, 'PPP') : 'Invalid Date';
+
     return (
         <div className="space-y-6">
             <h1 className="text-3xl font-bold mb-6">Your Profile</h1>
@@ -99,7 +102,7 @@ export default function ProfilePage() {
                             <ProfileItem icon={<User className="h-5 w-5" />} label="Full Name" value={userProfile.displayName} />
                             <ProfileItem icon={<Mail className="h-5 w-5" />} label="Email Address" value={userProfile.email} />
                             <ProfileItem icon={<Phone className="h-5 w-5" />} label="Phone Number" value={userProfile.phone} />
-                            <ProfileItem icon={<Calendar className="h-5 w-5" />} label="Date of Birth" value={format(new Date(userProfile.birthDate), 'PPP')} />
+                            <ProfileItem icon={<Calendar className="h-5 w-5" />} label="Date of Birth" value={formattedBirthDate} />
                         </div>
                     </CardContent>
                 </Card>
