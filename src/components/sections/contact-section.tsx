@@ -1,32 +1,12 @@
+
 "use client";
 
-import { useFormState } from "react-dom";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
-import { useEffect } from "react";
-import { useToast } from "@/hooks/use-toast";
-
-import { submitContactForm } from "@/app/actions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Label } from "@/components/ui/label";
 import { Mail, Send } from "lucide-react";
 import { motion } from "framer-motion";
-
-const contactFormSchema = z.object({
-  name: z.string().min(2, { message: "Name must be at least 2 characters." }),
-  email: z.string().email({ message: "Please enter a valid email address." }),
-  message: z.string().min(10, { message: "Message must be at least 10 characters." }),
-});
-
-type ContactFormValues = z.infer<typeof contactFormSchema>;
-
-const initialState = {
-  message: "",
-  errors: undefined,
-};
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -42,34 +22,6 @@ const itemVariants = {
 };
 
 export function ContactSection() {
-  const { toast } = useToast();
-  const [state, formAction] = useFormState(submitContactForm, initialState);
-
-  const form = useForm<ContactFormValues>({
-    resolver: zodResolver(contactFormSchema),
-    defaultValues: {
-      name: "",
-      email: "",
-      message: "",
-    },
-  });
-
-  useEffect(() => {
-    if (state.message && !state.errors) {
-      toast({
-        title: "Success!",
-        description: state.message,
-      });
-      form.reset();
-    } else if (state.message && state.errors) {
-       toast({
-        title: "Error",
-        description: state.message,
-        variant: "destructive",
-      });
-    }
-  }, [state, toast, form]);
-
   return (
     <motion.section 
       id="contact" 
@@ -92,57 +44,30 @@ export function ContactSection() {
           </p>
           <div className="flex items-center space-x-4 text-muted-foreground">
             <Mail className="h-6 w-6 text-primary" />
-            <span>support@evertrust.bank</span>
+            <span>info@evertrustdigitalbank.com</span>
           </div>
         </motion.div>
         
         <motion.div variants={itemVariants}>
-          <Form {...form}>
-            <form action={formAction} className="space-y-6">
-              <FormField
-                control={form.control}
-                name="name"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Full Name</FormLabel>
-                    <FormControl>
-                      <Input placeholder="John Doe" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="email"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Email Address</FormLabel>
-                    <FormControl>
-                      <Input placeholder="john.doe@example.com" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="message"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Your Message</FormLabel>
-                    <FormControl>
-                      <Textarea placeholder="How can we help you today?" className="min-h-[120px]" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <Button type="submit" className="w-full" style={{ backgroundColor: 'hsl(var(--accent))', color: 'hsl(var(--accent-foreground))' }} disabled={form.formState.isSubmitting}>
+            <form action="https://formsubmit.co/info@evertrustdigitalbank.com" method="POST" className="space-y-6">
+              <div className="space-y-2">
+                <Label htmlFor="name">Full Name</Label>
+                <Input id="name" name="name" placeholder="John Doe" required />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="email">Email Address</Label>
+                <Input id="email" name="email" type="email" placeholder="john.doe@example.com" required />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="message">Your Message</Label>
+                <Textarea id="message" name="message" placeholder="How can we help you today?" className="min-h-[120px]" required />
+              </div>
+              <input type="hidden" name="_next" value="/" />
+              <input type="hidden" name="_captcha" value="false" />
+              <Button type="submit" className="w-full" style={{ backgroundColor: 'hsl(var(--accent))', color: 'hsl(var(--accent-foreground))' }}>
                 Send Message <Send className="ml-2 h-4 w-4" />
               </Button>
             </form>
-          </Form>
         </motion.div>
       </div>
     </motion.section>

@@ -126,7 +126,7 @@ export default function PressPage() {
                     </p>
                     <div className="space-y-2">
                         <p className="font-semibold text-primary">Media Contact:</p>
-                        <a href="mailto:press@evertrust.bank" className="text-accent hover:underline">press@evertrust.bank</a>
+                        <a href="mailto:info@evertrustdigitalbank.com" className="text-accent hover:underline">info@evertrustdigitalbank.com</a>
                     </div>
                 </motion.div>
                 

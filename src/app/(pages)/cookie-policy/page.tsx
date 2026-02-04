@@ -59,7 +59,7 @@ export default function CookiePolicyPage() {
             <motion.p variants={itemVariants}>We may update this Cookie Policy from time to time in order to reflect, for example, changes to the cookies we use or for other operational, legal, or regulatory reasons. Please therefore re-visit this Cookie Policy regularly to stay informed about our use of cookies and related technologies.</motion.p>
 
             <motion.h2 variants={itemVariants}>5. Contact Us</motion.h2>
-            <motion.p variants={itemVariants}>If you have any questions about our use of cookies or other technologies, please email us at <a href="mailto:support@evertrust.bank">support@evertrust.bank</a>.</motion.p>
+            <motion.p variants={itemVariants}>If you have any questions about our use of cookies or other technologies, please email us at <a href="mailto:info@evertrustdigitalbank.com">info@evertrustdigitalbank.com</a>.</motion.p>
           </motion.article>
         </div>
       </main>

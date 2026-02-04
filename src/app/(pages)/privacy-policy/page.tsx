@@ -75,7 +75,7 @@ export default function PrivacyPolicyPage() {
             <motion.p variants={itemVariants}>We may update this Privacy Policy from time to time. We will notify you of any changes by posting the new Privacy Policy on this page. You are advised to review this Privacy Policy periodically for any changes.</motion.p>
             
             <motion.h2 variants={itemVariants}>7. Contact Us</motion.h2>
-            <motion.p variants={itemVariants}>If you have any questions about this Privacy Policy, please contact us at <a href="mailto:support@evertrust.bank">support@evertrust.bank</a>.</motion.p>
+            <motion.p variants={itemVariants}>If you have any questions about this Privacy Policy, please contact us at <a href="mailto:info@evertrustdigitalbank.com">info@evertrustdigitalbank.com</a>.</motion.p>
           </motion.article>
         </div>
       </main>

@@ -67,7 +67,7 @@ export default function TermsOfServicePage() {
             <motion.p variants={itemVariants}>These Terms shall be governed and construed in accordance with the laws of the jurisdiction in which our company is established, without regard to its conflict of law provisions.</motion.p>
             
             <motion.h2 variants={itemVariants}>10. Contact Us</motion.h2>
-            <motion.p variants={itemVariants}>If you have any questions about these Terms, please contact us at <a href="mailto:support@evertrust.bank">support@evertrust.bank</a>.</motion.p>
+            <motion.p variants={itemVariants}>If you have any questions about these Terms, please contact us at <a href="mailto:info@evertrustdigitalbank.com">info@evertrustdigitalbank.com</a>.</motion.p>
           </motion.article>
         </div>
       </main>
