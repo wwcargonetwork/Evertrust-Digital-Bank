@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { PlaceHolderImages } from "@/lib/placeholder-images";
 import { ArrowRight } from "lucide-react";
 import { motion } from "framer-motion";
+import Link from "next/link";
 
 const itemVariants = {
   hidden: { y: 20, opacity: 0 },
@@ -60,12 +61,16 @@ export function HeroSection() {
           animate="visible"
           transition={{ delay: 0.9, duration: 0.8 }}
         >
-          <Button size="lg" style={{ backgroundColor: 'hsl(var(--accent))', color: 'hsl(var(--accent-foreground))' }}>
-            Open an Account
-            <ArrowRight className="ml-2 h-5 w-5" />
+          <Button asChild size="lg" style={{ backgroundColor: 'hsl(var(--accent))', color: 'hsl(var(--accent-foreground))' }}>
+            <Link href="/signup">
+              Open an Account
+              <ArrowRight className="ml-2 h-5 w-5" />
+            </Link>
           </Button>
-          <Button size="lg" variant="outline" className="bg-transparent text-white border-white hover:bg-white hover:text-primary">
-            Learn More
+          <Button asChild size="lg" variant="outline" className="bg-transparent text-white border-white hover:bg-white hover:text-primary">
+            <Link href="/#features">
+              Learn More
+            </Link>
           </Button>
         </motion.div>
       </div>
