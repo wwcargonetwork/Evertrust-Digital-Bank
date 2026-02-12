@@ -95,7 +95,7 @@ export function Header() {
           <Link href="/" className="mr-6 flex items-center space-x-2">
             <Landmark className="h-6 w-6 text-primary" />
             <span className="font-bold font-headline sm:inline-block">
-              Evertrust
+              Global Trusera
             </span>
           </Link>
           <NavigationMenu className="hidden md:flex">
@@ -167,7 +167,7 @@ export function Header() {
               <Link href="/" className="mr-6 flex items-center space-x-2 mb-6">
                 <Landmark className="h-6 w-6 text-primary" />
                 <span className="font-bold font-headline sm:inline-block">
-                  Evertrust
+                  Global Trusera
                 </span>
               </Link>
               <div className="flex flex-col space-y-3">

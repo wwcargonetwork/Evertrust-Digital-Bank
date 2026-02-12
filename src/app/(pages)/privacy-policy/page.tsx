@@ -37,7 +37,7 @@ export default function PrivacyPolicyPage() {
             <motion.h1 variants={itemVariants}>Privacy Policy</motion.h1>
             <motion.p variants={itemVariants} className="lead !text-muted-foreground">Last updated: {new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</motion.p>
             
-            <motion.p variants={itemVariants}>Evertrust Digital Bank ("we," "our," or "us") is committed to protecting your privacy. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you use our services. Please read this policy carefully. If you do not agree with the terms of this privacy policy, please do not access our services.</motion.p>
+            <motion.p variants={itemVariants}>Global Trusera Holdings ("we," "our," or "us") is committed to protecting your privacy. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you use our services. Please read this policy carefully. If you do not agree with the terms of this privacy policy, please do not access our services.</motion.p>
 
             <motion.h2 variants={itemVariants}>1. Information We Collect</motion.h2>
             <motion.p variants={itemVariants}>We may collect personal information from you in a variety of ways, including, but not limited to, when you open an account, apply for a loan, make transactions, or use our website and mobile app. The types of personal information we may collect include:</motion.p>
@@ -75,7 +75,7 @@ export default function PrivacyPolicyPage() {
             <motion.p variants={itemVariants}>We may update this Privacy Policy from time to time. We will notify you of any changes by posting the new Privacy Policy on this page. You are advised to review this Privacy Policy periodically for any changes.</motion.p>
             
             <motion.h2 variants={itemVariants}>7. Contact Us</motion.h2>
-            <motion.p variants={itemVariants}>If you have any questions about this Privacy Policy, please contact us at <a href="mailto:info@evertrustdigitalbank.com">info@evertrustdigitalbank.com</a>.</motion.p>
+            <motion.p variants={itemVariants}>If you have any questions about this Privacy Policy, please contact us at <a href="mailto:info@globaltruseraholdings.com">info@globaltruseraholdings.com</a>.</motion.p>
           </motion.article>
         </div>
       </main>

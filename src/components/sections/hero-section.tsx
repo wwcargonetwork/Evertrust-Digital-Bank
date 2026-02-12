@@ -52,7 +52,7 @@ export function HeroSection() {
           animate="visible"
           transition={{ delay: 0.7, duration: 0.8 }}
         >
-          Experience the future of finance with Evertrust. Secure, seamless, and designed for your life.
+          Experience the future of finance with Global Trusera. Secure, seamless, and designed for your life.
         </motion.p>
         <motion.div 
           className="mt-10 flex items-center gap-x-6"

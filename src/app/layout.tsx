@@ -5,7 +5,7 @@ import { ThemeProvider } from '@/components/theme-provider';
 import './globals.css';
 
 export const metadata: Metadata = {
-  title: 'Evertrust Digital Bank',
+  title: 'Global Trusera Holdings',
   description: 'Your trusted partner in digital banking. Secure, innovative, and customer-focused.',
   icons: {
     icon: '/favicon.ico',

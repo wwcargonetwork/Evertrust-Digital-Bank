@@ -93,7 +93,7 @@ export default function LoansPage() {
                     Financing Your Dreams
                 </motion.h1>
                 <motion.p variants={itemVariants} className="mt-6 max-w-3xl mx-auto text-lg text-muted-foreground md:text-xl">
-                    From personal goals to major life purchases, Evertrust offers a variety of loan options with competitive rates and flexible terms to help you achieve what's next.
+                    From personal goals to major life purchases, Global Trusera offers a variety of loan options with competitive rates and flexible terms to help you achieve what's next.
                 </motion.p>
                  <motion.div variants={itemVariants} className="mt-10 flex items-center justify-center gap-x-6">
                     <Button size="lg" style={{ backgroundColor: 'hsl(var(--accent))', color: 'hsl(var(--accent-foreground))' }}>

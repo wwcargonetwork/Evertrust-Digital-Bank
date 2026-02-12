@@ -95,8 +95,8 @@ export default function DepositsPage() {
                                 <TableHeader>
                                     <TableRow>
                                     <TableHead>Feature</TableHead>
-                                    <TableHead>Evertrust Basic Checking</TableHead>
-                                    <TableHead>Evertrust Premium Checking</TableHead>
+                                    <TableHead>Global Trusera Basic Checking</TableHead>
+                                    <TableHead>Global Trusera Premium Checking</TableHead>
                                     </TableRow>
                                 </TableHeader>
                                 <TableBody>

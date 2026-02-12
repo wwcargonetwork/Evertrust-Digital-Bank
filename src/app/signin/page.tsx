@@ -82,7 +82,7 @@ export default function SigninPage() {
               <CardHeader>
                 <Link href="/" className="flex items-center justify-center space-x-2 mb-4">
                     <Landmark className="h-8 w-8 text-primary" />
-                    <span className="text-2xl font-bold font-headline text-primary">Evertrust</span>
+                    <span className="text-2xl font-bold font-headline text-primary">Global Trusera</span>
                 </Link>
                 <CardTitle className="text-center font-headline text-3xl">Welcome Back</CardTitle>
                 <CardDescription className="text-center">

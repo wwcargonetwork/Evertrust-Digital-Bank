@@ -4,7 +4,7 @@
       "$schema": "http://json-schema.org/draft-07/schema#",
       "title": "Admin",
       "type": "object",
-      "description": "Represents an administrator user for managing the Evertrust Digital Bank website.",
+      "description": "Represents an administrator user for managing the Global Trusera Holdings website.",
       "properties": {
         "id": {
           "type": "string",
@@ -30,7 +30,7 @@
       "$schema": "http://json-schema.org/draft-07/schema#",
       "title": "Testimonial",
       "type": "object",
-      "description": "Represents a customer testimonial displayed on the Evertrust Digital Bank website.",
+      "description": "Represents a customer testimonial displayed on the Global Trusera Holdings website.",
       "properties": {
         "id": {
           "type": "string",
@@ -98,7 +98,7 @@
       "$schema": "http://json-schema.org/draft-07/schema#",
       "title": "Banner",
       "type": "object",
-      "description": "Represents a dynamic banner displayed on the Evertrust Digital Bank website.",
+      "description": "Represents a dynamic banner displayed on the Global Trusera Holdings website.",
       "properties": {
         "id": {
           "type": "string",
@@ -242,7 +242,7 @@
           "schema": {
             "$ref": "#/backend/entities/Testimonial"
           },
-          "description": "Stores customer testimonials for display on the Evertrust Digital Bank website."
+          "description": "Stores customer testimonials for display on the Global Trusera Holdings website."
         }
       },
       {
@@ -262,7 +262,7 @@
           "schema": {
             "$ref": "#/backend/entities/Banner"
           },
-          "description": "Stores dynamic banner information for display on the Evertrust Digital Bank website."
+          "description": "Stores dynamic banner information for display on the Global Trusera Holdings website."
         }
       },
       {

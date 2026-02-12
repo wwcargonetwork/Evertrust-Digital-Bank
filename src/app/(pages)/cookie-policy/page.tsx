@@ -37,7 +37,7 @@ export default function CookiePolicyPage() {
             <motion.h1 variants={itemVariants}>Cookie Policy</motion.h1>
             <motion.p variants={itemVariants} className="lead !text-muted-foreground">Last updated: {new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</motion.p>
 
-            <motion.p variants={itemVariants}>This Cookie Policy explains what cookies are and how Evertrust Digital Bank ("we," "our," or "us") uses them on our website and mobile application. We encourage you to read this policy in full so that you can understand what information we collect using cookies and how that information is used.</motion.p>
+            <motion.p variants={itemVariants}>This Cookie Policy explains what cookies are and how Global Trusera Holdings ("we," "our," or "us") uses them on our website and mobile application. We encourage you to read this policy in full so that you can understand what information we collect using cookies and how that information is used.</motion.p>
 
             <motion.h2 variants={itemVariants}>1. What Are Cookies?</motion.h2>
             <motion.p variants={itemVariants}>Cookies are small text files that are placed on your computer or mobile device when you visit a website. They are widely used to make websites work, or work more efficiently, as well as to provide information to the owners of the site.</motion.p>
@@ -59,7 +59,7 @@ export default function CookiePolicyPage() {
             <motion.p variants={itemVariants}>We may update this Cookie Policy from time to time in order to reflect, for example, changes to the cookies we use or for other operational, legal, or regulatory reasons. Please therefore re-visit this Cookie Policy regularly to stay informed about our use of cookies and related technologies.</motion.p>
 
             <motion.h2 variants={itemVariants}>5. Contact Us</motion.h2>
-            <motion.p variants={itemVariants}>If you have any questions about our use of cookies or other technologies, please email us at <a href="mailto:info@evertrustdigitalbank.com">info@evertrustdigitalbank.com</a>.</motion.p>
+            <motion.p variants={itemVariants}>If you have any questions about our use of cookies or other technologies, please email us at <a href="mailto:info@globaltruseraholdings.com">info@globaltruseraholdings.com</a>.</motion.p>
           </motion.article>
         </div>
       </main>

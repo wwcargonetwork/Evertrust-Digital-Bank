@@ -112,7 +112,7 @@ export default function AdminLayout({
         <SidebarHeader>
           <Link href="/admin" className="flex items-center gap-2 font-semibold">
             <Package2 className="h-6 w-6 text-primary" />
-            <span className="">Evertrust Admin</span>
+            <span className="">Global Trusera Admin</span>
           </Link>
         </SidebarHeader>
         <SidebarContent>

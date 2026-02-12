@@ -11,7 +11,7 @@ import Link from "next/link";
 
 const timelineEvents = [
     { year: "2021", title: "The Idea", description: "A small team of finance and tech experts envisioned a digital-first bank built on transparency and innovation." },
-    { year: "2022", title: "Foundation & Funding", description: "Evertrust Digital Bank was officially founded, securing initial seed funding to build our core platform." },
+    { year: "2022", title: "Foundation & Funding", description: "Global Trusera Holdings was officially founded, securing initial seed funding to build our core platform." },
     { year: "2023", title: "Platform Launch", description: "We launched our secure banking platform to the public, offering a new way for people to manage their finances." },
     { year: "2024", title: "Expansion", description: "Expanded our services to include investments and corporate banking, serving a wider range of customers." }
 ];
@@ -83,7 +83,7 @@ export default function AboutUsPage() {
                     animate="visible"
                     transition={{ delay: 0.7 }}
                 >
-                    Evertrust is more than a bank. We are a team of visionaries, innovators, and customer advocates committed to building a transparent and accessible financial future for everyone.
+                    Global Trusera is more than a bank. We are a team of visionaries, innovators, and customer advocates committed to building a transparent and accessible financial future for everyone.
                 </motion.p>
             </div>
         </motion.section>
@@ -162,7 +162,7 @@ export default function AboutUsPage() {
                 <div className="mx-auto max-w-2xl text-center">
                     <motion.h2 variants={itemVariants} className="font-headline text-3xl font-bold tracking-tight text-primary sm:text-4xl">Meet Our Leaders</motion.h2>
                     <motion.p variants={itemVariants} className="mt-6 text-lg leading-8 text-muted-foreground">
-                        The visionary minds steering Evertrust toward a brighter financial future.
+                        The visionary minds steering Global Trusera toward a brighter financial future.
                     </motion.p>
                 </div>
                 <div className="mt-16 grid grid-cols-1 gap-x-8 gap-y-16 text-center sm:grid-cols-2 lg:grid-cols-4">

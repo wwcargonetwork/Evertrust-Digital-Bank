@@ -50,7 +50,7 @@ const allocationConfig = {
 const investmentProducts = [
   {
     icon: <Bot className="h-10 w-10 text-primary" />,
-    title: "Evertrust Robo-Advisor",
+    title: "Global Trusera Robo-Advisor",
     description: "Our intelligent automated investing platform builds and manages a diversified portfolio for you. Just set your risk level, and we'll handle the rest. Perfect for hands-off investors.",
     features: ["Automated rebalancing", "Tax-loss harvesting", "Low advisory fees", "Personalized portfolios"],
     cta: "Get Started with Robo-Advisor"

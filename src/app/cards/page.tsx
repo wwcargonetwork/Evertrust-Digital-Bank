@@ -15,7 +15,7 @@ import { applyForCard } from "@/app/actions";
 
 const cardsData = [
     {
-        title: "Evertrust Cashback Plus",
+        title: "Global Trusera Cashback Plus",
         description: "Maximize your everyday spending with industry-leading cashback on groceries, gas, and dining. Simple, rewarding, and no annual fee.",
         icon: <Gift className="h-8 w-8 text-primary" />,
         image: {
@@ -31,7 +31,7 @@ const cardsData = [
         ]
     },
     {
-        title: "Evertrust Traveler Elite",
+        title: "Global Trusera Traveler Elite",
         description: "Explore the world with points on every purchase. Enjoy premium travel perks like lounge access and travel credits.",
         icon: <Plane className="h-8 w-8 text-primary" />,
         image: {
@@ -47,7 +47,7 @@ const cardsData = [
         ]
     },
     {
-        title: "Evertrust Premium Access",
+        title: "Global Trusera Premium Access",
         description: "Unlock a world of luxury. This card offers exclusive access, concierge services, and top-tier rewards for our most discerning clients.",
         icon: <Star className="h-8 w-8 text-primary" />,
         image: {

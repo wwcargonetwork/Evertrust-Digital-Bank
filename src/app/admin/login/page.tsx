@@ -73,7 +73,7 @@ export default function AdminLoginPage() {
           <CardHeader>
             <Link href="/" className="flex items-center justify-center space-x-2 mb-4">
               <Landmark className="h-8 w-8 text-primary" />
-              <span className="text-2xl font-bold font-headline text-primary">Evertrust Admin</span>
+              <span className="text-2xl font-bold font-headline text-primary">Global Trusera Admin</span>
             </Link>
             <CardTitle className="text-center font-headline text-3xl">Admin Access</CardTitle>
             <CardDescription className="text-center">
@@ -90,7 +90,7 @@ export default function AdminLoginPage() {
                     <FormItem>
                       <FormLabel>Email</FormLabel>
                       <FormControl>
-                        <Input type="email" placeholder="admin@evertrust.bank" {...field} />
+                        <Input type="email" placeholder="admin@globaltrusera.com" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>

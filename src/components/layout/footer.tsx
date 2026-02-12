@@ -24,7 +24,7 @@ export function Footer() {
              <Link href="/" className="flex items-center space-x-2 mb-4">
                 <Landmark className="h-8 w-8 text-primary" />
                 <span className="text-xl font-bold font-headline text-primary">
-                Evertrust
+                Global Trusera
                 </span>
             </Link>
             <p className="max-w-xs text-muted-foreground">Your trusted partner in digital banking. Secure, innovative, and customer-focused.</p>
@@ -53,7 +53,7 @@ export function Footer() {
           ))}
         </div>
         <div className="mt-12 border-t border-border pt-8 text-center text-sm text-muted-foreground">
-          <p>&copy; {new Date().getFullYear()} Evertrust Digital Bank. All rights reserved.</p>
+          <p>&copy; {new Date().getFullYear()} Global Trusera Holdings. All rights reserved.</p>
         </div>
       </div>
     </footer>

@@ -90,7 +90,7 @@ export default function DashboardLayout({
         <SidebarHeader>
           <Link href="/" className="flex items-center gap-2 font-semibold">
             <Landmark className="h-6 w-6 text-primary" />
-            <span className="">Evertrust</span>
+            <span className="">Global Trusera</span>
           </Link>
         </SidebarHeader>
         <SidebarContent>

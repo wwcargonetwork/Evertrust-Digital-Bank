@@ -75,7 +75,7 @@ export default function CorporateBankingPage() {
                     Powerful Solutions for Your Business
                 </motion.h1>
                 <motion.p variants={itemVariants} className="mt-6 max-w-3xl mx-auto text-lg text-muted-foreground md:text-xl">
-                    Evertrust provides sophisticated financial tools and expert guidance to help your business thrive in a competitive landscape.
+                    Global Trusera provides sophisticated financial tools and expert guidance to help your business thrive in a competitive landscape.
                 </motion.p>
             </div>
         </motion.section>

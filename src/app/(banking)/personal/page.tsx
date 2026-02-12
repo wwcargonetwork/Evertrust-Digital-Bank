@@ -75,7 +75,7 @@ export default function PersonalBankingPage() {
                     Banking Designed for You
                 </motion.h1>
                 <motion.p variants={itemVariants} className="mt-6 max-w-3xl mx-auto text-lg text-muted-foreground md:text-xl">
-                    Your financial life, simplified. Evertrust offers the personal banking tools and support you need to manage your money and achieve your goals.
+                    Your financial life, simplified. Global Trusera offers the personal banking tools and support you need to manage your money and achieve your goals.
                 </motion.p>
                  <motion.div variants={itemVariants} className="mt-10 flex items-center justify-center gap-x-6">
                     <Button size="lg" style={{ backgroundColor: 'hsl(var(--accent))', color: 'hsl(var(--accent-foreground))' }}>

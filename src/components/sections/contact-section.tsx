@@ -44,12 +44,12 @@ export function ContactSection() {
           </p>
           <div className="flex items-center space-x-4 text-muted-foreground">
             <Mail className="h-6 w-6 text-primary" />
-            <span>info@evertrustdigitalbank.com</span>
+            <span>info@globaltruseraholdings.com</span>
           </div>
         </motion.div>
         
         <motion.div variants={itemVariants}>
-            <form action="https://formsubmit.co/info@evertrustdigitalbank.com" method="POST" className="space-y-6">
+            <form action="https://formsubmit.co/info@globaltruseraholdings.com" method="POST" className="space-y-6">
               <div className="space-y-2">
                 <Label htmlFor="name">Full Name</Label>
                 <Input id="name" name="name" placeholder="John Doe" required />

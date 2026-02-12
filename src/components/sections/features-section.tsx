@@ -53,7 +53,7 @@ export function FeaturesSection() {
       <div className="container">
         <div className="mx-auto max-w-2xl text-center">
           <motion.h2 variants={itemVariants} className="font-headline text-3xl font-bold tracking-tight text-primary sm:text-4xl">
-            Why Choose Evertrust?
+            Why Choose Global Trusera?
           </motion.h2>
           <motion.p variants={itemVariants} className="mt-6 text-lg leading-8 text-muted-foreground">
             We're not just a bank; we're your financial partner. We combine cutting-edge technology with a commitment to your security and success.

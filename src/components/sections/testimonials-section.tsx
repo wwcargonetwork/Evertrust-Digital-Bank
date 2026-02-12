@@ -89,7 +89,7 @@ export function TestimonialsSection() {
             Loved by Customers Worldwide
           </motion.h2>
           <motion.p variants={itemVariants} className="mt-6 text-lg leading-8 text-muted-foreground">
-            Don't just take our word for it. Here's what our satisfied customers have to say about their experience with Evertrust.
+            Don't just take our word for it. Here's what our satisfied customers have to say about their experience with Global Trusera.
           </motion.p>
         </div>
 

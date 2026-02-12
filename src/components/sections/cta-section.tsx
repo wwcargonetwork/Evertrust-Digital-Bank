@@ -24,7 +24,7 @@ export function CtaSection() {
               of your finances?
             </h2>
             <p className="mt-6 text-lg leading-8 text-primary-foreground/80">
-              Join thousands of satisfied customers and start your journey with Evertrust today. It only takes a few minutes.
+              Join thousands of satisfied customers and start your journey with Global Trusera today. It only takes a few minutes.
             </p>
             <div className="mt-10 flex items-center justify-center gap-x-6 lg:justify-start">
               <Button asChild size="lg" style={{ backgroundColor: 'hsl(var(--accent))', color: 'hsl(var(--accent-foreground))' }}>
