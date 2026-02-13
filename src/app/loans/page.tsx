@@ -14,7 +14,7 @@ const loanProducts = [
         description: "Flexible financing for life's big moments. Consolidate debt, fund a home improvement project, or cover unexpected expenses with a predictable fixed-rate loan.",
         icon: <User className="h-8 w-8 text-primary" />,
         image: {
-            src: "https://picsum.photos/seed/loan1/600/400",
+            src: "https://www.kreditbee.in/blog/content/images/2023/06/shutterstock_1770758960.jpg",
             alt: "A person happily reviewing their personal loan documents.",
             hint: "personal finance planning"
         },
@@ -31,7 +31,7 @@ const loanProducts = [
         description: "Get behind the wheel of your new or used car with our competitive auto financing. Enjoy a simple application process and quick decisions.",
         icon: <Car className="h-8 w-8 text-primary" />,
         image: {
-            src: "https://picsum.photos/seed/loan2/600/400",
+            src: "https://defisolutions.com/wp-content/uploads/vehicle-lending-1.png",
             alt: "A new car with a bow on it, representing a recent purchase.",
             hint: "new car purchase"
         },
@@ -48,7 +48,7 @@ const loanProducts = [
         description: "Whether you're buying your first home, refinancing, or tapping into your home's equity, our mortgage specialists are here to guide you.",
         icon: <Home className="h-8 w-8 text-primary" />,
         image: {
-            src: "https://picsum.photos/seed/loan3/600/400",
+            src: "https://img-2.outlookindia.com/outlook/outlook-money/story/047fccd24be40ddb66759d2a6ebd46b3.jpg?w=640",
             alt: "A beautiful modern house, representing a home loan.",
             hint: "modern house exterior"
         },
