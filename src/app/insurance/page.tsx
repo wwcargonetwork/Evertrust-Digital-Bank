@@ -14,7 +14,7 @@ const insuranceProducts = [
         description: "Protect your loved ones' financial future. Our life insurance policies provide peace of mind, ensuring your family is supported no matter what tomorrow holds.",
         icon: <HeartHandshake className="h-8 w-8 text-primary" />,
         image: {
-            src: "https://picsum.photos/seed/insurance1/600/400",
+            src: "https://blog.bankerslife.com/wp-content/uploads/2024/09/GettyImages-1072120272-843x465.jpg",
             alt: "A happy family, representing the peace of mind from life insurance.",
             hint: "happy family portrait"
         },
@@ -31,7 +31,7 @@ const insuranceProducts = [
         description: "Your home is your biggest asset. Safeguard it from unexpected events like fire, theft, and natural disasters with our comprehensive home insurance.",
         icon: <Home className="h-8 w-8 text-primary" />,
         image: {
-            src: "https://picsum.photos/seed/insurance2/600/400",
+            src: "https://crestmontrealty.com/wp-content/uploads/2024/07/Home-Insurance-Post-Preview.png",
             alt: "A beautiful and secure home, protected by insurance.",
             hint: "suburban family house"
         },
@@ -48,7 +48,7 @@ const insuranceProducts = [
         description: "Stay protected on the road. Our auto insurance offers reliable coverage for you, your vehicle, and others, with great rates and excellent customer service.",
         icon: <Car className="h-8 w-8 text-primary" />,
         image: {
-            src: "https://picsum.photos/seed/insurance3/600/400",
+            src: "https://doi.sc.gov/ImageRepository/Document?documentId=13237",
             alt: "A modern car driving on a scenic road, covered by auto insurance.",
             hint: "car scenic road"
         },
@@ -93,7 +93,7 @@ export default function InsurancePage() {
                     Protect What Matters Most
                 </motion.h1>
                 <motion.p variants={itemVariants} className="mt-6 max-w-3xl mx-auto text-lg text-muted-foreground md:text-xl">
-                    From your family's future to your most valuable assets, Evertrust offers a range of insurance solutions to give you peace of mind and comprehensive protection.
+                    From your family's future to your most valuable assets, Global Trusera offers a range of insurance solutions to give you peace of mind and comprehensive protection.
                 </motion.p>
                  <motion.div variants={itemVariants} className="mt-10 flex items-center justify-center gap-x-6">
                     <Button size="lg" style={{ backgroundColor: 'hsl(var(--accent))', color: 'hsl(var(--accent-foreground))' }}>
