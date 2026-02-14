@@ -41,6 +41,7 @@ export default function SigninPage() {
   });
 
   async function onSubmit(values: FormValues) {
+    if (!auth) return;
     try {
       await signInWithEmailAndPassword(auth, values.email, values.password);
       router.push('/dashboard'); // Redirect to dashboard on successful login
@@ -55,6 +56,7 @@ export default function SigninPage() {
   }
 
   async function handleGoogleSignIn() {
+    if (!auth) return;
     const provider = new GoogleAuthProvider();
     try {
       await signInWithPopup(auth, provider);

@@ -7,7 +7,7 @@ import { useForm, type UseFormReturn } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { motion, AnimatePresence } from 'framer-motion';
-import { createUserWithEmailAndPassword } from 'firebase/auth';
+import { createUserWithEmailAndPassword, GoogleAuthProvider, getAdditionalUserInfo, signInWithPopup } from 'firebase/auth';
 import { doc, serverTimestamp } from 'firebase/firestore';
 
 import { Button } from '@/components/ui/button';
@@ -115,6 +115,7 @@ export default function SignupPage() {
   });
 
   async function processForm(values: FormValues) {
+    if (!auth || !firestore) return;
     try {
         const userCredential = await createUserWithEmailAndPassword(auth, values.email, values.password);
         const user = userCredential.user;
@@ -150,6 +151,63 @@ export default function SignupPage() {
         });
     }
   }
+
+  async function handleGoogleSignUp() {
+    if (!auth || !firestore) return;
+    const provider = new GoogleAuthProvider();
+    try {
+      const result = await signInWithPopup(auth, provider);
+      const additionalUserInfo = getAdditionalUserInfo(result);
+      const user = result.user;
+
+      if (additionalUserInfo?.isNewUser) {
+        const userDocRef = doc(firestore, 'users', user.uid);
+        const [firstName, ...lastName] = user.displayName?.split(' ') || ['', ''];
+        
+        const userProfile = {
+            email: user.email,
+            firstName: firstName || '',
+            lastName: lastName.join(' ') || '',
+            displayName: user.displayName || '',
+            phone: '',
+            birthDate: '',
+            gender: '',
+            religion: '',
+            homeAddress: '',
+            state: '',
+            city: '',
+            country: '',
+            zipcode: '',
+            kinFirstName: '',
+            kinLastName: '',
+            kinRelationship: '',
+            kinAddress: '',
+            preferredCurrency: 'usd',
+            accountType: 'savings',
+            createdAt: serverTimestamp(),
+            status: 'active',
+            accountBalance: 0,
+        };
+
+        setDocumentNonBlocking(userDocRef, userProfile, { merge: true });
+
+        toast({
+            title: 'Account Created!',
+            description: 'Welcome! Please take a moment to review your profile details.',
+        });
+        router.push('/dashboard/profile');
+      } else {
+        router.push('/dashboard');
+      }
+    } catch (error: any) {
+      console.error('Google Sign Up Error:', error);
+      toast({
+        variant: 'destructive',
+        title: 'Google Sign Up Failed',
+        description: error.message || 'An unexpected error occurred.',
+      });
+    }
+}
 
   type FieldName = keyof FormValues;
 
@@ -226,6 +284,18 @@ export default function SignupPage() {
                 </div>
               </form>
             </Form>
+             <div className="relative my-6">
+                <div className="absolute inset-0 flex items-center">
+                    <span className="w-full border-t" />
+                </div>
+                <div className="relative flex justify-center text-xs uppercase">
+                    <span className="bg-background px-2 text-muted-foreground">Or sign up with</span>
+                </div>
+            </div>
+            <Button variant="outline" className="w-full" onClick={handleGoogleSignUp}>
+                <svg className="mr-2 h-4 w-4" aria-hidden="true" focusable="false" data-prefix="fab" data-icon="google" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 488 512"><path fill="currentColor" d="M488 261.8C488 403.3 381.5 512 244 512 111.8 512 0 400.2 0 264.8S111.8 17.6 244 17.6c70.3 0 129.8 27.8 174.4 72.4l-64 64c-21-20.5-49.8-39.7-110.4-39.7-93.5 0-169.5 76.8-169.5 171.4 0 94.7 76 171.4 169.5 171.4 106.8 0 146-77.2 149.8-118.4H244V261.8h244z"></path></svg>
+                Sign up with Google
+            </Button>
              <p className="mt-6 text-center text-sm text-muted-foreground">
                 Already have an account?{' '}
                 <Link href="/signin" className="font-semibold text-accent hover:underline">
