@@ -1,4 +1,3 @@
-
 'use client';
 
 import * as React from 'react';
@@ -12,6 +11,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { ArrowRight, User, Shield, Bell, Landmark, DollarSign, ArrowUp, ArrowDown, PlusCircle, MinusCircle } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useUserTransactions, type UserTransaction } from '@/hooks/use-user-transactions';
+import { useUserConversation } from '@/hooks/use-user-conversation-data';
 import { format } from 'date-fns';
 import {
   Dialog,
@@ -116,6 +116,8 @@ function TransactionDialog({ type, onOpenChange, open }: { type: 'deposit' | 'wi
   const { toast } = useToast();
   const firestore = useFirestore();
   const { user } = useUser();
+  const router = useRouter();
+  const { sendMessage } = useUserConversation();
   
   const form = useForm<TransactionFormValues>({
     resolver: zodResolver(transactionSchema),
@@ -132,34 +134,54 @@ function TransactionDialog({ type, onOpenChange, open }: { type: 'deposit' | 'wi
       return;
     }
 
-    const transactionData = {
-      amount: values.amount,
-      description: values.description,
-      type,
-      status: 'pending',
-      createdAt: serverTimestamp(),
-      ...(type === 'withdrawal' && { recipient: values.recipient }),
-    };
+    if (type === 'deposit') {
+        const depositMessage = `Hello, I would like to make a deposit of ${formatCurrency(values.amount, 'USD')}.`;
+        
+        await sendMessage({
+            text: depositMessage,
+            senderId: user.uid,
+            senderType: 'user'
+        });
 
-    try {
-      const colRef = collection(firestore, 'users', user.uid, 'transactions');
-      addDocumentNonBlocking(colRef, transactionData);
-      
-      const notificationColRef = collection(firestore, `users/${user.uid}/notifications`);
-      const notification = {
-        title: "Transaction Submitted",
-        message: `Your ${type} request for ${formatCurrency(values.amount, 'USD')} is pending.`,
-        link: "/dashboard/transactions",
-        isRead: false,
-        createdAt: serverTimestamp(),
-      };
-      addDocumentNonBlocking(notificationColRef, notification);
+        toast({
+            title: 'Action Required',
+            description: 'Deposits are processed manually. Please follow up with the admin in the messages tab to complete your deposit.',
+            duration: 9000,
+        });
 
-      toast({ title: 'Success!', description: `Your ${type} request has been submitted for approval.` });
-      onOpenChange(false);
-      form.reset();
-    } catch (error: any) {
-      toast({ variant: 'destructive', title: 'Error', description: error.message });
+        onOpenChange(false);
+        form.reset();
+        router.push('/dashboard/messages');
+    } else { // Withdrawal
+        const transactionData = {
+          amount: values.amount,
+          description: values.description,
+          type,
+          status: 'pending',
+          createdAt: serverTimestamp(),
+          ...(type === 'withdrawal' && { recipient: values.recipient }),
+        };
+
+        try {
+          const colRef = collection(firestore, 'users', user.uid, 'transactions');
+          addDocumentNonBlocking(colRef, transactionData);
+          
+          const notificationColRef = collection(firestore, `users/${user.uid}/notifications`);
+          const notification = {
+            title: "Transaction Submitted",
+            message: `Your ${type} request for ${formatCurrency(values.amount, 'USD')} is pending.`,
+            link: "/dashboard/transactions",
+            isRead: false,
+            createdAt: serverTimestamp(),
+          };
+          addDocumentNonBlocking(notificationColRef, notification);
+
+          toast({ title: 'Success!', description: `Your ${type} request has been submitted for approval.` });
+          onOpenChange(false);
+          form.reset();
+        } catch (error: any) {
+          toast({ variant: 'destructive', title: 'Error', description: error.message });
+        }
     }
   };
   
@@ -169,7 +191,9 @@ function TransactionDialog({ type, onOpenChange, open }: { type: 'deposit' | 'wi
         <DialogHeader>
           <DialogTitle className="capitalize">{type} Funds</DialogTitle>
           <DialogDescription>
-            Enter the details for your {type} request. It will be sent to an admin for approval.
+            {type === 'deposit'
+              ? 'Deposits are processed manually. Enter the amount you wish to deposit, and a message will be sent to an admin to arrange the transfer.'
+              : 'Enter the details for your withdrawal request. It will be sent to an admin for approval.'}
           </DialogDescription>
         </DialogHeader>
         <Form {...form}>
