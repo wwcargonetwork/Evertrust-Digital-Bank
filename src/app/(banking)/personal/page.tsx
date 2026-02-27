@@ -113,6 +113,7 @@ export default function PersonalBankingPage() {
                                     fill
                                     className="rounded-xl object-cover shadow-lg"
                                     data-ai-hint={feature.image.hint}
+                                    priority={index === 0}
                                 />
                             </div>
                         </div>

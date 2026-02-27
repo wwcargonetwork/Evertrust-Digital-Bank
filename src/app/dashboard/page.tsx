@@ -1,15 +1,9 @@
-'use client';
+import { redirect } from 'next/navigation';
 
-import { useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-
-// This page just redirects to the overview page.
+/**
+ * Server Component that handles the root dashboard route by redirecting
+ * to the overview sub-page. This is faster than a client-side useEffect redirect.
+ */
 export default function DashboardPage() {
-    const router = useRouter();
-
-    useEffect(() => {
-        router.replace('/dashboard/overview');
-    }, [router]);
-
-    return null;
+    redirect('/dashboard/overview');
 }

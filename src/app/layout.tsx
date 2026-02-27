@@ -4,6 +4,20 @@ import { FirebaseClientProvider } from '@/firebase/client-provider';
 import { ThemeProvider } from '@/components/theme-provider';
 import './globals.css';
 import Script from 'next/script';
+import { Playfair_Display, PT_Sans } from 'next/font/google';
+
+const playfair = Playfair_Display({
+  subsets: ['latin'],
+  display: 'swap',
+  variable: '--font-playfair',
+});
+
+const ptSans = PT_Sans({
+  subsets: ['latin'],
+  weight: ['400', '700'],
+  display: 'swap',
+  variable: '--font-pt-sans',
+});
 
 export const metadata: Metadata = {
   title: 'Global Trusera Holdings',
@@ -19,12 +33,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="scroll-smooth" suppressHydrationWarning>
-      <head>
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400..900&family=PT+Sans:wght@400;700&display=swap" rel="stylesheet" />
-      </head>
+    <html lang="en" className={`${ptSans.variable} ${playfair.variable} scroll-smooth`} suppressHydrationWarning>
       <body className="font-body antialiased">
         <ThemeProvider
           attribute="class"
