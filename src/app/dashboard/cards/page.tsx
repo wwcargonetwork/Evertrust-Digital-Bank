@@ -18,9 +18,9 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 const availableCards = [
-    { type: 'virtual', name: 'Global Virtual Stealth', brand: 'visa', price: 15, description: 'Instant virtual card for secure online shopping.' },
-    { type: 'debit', name: 'Global Classic Debit', brand: 'mastercard', price: 25, description: 'Physical debit card for everyday use.' },
-    { type: 'credit', name: 'Global Elite Credit', brand: 'amex', price: 99, description: 'Premium credit card with global travel perks.' },
+    { type: 'credit', name: 'Global Trusera Cashback Plus', brand: 'visa', price: 25, description: 'Maximize your everyday spending with industry-leading cashback on groceries, gas, and dining.' },
+    { type: 'credit', name: 'Global Trusera Traveler Elite', brand: 'mastercard', price: 95, description: 'Explore the world with points on every purchase. Enjoy premium travel perks like lounge access.' },
+    { type: 'credit', name: 'Global Trusera Premium Access', brand: 'amex', price: 550, description: 'Unlock a world of luxury. Exclusive access and concierge services for our most discerning clients.' },
 ];
 
 const addCardSchema = z.object({
@@ -140,7 +140,7 @@ export default function CardsPage() {
                                         <BadgeCheck className="text-accent h-8 w-8" />
                                         <span className="text-2xl font-bold">${item.price}</span>
                                     </div>
-                                    <CardTitle>{item.name}</CardTitle>
+                                    <CardTitle className="text-lg">{item.name}</CardTitle>
                                     <CardDescription className="capitalize">{item.type} Card • {item.brand}</CardDescription>
                                 </CardHeader>
                                 <CardContent className="flex-1">
