@@ -2,146 +2,63 @@
 {
   "entities": {
     "Admin": {
-      "$schema": "http://json-schema.org/draft-07/schema#",
       "title": "Admin",
       "type": "object",
       "description": "Represents an administrator user for managing the Global Trusera Holdings website.",
       "properties": {
-        "id": {
-          "type": "string",
-          "description": "Unique identifier for the Admin entity."
-        },
-        "username": {
-          "type": "string",
-          "description": "The username of the administrator."
-        },
-        "email": {
-          "type": "string",
-          "description": "The email address of the administrator.",
-          "format": "email"
-        }
+        "id": { "type": "string" },
+        "username": { "type": "string" },
+        "email": { "type": "string", "format": "email" }
       },
-      "required": [
-        "id",
-        "username",
-        "email"
-      ]
+      "required": ["id", "username", "email"]
     },
     "Testimonial": {
-      "$schema": "http://json-schema.org/draft-07/schema#",
       "title": "Testimonial",
       "type": "object",
-      "description": "Represents a customer testimonial displayed on the Global Trusera Holdings website.",
+      "description": "Represents a customer testimonial.",
       "properties": {
-        "id": {
-          "type": "string",
-          "description": "Unique identifier for the Testimonial entity."
-        },
-        "customerName": {
-          "type": "string",
-          "description": "The name of the customer providing the testimonial."
-        },
-        "testimonialText": {
-          "type": "string",
-          "description": "The text content of the testimonial."
-        },
-        "imageURL": {
-          "type": "string",
-          "description": "URL to a high resolution image of the customer.",
-          "format": "uri"
-        }
+        "id": { "type": "string" },
+        "customerName": { "type": "string" },
+        "testimonialText": { "type": "string" },
+        "imageURL": { "type": "string", "format": "uri" }
       },
-      "required": [
-        "id",
-        "customerName",
-        "testimonialText",
-        "imageURL"
-      ]
+      "required": ["id", "customerName", "testimonialText", "imageURL"]
     },
     "ContactFormSubmission": {
-      "$schema": "http://json-schema.org/draft-07/schema#",
       "title": "ContactFormSubmission",
       "type": "object",
-      "description": "Represents a contact form submission from a potential customer.",
+      "description": "Represents a contact form submission.",
       "properties": {
-        "id": {
-          "type": "string",
-          "description": "Unique identifier for the ContactFormSubmission entity."
-        },
-        "name": {
-          "type": "string",
-          "description": "The name of the person submitting the form."
-        },
-        "email": {
-          "type": "string",
-          "description": "The email address of the person submitting the form.",
-          "format": "email"
-        },
-        "message": {
-          "type": "string",
-          "description": "The message content submitted through the form."
-        },
-        "submissionDate": {
-          "type": "string",
-          "description": "The date and time the form was submitted.",
-          "format": "date-time"
-        }
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "email": { "type": "string", "format": "email" },
+        "message": { "type": "string" },
+        "submissionDate": { "type": "string", "format": "date-time" }
       },
-      "required": [
-        "id",
-        "name",
-        "email",
-        "message",
-        "submissionDate"
-      ]
+      "required": ["id", "name", "email", "message", "submissionDate"]
     },
     "Banner": {
-      "$schema": "http://json-schema.org/draft-07/schema#",
       "title": "Banner",
       "type": "object",
-      "description": "Represents a dynamic banner displayed on the Global Trusera Holdings website.",
+      "description": "Represents a dynamic banner.",
       "properties": {
-        "id": {
-          "type": "string",
-          "description": "Unique identifier for the Banner entity."
-        },
-        "title": {
-          "type": "string",
-          "description": "The title of the banner."
-        },
-        "imageUrl": {
-          "type": "string",
-          "description": "URL to the banner image.",
-          "format": "uri"
-        },
-        "linkUrl": {
-          "type": "string",
-          "description": "URL the banner links to when clicked.",
-          "format": "uri"
-        },
-        "serviceType": {
-          "type": "string",
-          "description": "The type of service this banner promotes (e.g., Loan Services, Savings Services, Stock Trading Services)."
-        }
+        "id": { "type": "string" },
+        "title": { "type": "string" },
+        "imageUrl": { "type": "string", "format": "uri" },
+        "linkUrl": { "type": "string", "format": "uri" },
+        "serviceType": { "type": "string" }
       },
-      "required": [
-        "id",
-        "title",
-        "imageUrl",
-        "linkUrl",
-        "serviceType"
-      ]
+      "required": ["id", "title", "imageUrl", "linkUrl", "serviceType"]
     },
     "UserProfile": {
-      "$schema": "http://json-schema.org/draft-07/schema#",
       "title": "UserProfile",
       "type": "object",
-      "description": "Represents a user profile containing information from the signup form.",
+      "description": "Represents a user profile.",
       "properties": {
         "email": { "type": "string", "format": "email" },
         "firstName": { "type": "string" },
         "lastName": { "type": "string" },
-        "displayName": { "type": "string", "description": "The user's full name."},
+        "displayName": { "type": "string" },
         "phone": { "type": "string" },
         "birthDate": { "type": "string", "format": "date" },
         "gender": { "type": "string" },
@@ -158,192 +75,108 @@
         "preferredCurrency": { "type": "string" },
         "accountType": { "type": "string" },
         "createdAt": { "type": "string", "format": "date-time" },
-        "accountBalance": { "type": "number", "description": "The user's current account balance." },
-        "status": {
-          "type": "string",
-          "enum": ["active", "inactive", "suspended"],
-          "description": "The current status of the user's account."
-        }
+        "accountBalance": { "type": "number" },
+        "status": { "type": "string", "enum": ["active", "inactive", "suspended"] }
       },
-      "required": [
-        "email",
-        "firstName",
-        "lastName",
-        "displayName",
-        "phone",
-        "birthDate",
-        "homeAddress",
-        "city",
-        "state",
-        "zipcode",
-        "country",
-        "preferredCurrency",
-        "accountType",
-        "status",
-        "accountBalance"
-      ]
+      "required": ["email", "firstName", "lastName", "displayName", "phone", "birthDate", "homeAddress", "city", "state", "zipcode", "country", "preferredCurrency", "accountType", "status", "accountBalance"]
     },
     "Transaction": {
-      "$schema": "http://json-schema.org/draft-07/schema#",
       "title": "Transaction",
       "type": "object",
-      "description": "Represents a financial transaction in the system.",
+      "description": "Represents a financial transaction.",
       "properties": {
-        "amount": { "type": "number", "description": "The amount of the transaction." },
-        "type": { "type": "string", "enum": ["deposit", "withdrawal", "transfer", "sale", "refund"], "description": "The type of transaction." },
-        "status": { "type": "string", "enum": ["approved", "pending", "declined"], "description": "The status of the transaction." },
-        "createdAt": { "type": "string", "format": "date-time", "description": "Timestamp of the transaction." },
-        "description": { "type": "string", "description": "A user-provided description for the transaction." },
-        "recipient": { "type": "string", "description": "Recipient details for withdrawals or transfers." }
+        "amount": { "type": "number" },
+        "type": { "type": "string", "enum": ["deposit", "withdrawal", "transfer", "sale", "refund"] },
+        "status": { "type": "string", "enum": ["approved", "pending", "declined"] },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "description": { "type": "string" },
+        "recipient": { "type": "string" }
       },
       "required": ["amount", "type", "status", "createdAt", "description"]
     },
     "Conversation": {
-      "$schema": "http://json-schema.org/draft-07/schema#",
       "title": "Conversation",
       "type": "object",
-      "description": "Represents a chat conversation between a user and an admin.",
+      "description": "Represents a support chat conversation.",
       "properties": {
-        "userId": { "type": "string", "description": "The ID of the user in the conversation." },
-        "userName": { "type": "string", "description": "The name of the user in the conversation." },
-        "lastMessage": { "type": "string", "description": "A snippet of the last message sent." },
-        "lastUpdatedAt": { "type": "string", "format": "date-time", "description": "Timestamp of the last message." },
-        "isReadByUser": { "type": "boolean", "description": "Indicates if the user has read the last message." },
-        "isReadByAdmin": { "type": "boolean", "description": "Indicates if an admin has read the last message." }
+        "userId": { "type": "string" },
+        "userName": { "type": "string" },
+        "lastMessage": { "type": "string" },
+        "lastUpdatedAt": { "type": "string", "format": "date-time" },
+        "isReadByUser": { "type": "boolean" },
+        "isReadByAdmin": { "type": "boolean" }
       },
       "required": ["userId", "userName", "lastMessage", "lastUpdatedAt", "isReadByUser", "isReadByAdmin"]
     },
     "Message": {
-      "$schema": "http://json-schema.org/draft-07/schema#",
       "title": "Message",
       "type": "object",
-      "description": "Represents a single message within a conversation.",
+      "description": "Represents a single chat message.",
       "properties": {
-        "text": { "type": "string", "description": "The content of the message." },
-        "senderId": { "type": "string", "description": "The UID of the message sender." },
-        "senderType": { "type": "string", "enum": ["user", "admin"], "description": "The role of the sender." },
-        "createdAt": { "type": "string", "format": "date-time", "description": "Timestamp when the message was sent." }
+        "text": { "type": "string" },
+        "senderId": { "type": "string" },
+        "senderType": { "type": "string", "enum": ["user", "admin"] },
+        "createdAt": { "type": "string", "format": "date-time" }
       },
       "required": ["text", "senderId", "senderType", "createdAt"]
     },
     "Card": {
-      "$schema": "http://json-schema.org/draft-07/schema#",
       "title": "Card",
       "type": "object",
-      "description": "Represents a physical or virtual card associated with a user account.",
+      "description": "Represents a banking card.",
       "properties": {
         "id": { "type": "string" },
         "type": { "type": "string", "enum": ["debit", "credit", "virtual"] },
         "nameOnCard": { "type": "string" },
-        "cardNumber": { "type": "string", "description": "Masked or partial card number." },
+        "cardNumber": { "type": "string" },
         "expiryDate": { "type": "string" },
         "status": { "type": "string", "enum": ["active", "blocked", "pending"] },
         "brand": { "type": "string", "enum": ["visa", "mastercard", "amex"] },
         "createdAt": { "type": "string", "format": "date-time" },
-        "price": { "type": "number", "description": "Purchase price if applicable." }
+        "price": { "type": "number" }
       },
       "required": ["type", "nameOnCard", "cardNumber", "expiryDate", "status", "brand", "createdAt"]
     }
   },
   "auth": {
-    "providers": [
-      "password",
-      "anonymous",
-      "google.com"
-    ]
+    "providers": ["password", "anonymous", "google.com"]
   },
   "firestore": {
-    "structure": [
-      {
-        "path": "/testimonials/{testimonialId}",
-        "definition": {
-          "entityName": "Testimonial",
-          "schema": {
-            "$ref": "#/backend/entities/Testimonial"
-          },
-          "description": "Stores customer testimonials for display on the Global Trusera Holdings website."
-        }
-      },
-      {
-        "path": "/contact_form_submissions/{contactFormSubmissionId}",
-        "definition": {
-          "entityName": "ContactFormSubmission",
-          "schema": {
-            "$ref": "#/backend/entities/ContactFormSubmission"
-          },
-          "description": "Stores contact form submissions from potential customers."
-        }
-      },
-      {
-        "path": "/banners/{bannerId}",
-        "definition": {
-          "entityName": "Banner",
-          "schema": {
-            "$ref": "#/backend/entities/Banner"
-          },
-          "description": "Stores dynamic banner information for display on the Global Trusera Holdings website."
-        }
-      },
-      {
-        "path": "/admins/{adminId}",
-        "definition": {
-          "entityName": "Admin",
-          "schema": {
-            "$ref": "#/backend/entities/Admin"
-          },
-          "description": "Stores administrator user accounts. The presence of a document with a matching {adminId} grants admin privileges."
-        }
-      },
-      {
-        "path": "/users/{userId}",
-        "definition": {
-          "entityName": "UserProfile",
-          "schema": {
-            "$ref": "#/backend/entities/UserProfile"
-          },
-          "description": "Stores public user profile information."
-        }
-      },
-      {
-        "path": "/users/{userId}/transactions/{transactionId}",
-        "definition": {
-            "entityName": "Transaction",
-            "schema": {
-                "$ref": "#/backend/entities/Transaction"
-            },
-            "description": "Stores all financial transactions for a specific user."
-        }
-      },
-      {
-        "path": "/users/{userId}/cards/{cardId}",
-        "definition": {
-            "entityName": "Card",
-            "schema": {
-                "$ref": "#/backend/entities/Card"
-            },
-            "description": "Stores all cards (purchased or linked) for a specific user."
-        }
-      },
-      {
-        "path": "/conversations/{conversationId}",
-        "definition": {
-            "entityName": "Conversation",
-            "schema": {
-                "$ref": "#/backend/entities/Conversation"
-            },
-            "description": "Stores metadata for a single chat conversation between a user and an admin."
-        }
-      },
-      {
-        "path": "/conversations/{conversationId}/messages/{messageId}",
-        "definition": {
-            "entityName": "Message",
-            "schema": {
-                "$ref": "#/backend/entities/Message"
-            },
-            "description": "Stores the individual messages within a conversation."
-        }
-      }
-    ]
+    "/testimonials/{testimonialId}": {
+      "schema": { "$ref": "#/backend/entities/Testimonial" },
+      "description": "Stores customer testimonials."
+    },
+    "/contact_form_submissions/{contactFormSubmissionId}": {
+      "schema": { "$ref": "#/backend/entities/ContactFormSubmission" },
+      "description": "Stores contact form submissions."
+    },
+    "/banners/{bannerId}": {
+      "schema": { "$ref": "#/backend/entities/Banner" },
+      "description": "Stores dynamic banners."
+    },
+    "/admins/{adminId}": {
+      "schema": { "$ref": "#/backend/entities/Admin" },
+      "description": "Stores administrator accounts."
+    },
+    "/users/{userId}": {
+      "schema": { "$ref": "#/backend/entities/UserProfile" },
+      "description": "Stores user profile information."
+    },
+    "/users/{userId}/transactions/{transactionId}": {
+      "schema": { "$ref": "#/backend/entities/Transaction" },
+      "description": "Stores user transactions."
+    },
+    "/users/{userId}/cards/{cardId}": {
+      "schema": { "$ref": "#/backend/entities/Card" },
+      "description": "Stores user cards."
+    },
+    "/conversations/{conversationId}": {
+      "schema": { "$ref": "#/backend/entities/Conversation" },
+      "description": "Stores support conversation metadata."
+    },
+    "/conversations/{conversationId}/messages/{messageId}": {
+      "schema": { "$ref": "#/backend/entities/Message" },
+      "description": "Stores individual chat messages."
+    }
   }
 }
