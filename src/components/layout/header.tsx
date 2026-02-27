@@ -5,7 +5,7 @@ import * as React from "react"
 import Link from "next/link"
 import { Landmark, Menu, LogOut, LayoutDashboard, Sun, Moon } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription, SheetTrigger } from "@/components/ui/sheet"
 import {
   NavigationMenu,
   NavigationMenuContent,
@@ -164,6 +164,12 @@ export function Header() {
               </Button>
             </SheetTrigger>
             <SheetContent side="left" className="pr-0">
+              <SheetHeader className="sr-only">
+                <SheetTitle>Navigation Menu</SheetTitle>
+                <SheetDescription>
+                  Access site navigation links and banking services.
+                </SheetDescription>
+              </SheetHeader>
               <Link href="/" className="mr-6 flex items-center space-x-2 mb-6">
                 <Landmark className="h-6 w-6 text-primary" />
                 <span className="font-bold font-headline sm:inline-block">
