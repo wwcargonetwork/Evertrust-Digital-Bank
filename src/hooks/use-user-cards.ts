@@ -14,7 +14,6 @@ export type UserCard = WithId<{
   brand: 'visa' | 'mastercard' | 'amex';
   createdAt: any;
   price?: number;
-  // Billing Address Fields
   billingAddress?: string;
   billingCity?: string;
   billingState?: string;
@@ -54,27 +53,23 @@ export function useUserCards(): UseUserCardsResult {
 
     const price = cardDetails.price || 0;
 
-    // Create the card
+    // Create the card as pending
     batch.set(cardRef, {
       ...cardDetails,
       status: 'pending',
       createdAt: serverTimestamp(),
     });
 
-    // Create a transaction record
+    // Create a transaction record as pending
     if (price > 0) {
         batch.set(txRef, {
             amount: price,
             type: 'sale',
-            status: 'approved',
+            status: 'pending',
             description: `Card Purchase: ${cardDetails.nameOnCard} (${cardDetails.type})`,
             createdAt: serverTimestamp(),
         });
-
-        // Deduct from balance
-        batch.update(userDocRef, {
-            accountBalance: increment(-price)
-        });
+        // Balance deduction now only happens upon admin approval per standardize logic.
     }
 
     await batch.commit();

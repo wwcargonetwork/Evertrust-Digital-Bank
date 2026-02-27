@@ -2,14 +2,14 @@
 'use client';
 
 import * as React from 'react';
-import { useUser, useDoc, useMemoFirebase, useFirestore, addDocumentNonBlocking } from '@/firebase';
+import { useUser, useDoc, useMemoFirebase, useFirestore } from '@/firebase';
 import { useRouter } from 'next/navigation';
-import { doc, collection, serverTimestamp, writeBatch, increment } from 'firebase/firestore';
+import { doc, collection, serverTimestamp, writeBatch } from 'firebase/firestore';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Skeleton } from '@/components/ui/skeleton';
-import { ArrowRight, User, Shield, Bell, Landmark, DollarSign, ArrowUp, ArrowDown, PlusCircle, MinusCircle } from 'lucide-react';
+import { ArrowRight, Bell, DollarSign, ArrowUp, ArrowDown, PlusCircle, MinusCircle, Landmark } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useUserTransactions, type UserTransaction } from '@/hooks/use-user-transactions';
 import { useUserConversation } from '@/hooks/use-user-conversation-data';
@@ -21,17 +21,14 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
 import { useToast } from '@/hooks/use-toast';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 
-// Define the shape of the user profile data
 interface UserProfile {
     firstName: string;
     lastName: string;
@@ -168,18 +165,18 @@ function TransactionDialog({ type, onOpenChange, open }: { type: 'deposit' | 'wi
             recipient: values.recipient || '',
           };
 
-          // Step 1: Create the transaction
+          // Step 1: Create the transaction as pending.
           batch.set(txRef, transactionData);
           
-          // Step 2: Deduct amount from balance immediately for withdrawals
-          batch.update(userDocRef, { accountBalance: increment(-values.amount) });
+          // Step 2: Per standardized logic, balance deduction ONLY happens upon approval.
+          // batch.update(userDocRef, { accountBalance: increment(-values.amount) }); // Removed
           
           // Step 3: Create notification for the user
           const notificationColRef = collection(userDocRef, 'notifications');
           const notifRef = doc(notificationColRef);
           batch.set(notifRef, {
             title: "Withdrawal Requested",
-            message: `Your withdrawal request for ${formatCurrency(values.amount, 'USD')} has been submitted and your balance adjusted.`,
+            message: `Your withdrawal request for ${formatCurrency(values.amount, 'USD')} has been submitted for review.`,
             link: "/dashboard/transactions",
             isRead: false,
             createdAt: serverTimestamp(),
@@ -187,7 +184,7 @@ function TransactionDialog({ type, onOpenChange, open }: { type: 'deposit' | 'wi
 
           await batch.commit();
 
-          toast({ title: 'Success!', description: `Your withdrawal request has been submitted and your balance adjusted.` });
+          toast({ title: 'Success!', description: `Your withdrawal request has been submitted and is pending review.` });
           onOpenChange(false);
           form.reset();
         } catch (error: any) {
@@ -204,7 +201,7 @@ function TransactionDialog({ type, onOpenChange, open }: { type: 'deposit' | 'wi
           <DialogDescription>
             {type === 'deposit'
               ? 'Deposits are processed manually. Enter the amount you wish to deposit, and a message will be sent to an admin to arrange the transfer.'
-              : 'Enter the details for your withdrawal request. The amount will be deducted from your balance immediately and sent to an admin for approval.'}
+              : 'Enter the details for your withdrawal request. The request will be sent to an admin for approval before funds are deducted.'}
           </DialogDescription>
         </DialogHeader>
         <Form {...form}>
@@ -267,8 +264,6 @@ export default function OverviewPage() {
     const firestore = useFirestore();
     const [dialog, setDialog] = React.useState<{open: boolean, type: 'deposit' | 'withdrawal' | null}>({open: false, type: null});
 
-
-    // Memoize the document reference to prevent re-renders
     const userDocRef = useMemoFirebase(() => {
         if (!user) return null;
         return doc(firestore, 'users', user.uid);
@@ -276,14 +271,12 @@ export default function OverviewPage() {
 
     const { data: userProfile, isLoading: isProfileLoading } = useDoc<UserProfile>(userDocRef);
 
-    // Redirect to signin if not logged in
     React.useEffect(() => {
         if (!isUserLoading && !user) {
             router.replace('/signin');
         }
     }, [user, isUserLoading, router]);
     
-    // Show a loading state while user or profile is being fetched
     if (isUserLoading || isProfileLoading || !user) {
         return (
             <div className="space-y-6">

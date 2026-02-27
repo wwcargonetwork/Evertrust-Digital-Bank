@@ -28,9 +28,6 @@ interface UseAdminTransactionsResult {
 
 /**
  * Hook to fetch all transactions for the admin page, enriched with user data.
- * This hook first fetches all users, then sets up individual listeners for each user's
- * transactions sub-collection.
- * @returns An object containing transactions, loading state, and any errors.
  */
 export function useAdminTransactionsData(): UseAdminTransactionsResult {
   const firestore = useFirestore();
@@ -61,7 +58,6 @@ export function useAdminTransactionsData(): UseAdminTransactionsResult {
         const allUsers = usersSnapshot.docs.map(d => ({ ...d.data(), id: d.id } as UserProfile));
         const userMap = new Map(allUsers.map(u => [u.id, { displayName: u.displayName, email: u.email }]));
         let allTransactions: Transaction[] = [];
-        let listenersAttached = 0;
 
         if (allUsers.length === 0) {
             setTransactions([]);
@@ -83,23 +79,19 @@ export function useAdminTransactionsData(): UseAdminTransactionsResult {
               createdAt: d.data().createdAt?.toDate() ?? new Date(),
             }));
             
-            // This logic replaces the transactions for a specific user while keeping others
             allTransactions = allTransactions.filter(t => t.userId !== user.id).concat(userTransactions);
-
-            // Sort all transactions by date after each update
             allTransactions.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
             
             setTransactions([...allTransactions]);
             setError(null);
           }, (err) => {
             console.error(`Error fetching transactions for user ${user.id}:`, err);
-            setError(err); // Consider how to handle partial errors
+            setError(err);
           });
 
           unsubs.push(unsubscribe);
         });
 
-        // Set initial loading to false after setting up listeners
         setIsLoading(false);
 
       } catch (err) {
@@ -150,16 +142,17 @@ export function useTransactionActions() {
       // Update transaction status
       batch.update(txDocRef, { status: 'approved' });
 
-      // Update user balance ONLY if it's NOT a withdrawal.
-      // Withdrawals are now deducted upon creation when pending.
-      // Deposits and refunds are added upon approval.
+      // Balance modifications happen ONLY upon approval per standardizing system.
       if (tx.type === 'deposit' || tx.type === 'refund') {
         batch.update(userDocRef, { accountBalance: increment(tx.amount) });
+      } else {
+        // withdrawal, transfer, sale
+        batch.update(userDocRef, { accountBalance: increment(-tx.amount) });
       }
       
       await batch.commit();
 
-      createNotification(tx.userId, "Transaction Approved", `Your ${tx.type} of ${tx.amount} was approved.`);
+      createNotification(tx.userId, "Transaction Approved", `Your ${tx.type} of ${tx.amount} was approved and your balance updated.`);
 
     } catch (error) {
       console.error("Failed to approve transaction:", error);
@@ -177,18 +170,11 @@ export function useTransactionActions() {
       const userDocRef = doc(firestore, 'users', tx.userId);
       const txDocRef = doc(userDocRef, 'transactions', tx.id);
       
-      // Update transaction status
       batch.update(txDocRef, { status: 'declined' });
-
-      // If it was a withdrawal (or similar outgoing fund), refund the balance 
-      // because it was already deducted when the transaction was created as 'pending'.
-      if (tx.type === 'withdrawal' || tx.type === 'transfer' || tx.type === 'sale') {
-        batch.update(userDocRef, { accountBalance: increment(tx.amount) });
-      }
       
       await batch.commit();
       
-      createNotification(tx.userId, "Transaction Declined", `Your ${tx.type} of ${tx.amount} was declined and funds restored.`);
+      createNotification(tx.userId, "Transaction Declined", `Your ${tx.type} request was declined.`);
 
     } catch (error) {
       console.error("Failed to decline transaction:", error);
