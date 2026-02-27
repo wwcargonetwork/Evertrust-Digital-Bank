@@ -216,7 +216,7 @@ export default function CardsPage() {
                                     </div>
                                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                                         <FormField control={form.control} name="expiryDate" render={({ field }) => (
-                                            <FormItem><FormLabel>Expiry Date</FormLabel><FormControl><Input placeholder="MM/YY" maxLength={5} {...field} /></FormControl><FormMessage /></FormMessage>
+                                            <FormItem><FormLabel>Expiry Date</FormLabel><FormControl><Input placeholder="MM/YY" maxLength={5} {...field} /></FormControl><FormMessage /></FormItem>
                                         )} />
                                         <FormField control={form.control} name="cvv" render={({ field }) => (
                                             <FormItem><FormLabel>CVV</FormLabel><FormControl><Input placeholder="123" maxLength={4} {...field} /></FormControl><FormMessage /></FormItem>
