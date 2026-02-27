@@ -1,3 +1,4 @@
+
 {
   "entities": {
     "Admin": {
@@ -224,6 +225,24 @@
         "createdAt": { "type": "string", "format": "date-time", "description": "Timestamp when the message was sent." }
       },
       "required": ["text", "senderId", "senderType", "createdAt"]
+    },
+    "Card": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Card",
+      "type": "object",
+      "description": "Represents a physical or virtual card associated with a user account.",
+      "properties": {
+        "id": { "type": "string" },
+        "type": { "type": "string", "enum": ["debit", "credit", "virtual"] },
+        "nameOnCard": { "type": "string" },
+        "cardNumber": { "type": "string", "description": "Masked or partial card number." },
+        "expiryDate": { "type": "string" },
+        "status": { "type": "string", "enum": ["active", "blocked", "pending"] },
+        "brand": { "type": "string", "enum": ["visa", "mastercard", "amex"] },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "price": { "type": "number", "description": "Purchase price if applicable." }
+      },
+      "required": ["type", "nameOnCard", "cardNumber", "expiryDate", "status", "brand", "createdAt"]
     }
   },
   "auth": {
@@ -293,6 +312,16 @@
                 "$ref": "#/backend/entities/Transaction"
             },
             "description": "Stores all financial transactions for a specific user."
+        }
+      },
+      {
+        "path": "/users/{userId}/cards/{cardId}",
+        "definition": {
+            "entityName": "Card",
+            "schema": {
+                "$ref": "#/backend/entities/Card"
+            },
+            "description": "Stores all cards (purchased or linked) for a specific user."
         }
       },
       {

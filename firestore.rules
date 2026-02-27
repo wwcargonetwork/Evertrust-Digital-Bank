@@ -44,6 +44,13 @@ service cloud.firestore {
         allow update, delete: if isAdmin();
       }
 
+      match /cards/{cardId} {
+        // Users can manage their own cards.
+        allow read, write: if isOwner(userId);
+        // Admins can view cards for support.
+        allow read: if isAdmin();
+      }
+
       match /notifications/{notificationId} {
         // User can read and list their own notifications.
         allow get, list: if isOwner(userId);
