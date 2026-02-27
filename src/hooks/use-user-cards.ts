@@ -14,6 +14,12 @@ export type UserCard = WithId<{
   brand: 'visa' | 'mastercard' | 'amex';
   createdAt: any;
   price?: number;
+  // Billing Address Fields
+  billingAddress?: string;
+  billingCity?: string;
+  billingState?: string;
+  billingZip?: string;
+  billingCountry?: string;
 }>;
 
 interface UseUserCardsResult {
