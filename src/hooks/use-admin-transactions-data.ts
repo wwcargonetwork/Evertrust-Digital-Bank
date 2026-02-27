@@ -11,7 +11,7 @@ import { UserProfile } from './use-admin-users-data';
 export type Transaction = WithId<{
   userId: string;
   amount: number;
-  type: 'deposit' | 'withdrawal';
+  type: 'deposit' | 'withdrawal' | 'transfer' | 'sale' | 'refund';
   status: 'approved' | 'pending' | 'declined';
   createdAt: any; // Can be a string from server or Date object after conversion
   description: string;
@@ -150,9 +150,12 @@ export function useTransactionActions() {
       // Update transaction status
       batch.update(txDocRef, { status: 'approved' });
 
-      // Update user balance
-      const amount = tx.type === 'deposit' ? tx.amount : -tx.amount;
-      batch.update(userDocRef, { accountBalance: increment(amount) });
+      // Update user balance ONLY if it's NOT a withdrawal.
+      // Withdrawals are now deducted upon creation when pending.
+      // Deposits and refunds are added upon approval.
+      if (tx.type === 'deposit' || tx.type === 'refund') {
+        batch.update(userDocRef, { accountBalance: increment(tx.amount) });
+      }
       
       await batch.commit();
 
@@ -170,10 +173,22 @@ export function useTransactionActions() {
     if (!firestore) return;
     setIsUpdating(true);
     try {
-      const txDocRef = doc(firestore, 'users', tx.userId, 'transactions', tx.id);
-      await writeBatch(firestore).update(txDocRef, { status: 'declined' }).commit();
+      const batch = writeBatch(firestore);
+      const userDocRef = doc(firestore, 'users', tx.userId);
+      const txDocRef = doc(userDocRef, 'transactions', tx.id);
       
-      createNotification(tx.userId, "Transaction Declined", `Your ${tx.type} of ${tx.amount} was declined.`);
+      // Update transaction status
+      batch.update(txDocRef, { status: 'declined' });
+
+      // If it was a withdrawal (or similar outgoing fund), refund the balance 
+      // because it was already deducted when the transaction was created as 'pending'.
+      if (tx.type === 'withdrawal' || tx.type === 'transfer' || tx.type === 'sale') {
+        batch.update(userDocRef, { accountBalance: increment(tx.amount) });
+      }
+      
+      await batch.commit();
+      
+      createNotification(tx.userId, "Transaction Declined", `Your ${tx.type} of ${tx.amount} was declined and funds restored.`);
 
     } catch (error) {
       console.error("Failed to decline transaction:", error);

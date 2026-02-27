@@ -1,9 +1,10 @@
+
 'use client';
 
 import * as React from 'react';
 import { useUser, useDoc, useMemoFirebase, useFirestore, addDocumentNonBlocking } from '@/firebase';
 import { useRouter } from 'next/navigation';
-import { doc, collection, serverTimestamp } from 'firebase/firestore';
+import { doc, collection, serverTimestamp, writeBatch, increment } from 'firebase/firestore';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -153,30 +154,40 @@ function TransactionDialog({ type, onOpenChange, open }: { type: 'deposit' | 'wi
         form.reset();
         router.push('/dashboard/messages');
     } else { // Withdrawal
-        const transactionData = {
-          amount: values.amount,
-          description: values.description,
-          type,
-          status: 'pending',
-          createdAt: serverTimestamp(),
-          ...(type === 'withdrawal' && { recipient: values.recipient }),
-        };
-
         try {
-          const colRef = collection(firestore, 'users', user.uid, 'transactions');
-          addDocumentNonBlocking(colRef, transactionData);
+          const batch = writeBatch(firestore);
+          const userDocRef = doc(firestore, 'users', user.uid);
+          const txRef = doc(collection(userDocRef, 'transactions'));
           
-          const notificationColRef = collection(firestore, `users/${user.uid}/notifications`);
-          const notification = {
-            title: "Transaction Submitted",
-            message: `Your ${type} request for ${formatCurrency(values.amount, 'USD')} is pending.`,
+          const transactionData = {
+            amount: values.amount,
+            description: values.description,
+            type,
+            status: 'pending',
+            createdAt: serverTimestamp(),
+            recipient: values.recipient || '',
+          };
+
+          // Step 1: Create the transaction
+          batch.set(txRef, transactionData);
+          
+          // Step 2: Deduct amount from balance immediately for withdrawals
+          batch.update(userDocRef, { accountBalance: increment(-values.amount) });
+          
+          // Step 3: Create notification for the user
+          const notificationColRef = collection(userDocRef, 'notifications');
+          const notifRef = doc(notificationColRef);
+          batch.set(notifRef, {
+            title: "Withdrawal Requested",
+            message: `Your withdrawal request for ${formatCurrency(values.amount, 'USD')} has been submitted and your balance adjusted.`,
             link: "/dashboard/transactions",
             isRead: false,
             createdAt: serverTimestamp(),
-          };
-          addDocumentNonBlocking(notificationColRef, notification);
+          });
 
-          toast({ title: 'Success!', description: `Your ${type} request has been submitted for approval.` });
+          await batch.commit();
+
+          toast({ title: 'Success!', description: `Your withdrawal request has been submitted and your balance adjusted.` });
           onOpenChange(false);
           form.reset();
         } catch (error: any) {
@@ -193,7 +204,7 @@ function TransactionDialog({ type, onOpenChange, open }: { type: 'deposit' | 'wi
           <DialogDescription>
             {type === 'deposit'
               ? 'Deposits are processed manually. Enter the amount you wish to deposit, and a message will be sent to an admin to arrange the transfer.'
-              : 'Enter the details for your withdrawal request. It will be sent to an admin for approval.'}
+              : 'Enter the details for your withdrawal request. The amount will be deducted from your balance immediately and sent to an admin for approval.'}
           </DialogDescription>
         </DialogHeader>
         <Form {...form}>

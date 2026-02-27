@@ -47,7 +47,7 @@ import { useAdminUsersData } from '@/hooks/use-admin-users-data';
 import { useAdminTransactionsData, type Transaction } from '@/hooks/use-admin-transactions-data';
 import { useFirestore, addDocumentNonBlocking } from '@/firebase';
 import { useToast } from '@/hooks/use-toast';
-import { collection, serverTimestamp } from 'firebase/firestore';
+import { collection, serverTimestamp, writeBatch, doc, increment } from 'firebase/firestore';
 import { format } from 'date-fns';
 
 const transactionFormSchema = z.object({
@@ -98,20 +98,37 @@ export default function TransactionsPage() {
   async function onSubmit(values: TransactionFormValues) {
     if (!firestore) return;
 
-    const userTransactionsRef = collection(firestore, 'users', values.userId, 'transactions');
-    addDocumentNonBlocking(userTransactionsRef, {
+    try {
+      const batch = writeBatch(firestore);
+      const userDocRef = doc(firestore, 'users', values.userId);
+      const txRef = doc(collection(userDocRef, 'transactions'));
+
+      const transactionData = {
         amount: values.amount,
         description: values.description,
         type: values.type,
         status: 'pending',
         createdAt: serverTimestamp(),
-    });
+      };
 
-    toast({
-        title: 'Success!',
-        description: `Successfully created a pending ${values.type}. Please approve it in the Approvals page.`,
-    });
-    form.reset();
+      // Step 1: Add the transaction request
+      batch.set(txRef, transactionData);
+
+      // Step 2: If it's a withdrawal (or other outbound fund), deduct from balance immediately
+      if (values.type === 'withdrawal' || values.type === 'transfer' || values.type === 'sale') {
+        batch.update(userDocRef, { accountBalance: increment(-values.amount) });
+      }
+
+      await batch.commit();
+
+      toast({
+          title: 'Success!',
+          description: `Successfully created a pending ${values.type}. ${values.type === 'withdrawal' ? 'User balance adjusted.' : ''} Please approve it in the Approvals page.`,
+      });
+      form.reset();
+    } catch (error: any) {
+      toast({ variant: 'destructive', title: 'Error', description: error.message });
+    }
   }
 
   const getStatusBadgeVariant = (status: Transaction['status']) => {
@@ -161,7 +178,7 @@ export default function TransactionsPage() {
         <CardHeader>
           <CardTitle>Create Transaction Request</CardTitle>
           <CardDescription>
-            Create a pending transaction for a user. It will appear in the 'Approvals' page for review.
+            Create a pending transaction for a user. Outbound funds (like withdrawals) will adjust the user's balance immediately.
           </CardDescription>
         </CardHeader>
         <CardContent>
