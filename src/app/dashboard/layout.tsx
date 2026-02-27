@@ -1,4 +1,3 @@
-
 'use client';
 
 import * as React from 'react';
@@ -25,6 +24,7 @@ import {
   SidebarFooter,
   SidebarInset,
   SidebarMenuBadge,
+  useSidebar,
 } from '@/components/ui/sidebar';
 import { useUser, useAuth } from '@/firebase';
 import { useRouter, usePathname } from 'next/navigation';
@@ -39,6 +39,98 @@ import { cn } from '@/lib/utils';
 import { useUserConversation } from '@/hooks/use-user-conversation-data';
 import { useUserTransactions } from '@/hooks/use-user-transactions';
 
+function DashboardSidebar() {
+  const pathname = usePathname();
+  const { setOpenMobile } = useSidebar();
+  const { unreadMessagesCount } = useUserConversation();
+  const { pendingTransactionsCount } = useUserTransactions();
+  const auth = useAuth();
+  const router = useRouter();
+
+  const isActive = (path: string) => pathname === path;
+  const closeSidebar = () => setOpenMobile(false);
+
+  const handleLogout = async () => {
+    await signOut(auth);
+    router.replace('/');
+  };
+
+  return (
+    <Sidebar>
+      <SidebarHeader>
+        <Link href="/" className="flex items-center gap-2 font-semibold" onClick={closeSidebar}>
+          <Landmark className="h-6 w-6 text-primary" />
+          <span className="">Global Trusera</span>
+        </Link>
+      </SidebarHeader>
+      <SidebarContent>
+        <SidebarMenu>
+          <SidebarMenuItem>
+            <SidebarMenuButton asChild isActive={isActive('/dashboard/overview')} onClick={closeSidebar}>
+              <Link href="/dashboard/overview">
+                <Home />
+                Overview
+              </Link>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+          <SidebarMenuItem>
+            <SidebarMenuButton asChild isActive={isActive('/dashboard/accounts')} onClick={closeSidebar}>
+              <Link href="/dashboard/accounts">
+                <CreditCard />
+                Accounts
+              </Link>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+          <SidebarMenuItem>
+            <SidebarMenuButton asChild isActive={isActive('/dashboard/transactions')} onClick={closeSidebar}>
+              <Link href="/dashboard/transactions">
+                <CreditCard />
+                Transactions
+                {pendingTransactionsCount > 0 && <SidebarMenuBadge>{pendingTransactionsCount}</SidebarMenuBadge>}
+              </Link>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+          <SidebarMenuItem>
+            <SidebarMenuButton asChild isActive={isActive('/dashboard/messages')} onClick={closeSidebar}>
+              <Link href="/dashboard/messages">
+                <MessageSquare />
+                Messages
+                {unreadMessagesCount > 0 && <SidebarMenuBadge>{unreadMessagesCount}</SidebarMenuBadge>}
+              </Link>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+          <SidebarMenuItem>
+            <SidebarMenuButton asChild isActive={isActive('/dashboard/profile')} onClick={closeSidebar}>
+              <Link href="/dashboard/profile">
+                <UserIcon />
+                Profile
+              </Link>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+        </SidebarMenu>
+      </SidebarContent>
+      <SidebarFooter>
+        <SidebarMenu>
+          <SidebarMenuItem>
+            <SidebarMenuButton asChild isActive={isActive('/dashboard/settings')} onClick={closeSidebar}>
+              <Link href="/dashboard/settings">
+                <Settings />
+                Settings
+              </Link>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+          <SidebarMenuItem>
+            <SidebarMenuButton onClick={handleLogout}>
+              <LogOut />
+              Logout
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+        </SidebarMenu>
+      </SidebarFooter>
+    </Sidebar>
+  );
+}
+
 export default function DashboardLayout({
   children,
 }: {
@@ -47,10 +139,7 @@ export default function DashboardLayout({
   const { user, isUserLoading } = useUser();
   const auth = useAuth();
   const router = useRouter();
-  const pathname = usePathname();
   const { notifications, unreadCount, markAsRead } = useNotifications();
-  const { unreadMessagesCount } = useUserConversation();
-  const { pendingTransactionsCount } = useUserTransactions();
 
   React.useEffect(() => {
     if (!isUserLoading && !user) {
@@ -82,87 +171,13 @@ export default function DashboardLayout({
     return 'U';
   }
 
-  const isActive = (path: string) => pathname === path;
-
   return (
     <SidebarProvider>
-      <Sidebar>
-        <SidebarHeader>
-          <Link href="/" className="flex items-center gap-2 font-semibold">
-            <Landmark className="h-6 w-6 text-primary" />
-            <span className="">Global Trusera</span>
-          </Link>
-        </SidebarHeader>
-        <SidebarContent>
-          <SidebarMenu>
-            <SidebarMenuItem>
-              <SidebarMenuButton asChild isActive={isActive('/dashboard/overview')}>
-                <Link href="/dashboard/overview">
-                  <Home />
-                  Overview
-                </Link>
-              </SidebarMenuButton>
-            </SidebarMenuItem>
-            <SidebarMenuItem>
-              <SidebarMenuButton asChild isActive={isActive('/dashboard/accounts')}>
-                <Link href="/dashboard/accounts">
-                  <CreditCard />
-                  Accounts
-                </Link>
-              </SidebarMenuButton>
-            </SidebarMenuItem>
-            <SidebarMenuItem>
-              <SidebarMenuButton asChild isActive={isActive('/dashboard/transactions')}>
-                <Link href="/dashboard/transactions">
-                  <CreditCard />
-                  Transactions
-                  {pendingTransactionsCount > 0 && <SidebarMenuBadge>{pendingTransactionsCount}</SidebarMenuBadge>}
-                </Link>
-              </SidebarMenuButton>
-            </SidebarMenuItem>
-             <SidebarMenuItem>
-              <SidebarMenuButton asChild isActive={isActive('/dashboard/messages')}>
-                <Link href="/dashboard/messages">
-                  <MessageSquare />
-                  Messages
-                  {unreadMessagesCount > 0 && <SidebarMenuBadge>{unreadMessagesCount}</SidebarMenuBadge>}
-                </Link>
-              </SidebarMenuButton>
-            </SidebarMenuItem>
-            <SidebarMenuItem>
-              <SidebarMenuButton asChild isActive={isActive('/dashboard/profile')}>
-                <Link href="/dashboard/profile">
-                  <UserIcon />
-                  Profile
-                </Link>
-              </SidebarMenuButton>
-            </SidebarMenuItem>
-          </SidebarMenu>
-        </SidebarContent>
-        <SidebarFooter>
-          <SidebarMenu>
-            <SidebarMenuItem>
-              <SidebarMenuButton asChild isActive={isActive('/dashboard/settings')}>
-                <Link href="/dashboard/settings">
-                  <Settings />
-                  Settings
-                </Link>
-              </SidebarMenuButton>
-            </SidebarMenuItem>
-            <SidebarMenuItem>
-              <SidebarMenuButton onClick={handleLogout}>
-                <LogOut />
-                Logout
-              </SidebarMenuButton>
-            </SidebarMenuItem>
-          </SidebarMenu>
-        </SidebarFooter>
-      </Sidebar>
+      <DashboardSidebar />
       <SidebarInset>
         <header className="flex h-14 items-center justify-between gap-4 border-b bg-background px-4 lg:h-[60px] lg:px-6">
           <SidebarTrigger className="md:hidden" />
           <div className="flex-1">
-            {/* Can add breadcrumbs or page title here */}
           </div>
           <div className="flex items-center gap-4">
             <DropdownMenu>
@@ -213,8 +228,6 @@ export default function DashboardLayout({
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
-                <DropdownMenuLabel>My Account</DropdownMenuLabel>
-                <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={() => router.push('/dashboard/profile')}>Profile</DropdownMenuItem>
                 <DropdownMenuItem onClick={() => router.push('/dashboard/settings')}>Settings</DropdownMenuItem>
                 <DropdownMenuItem>Support</DropdownMenuItem>
