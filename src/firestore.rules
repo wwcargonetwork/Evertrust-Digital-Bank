@@ -49,17 +49,18 @@ service cloud.firestore {
         allow get, list: if isOwner(userId);
         // User can update their own notifications (e.g., mark as read).
         allow update: if isOwner(userId);
-        // Admin can create notifications for users.
-        allow create: if isAdmin();
+        // Allow both admins and the account owner to create notifications.
+        allow create: if isAdmin() || isOwner(userId);
       }
     }
     
     match /conversations/{conversationId} {
         // Users can list/read conversations they are part of. Admins can read all.
         allow list, get: if isAdmin() || (isSignedIn() && resource.data.userId == request.auth.uid);
-        // Users can create conversations. Admins can update them (e.g., mark as read).
+        // Users can create conversations.
         allow create: if isSignedIn();
-        allow update: if isAdmin();
+        // Allow users to update their own conversation metadata (lastMessage, lastUpdatedAt) when sending messages.
+        allow update: if isAdmin() || (isSignedIn() && resource.data.userId == request.auth.uid);
 
         match /messages/{messageId} {
             // Users can read messages in their own conversations. Admins can read all.
