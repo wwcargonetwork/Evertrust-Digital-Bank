@@ -1,3 +1,4 @@
+
 'use client';
 
 import * as React from 'react';
@@ -8,6 +9,7 @@ import { useUserTransactions, type UserTransaction } from '@/hooks/use-user-tran
 import { doc } from 'firebase/firestore';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
 
@@ -80,6 +82,15 @@ function RecentTransactions() {
     if (!transactions || transactions.length === 0) {
         return <p className="text-sm text-muted-foreground text-center py-4">No recent transactions.</p>;
     }
+
+    const getStatusBadgeVariant = (status: string) => {
+        switch (status) {
+            case 'approved': return 'default';
+            case 'pending': return 'secondary';
+            case 'declined': return 'destructive';
+            default: return 'outline';
+        }
+    };
     
     return (
         <div className="space-y-4">
@@ -89,7 +100,12 @@ function RecentTransactions() {
                         {tx.type === 'deposit' ? <ArrowDown className="h-5 w-5 text-green-500" /> : <ArrowUp className="h-5 w-5 text-red-500" />}
                     </div>
                     <div className="flex-1 space-y-1">
-                        <p className="text-sm font-medium capitalize leading-none">{tx.type}</p>
+                        <div className="flex items-center gap-2">
+                            <p className="text-sm font-medium capitalize leading-none">{tx.type}</p>
+                            <Badge variant={getStatusBadgeVariant(tx.status)} className="text-[10px] h-4 px-1.5 capitalize">
+                                {tx.status}
+                            </Badge>
+                        </div>
                         <p className="text-sm text-muted-foreground">{tx.createdAt ? format(tx.createdAt.toDate(), 'PPP') : 'Pending...'}</p>
                     </div>
                     <div className={`font-medium ${tx.type === 'deposit' ? 'text-green-600' : 'text-foreground'}`}>
@@ -141,7 +157,7 @@ export default function AccountsPage() {
                 <CardHeader>
                     <div className="flex justify-between items-start">
                         <div>
-                            <CardTitle className="text-2xl font-bold capitalize">{userProfile.accountType.replace('_', ' ')} Account</CardTitle>
+                            <CardTitle className="text-2xl font-bold capitalize">{userProfile.accountType?.replace('_', ' ') || 'Primary'} Account</CardTitle>
                             <CardDescription>Primary Account</CardDescription>
                         </div>
                         <Wallet className="h-8 w-8 text-primary" />
@@ -150,7 +166,7 @@ export default function AccountsPage() {
                 <CardContent className="space-y-6">
                     <div>
                         <p className="text-sm text-muted-foreground">Current Balance</p>
-                        <p className="text-4xl font-bold">{formatCurrency(userProfile.accountBalance, userProfile.preferredCurrency)}</p>
+                        <p className="text-4xl font-bold">{formatCurrency(userProfile.accountBalance || 0, userProfile.preferredCurrency || 'USD')}</p>
                     </div>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-4 border-t">
                         <div>

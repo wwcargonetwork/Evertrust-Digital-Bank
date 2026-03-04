@@ -9,6 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Badge } from '@/components/ui/badge';
 import { ArrowRight, Bell, DollarSign, ArrowUp, ArrowDown, PlusCircle, MinusCircle, Landmark } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useUserTransactions, type UserTransaction } from '@/hooks/use-user-transactions';
@@ -81,6 +82,15 @@ function RecentActivity() {
         );
     }
 
+    const getStatusBadgeVariant = (status: string) => {
+        switch (status) {
+            case 'approved': return 'default';
+            case 'pending': return 'secondary';
+            case 'declined': return 'destructive';
+            default: return 'outline';
+        }
+    };
+
     return (
         <div className="space-y-6">
             {transactions.map((tx: UserTransaction) => (
@@ -89,7 +99,12 @@ function RecentActivity() {
                         {tx.type === 'deposit' ? <ArrowDown className="h-5 w-5 text-green-500" /> : <ArrowUp className="h-5 w-5 text-red-500" />}
                     </div>
                     <div className="flex-1 space-y-1">
-                        <p className="text-sm font-medium capitalize leading-none">{tx.type}</p>
+                        <div className="flex items-center gap-2">
+                            <p className="text-sm font-medium capitalize leading-none">{tx.type}</p>
+                            <Badge variant={getStatusBadgeVariant(tx.status)} className="text-[10px] h-4 px-1.5 capitalize">
+                                {tx.status}
+                            </Badge>
+                        </div>
                         <p className="text-sm text-muted-foreground">{tx.createdAt ? format(tx.createdAt.toDate(), 'PPP') : 'Pending...'}</p>
                     </div>
                     <div className={`font-medium ${tx.type === 'deposit' ? 'text-green-600' : 'text-foreground'}`}>
@@ -165,13 +180,8 @@ function TransactionDialog({ type, onOpenChange, open }: { type: 'deposit' | 'wi
             recipient: values.recipient || '',
           };
 
-          // Step 1: Create the transaction as pending.
           batch.set(txRef, transactionData);
           
-          // Step 2: Per standardized logic, balance deduction ONLY happens upon approval.
-          // batch.update(userDocRef, { accountBalance: increment(-values.amount) }); // Removed
-          
-          // Step 3: Create notification for the user
           const notificationColRef = collection(userDocRef, 'notifications');
           const notifRef = doc(notificationColRef);
           batch.set(notifRef, {
@@ -304,7 +314,7 @@ export default function OverviewPage() {
     }
 
     const getInitials = (firstName: string, lastName: string) => {
-        return `${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase();
+        return `${firstName?.charAt(0) || ''}${lastName?.charAt(0) || ''}`.toUpperCase();
     };
 
     return (
